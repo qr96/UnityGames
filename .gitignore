@@ -100,3 +100,5 @@ InitTestScene*.unity*
 GameClient/Library
 GameClient/Temp
 GameClient/UserSettings/Layouts/default-6000.dwlt
+GameClient/UserSettings/Layouts/default-6000.dwlt
+GameClient/obj
