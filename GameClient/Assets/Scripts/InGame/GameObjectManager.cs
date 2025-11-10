@@ -15,7 +15,7 @@ public class GameObjectManager : MonoBehaviour
         InitializeMeta();
     }
 
-    public bool TryCreate<T>(string name, out GameObject item)
+    public bool TryCreate(string name, out GameObject item)
     {
         item = null;
 
