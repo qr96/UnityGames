@@ -39,18 +39,18 @@ namespace GameData
         public int count { get; set; }
     }
 
-    public class BattleUnit
+    public class UnitModel
     {
-        public int id { get; private set; }
+        public string name { get; private set; }
         public Stat MaxStat => maxStat;
         public Stat NowStat => nowStat;
 
         Stat maxStat;
         Stat nowStat;
 
-        public BattleUnit(int id, Stat stat)
+        public UnitModel(string name, Stat stat)
         {
-            this.id = id;
+            this.name = name;
             maxStat = stat;
         }
 
@@ -105,11 +105,6 @@ namespace GameData
         public bool IsDead()
         {
             return nowStat.hp <= 0;
-        }
-
-        public bool IsEnd()
-        {
-            return nowStat.mp <= 0;
         }
     }
 }

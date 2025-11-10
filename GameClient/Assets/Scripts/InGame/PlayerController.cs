@@ -13,12 +13,18 @@ namespace InGame
         public Rigidbody rigid;
         public Animator animator;
 
+        public TriggerEvent attackTrigger;
+
         // 설정값
         public float speed;
+        public float attackCoolTime;
+        public float repulsivePower;
 
         // 상태값
         State nowState;
         Vector3 moveDirection;
+        DateTime attackEnd;
+        HashSet<EnemyController> enemies = new HashSet<EnemyController>();
 
         // 상수값
         readonly float cos45 = 0.707107f;
@@ -32,6 +38,7 @@ namespace InGame
 
         private void Start()
         {
+            attackTrigger.Set(OnEnterAttackTrigger, OnExitAttackTrigger);
             nowState = State.Idle;
         }
 
@@ -44,13 +51,47 @@ namespace InGame
                 input.Normalize();
                 moveDirection = new Vector3(input.x, 0f, input.y);
 
-                // 애니메이션
-                if (moveDirection == Vector3.zero)
-                    animator.SetBool("Moving", false);
+                if (enemies.Count > 0)
+                {
+                    var inputAttackVector = moveDirection;
+                    var isAttack = false;
+                    var lastEnemyVector = Vector3.zero;
+
+                    // 타겟 공격
+                    foreach (var enemy in enemies)
+                    {
+                        var enemyVector = (enemy.transform.position - transform.position);
+                        isAttack = Vector3.Dot(enemyVector, inputAttackVector) > 0f;
+                        enemy.OnAttacked(isAttack ? inputAttackVector : enemyVector, gameObject);
+                        lastEnemyVector = enemyVector;
+                    }
+
+                    // 비활성화된 타겟 목록에서 제거 (반드시 공격 직후에 해줘야함)
+                    enemies.RemoveWhere(enemy => !enemy.isActiveAndEnabled);
+
+                    if (isAttack)
+                    {
+                        // 공격 애니메이션
+                        animator.SetTrigger("Attack");
+                        animator.SetBool("Moving", false);
+                        attackEnd = DateTime.Now.AddSeconds(attackCoolTime);
+
+                        // 상태 변경
+                        nowState = State.Attack;
+                    }
+
+                    OnPushed(isAttack ? -inputAttackVector : -lastEnemyVector);
+                }
                 else
                 {
-                    animator.SetBool("Moving", true);
+                    // 애니메이션
+                    animator.SetBool("Moving", moveDirection != Vector3.zero);
                 }
+            }
+            else if (nowState == State.Attack)
+            {
+                if (DateTime.Now > attackEnd)
+                    nowState = State.Idle;
             }
         }
 
@@ -81,6 +122,30 @@ namespace InGame
                     rigid.rotation = Quaternion.LookRotation(moveDirection);
             }
         }
+
+        void OnEnterAttackTrigger(Collider col)
+        {
+            if (col.CompareTag("Enemy"))
+            {
+                var enemy = col.GetComponent<EnemyController>();
+                enemies.Add(enemy);
+            }
+        }
+
+        void OnExitAttackTrigger(Collider col)
+        {
+            if (col.CompareTag("Enemy"))
+            {
+                var enemy = col.GetComponent<EnemyController>();
+                if (enemies.Contains(enemy))
+                    enemies.Remove(enemy);
+            }
+        }
+
+        void OnPushed(Vector3 pushed)
+        {
+            rigid.linearVelocity = new Vector3(0f, rigid.linearVelocity.y, 0f);
+            rigid.AddForce(pushed * repulsivePower, ForceMode.Impulse);
+        }
     }
 }
-
