@@ -42,9 +42,7 @@ namespace InGame
 
         private void OnDisable()
         {
-            var mm = Managers.Instance.GetComponent<MonsterManager>();
-            if (mm != null)
-                mm.activeMonsterCount--;
+            Managers.Instance.GetComponent<MonsterManager>().activeMonsterCount--;
         }
 
         private void Update()
@@ -108,6 +106,9 @@ namespace InGame
 
             nowState = State.Damaged;
             knockBackEnd = DateTime.Now.AddSeconds(knockBackTime);
+
+            if (Managers.Instance.GetComponent<GameObjectManager>().TryCreate("Effect/HCFX_Hit_08", out var go))
+                go.transform.position = transform.position + new Vector3(0f, 1f, 0f);
         }
 
         public void OnDead()
