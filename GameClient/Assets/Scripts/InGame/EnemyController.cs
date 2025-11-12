@@ -29,15 +29,20 @@ namespace InGame
             Damaged
         }
 
-        private void Start()
+        private void Awake()
         {
             unitModel = new UnitModel("한나라 병사", new Stat() { attack = 2, hp = 20 });
+        }
+
+        private void Start()
+        {
             nowState = State.Idle;
         }
 
         private void OnEnable()
         {
             Managers.Instance.GetComponent<MonsterManager>().activeMonsterCount++;
+            unitModel.Reset();
         }
 
         private void OnDisable()
@@ -109,10 +114,17 @@ namespace InGame
 
             if (Managers.Instance.GetComponent<GameObjectManager>().TryCreate("Effect/HCFX_Hit_08", out var go))
                 go.transform.position = transform.position + new Vector3(0f, 1f, 0f);
+
+            unitModel.TakeDamage(5);
+            if (unitModel.IsDead())
+                OnDead();
         }
 
         public void OnDead()
         {
+            if (Managers.Instance.GetComponent<GameObjectManager>().TryCreate("Effect/CFXR2 WW Enemy Explosion", out var go))
+                go.transform.position = transform.position + new Vector3(0f, 1f, 0f);
+
             gameObject.SetActive(false);
             targetPlayer = null;
         }

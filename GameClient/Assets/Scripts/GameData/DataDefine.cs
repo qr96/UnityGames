@@ -54,7 +54,7 @@ namespace GameData
             maxStat = stat;
         }
 
-        public void Respawn()
+        public void Reset()
         {
             nowStat = maxStat;
         }
