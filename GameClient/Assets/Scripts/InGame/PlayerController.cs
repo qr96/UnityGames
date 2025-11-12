@@ -61,6 +61,8 @@ namespace InGame
                     foreach (var enemy in enemies)
                     {
                         var enemyVector = (enemy.transform.position - transform.position);
+                        enemyVector.y = 0f;
+                        enemyVector.Normalize();
                         isAttack = Vector3.Dot(enemyVector, inputAttackVector) > 0f;
                         enemy.OnAttacked(isAttack ? inputAttackVector : enemyVector, gameObject);
                         lastEnemyVector = enemyVector;
@@ -69,18 +71,14 @@ namespace InGame
                     // 비활성화된 타겟 목록에서 제거 (반드시 공격 직후에 해줘야함)
                     enemies.RemoveWhere(enemy => !enemy.isActiveAndEnabled);
 
-                    if (isAttack)
-                    {
-                        // 공격 애니메이션
-                        animator.SetTrigger("Attack");
-                        animator.SetBool("Moving", false);
-                        attackEnd = DateTime.Now.AddSeconds(attackCoolTime);
-
-                        // 상태 변경
-                        nowState = State.Attack;
-                    }
-
+                    // 공격 애니메이션
+                    animator.SetTrigger("Attack");
+                    animator.SetBool("Moving", false);
+                    attackEnd = DateTime.Now.AddSeconds(attackCoolTime);
                     OnPushed(isAttack ? -inputAttackVector : -lastEnemyVector);
+
+                    // 상태 변경
+                    nowState = State.Attack;
                 }
                 else
                 {
