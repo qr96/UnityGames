@@ -1,4 +1,5 @@
 using GameData;
+using GameUI;
 using System;
 using UnityEngine;
 
@@ -104,6 +105,7 @@ namespace InGame
 
         public void OnAttacked(Vector3 pushed, GameObject attacker)
         {
+            // 피격 연출
             rigid.linearVelocity = new Vector3(0f, rigid.linearVelocity.y, 0f);
             rigid.rotation = Quaternion.LookRotation(-pushed);
             rigid.AddForce(pushed.normalized * knockBack, ForceMode.Impulse);
@@ -112,10 +114,14 @@ namespace InGame
             nowState = State.Damaged;
             knockBackEnd = DateTime.Now.AddSeconds(knockBackTime);
 
+            // 피격 효과
             if (Managers.Instance.GetComponent<GameObjectManager>().TryCreate("Effect/HCFX_Hit_08", out var go))
                 go.transform.position = transform.position + new Vector3(0f, 1f, 0f);
 
-            unitModel.TakeDamage(5);
+            // 데미지 적용
+            var damage = 5L;
+            unitModel.TakeDamage(damage);
+            Managers.Instance.GetComponent<UIManager>().hudLayout.ShowDamage(new long[] { damage }, transform.position + new Vector3(0f, 1.8f, 0f));
             if (unitModel.IsDead())
                 OnDead();
         }

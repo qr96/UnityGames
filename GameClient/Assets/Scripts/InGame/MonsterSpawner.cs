@@ -22,7 +22,7 @@ namespace InGame
         {
             while (Managers.Instance.GetComponent<MonsterManager>().GetActiveMonsterCount() < maxCount)
             {
-                var randomPos = new Vector3(Random.Range(-5f, 5f), 0f, Random.Range(-5f, 5f));
+                var randomPos = new Vector3(Random.Range(-15f, 15f), 0f, Random.Range(-15f, 15f));
                 SpawnMonster(randomPos);
             }
         }
