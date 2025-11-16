@@ -31,10 +31,24 @@ public class GameObjectManager : MonoBehaviour
         }
 
         // 풀에서 찾고 없으면 생성
-        var go = poolDic[name].Count < metaDic[name].maxSize ? Instantiate(metaDic[name].resource) : poolDic[name].Dequeue();
-        poolDic[name].Enqueue(go);
-        go.SetActive(false);
-        go.SetActive(true);
+        GameObject go = null;
+
+        if (poolDic[name].Count < metaDic[name].maxSize)
+        {
+            go = Instantiate(metaDic[name].resource);
+            go.name = $"{name} {poolDic[name].Count}";
+        }
+        else
+            go = poolDic[name].Dequeue();
+
+        if (go != null)
+        {
+            poolDic[name].Enqueue(go);
+            go.SetActive(false);
+            go.SetActive(true);
+        }
+        else
+            Debug.LogError($"TryCreate() Failed to get go={go.name}");
 
         // item에 할당 및 true 반환
         item = go;
