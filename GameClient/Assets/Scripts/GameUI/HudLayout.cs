@@ -1,18 +1,26 @@
 using DG.Tweening;
+using InGame;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace GameUI
 {
     public class HudLayout : MonoBehaviour
     {
+        public TMP_Text damagePrefab;
+        public GuageBar hpGuagePrefab;
+
+        public int maxHpGuageCount;
+
         Camera mainCamera;
         RectTransform rectTransform;
 
-        public TMP_Text damagePrefab;
-
         Stack<TMP_Text> damagePool = new Stack<TMP_Text>();
+        Dictionary<Transform, GuageBar> hpRegisterDic = new Dictionary<Transform, GuageBar>();
+        LinkedList<Transform> hpRegisterQue = new LinkedList<Transform>();
+        Stack<GuageBar> inactiveHpPool = new Stack<GuageBar>();
 
         readonly float damageTextSpace = 36f;
 
@@ -22,12 +30,60 @@ namespace GameUI
             rectTransform = GetComponent<RectTransform>();
         }
 
+        private void LateUpdate()
+        {
+            UpdateHpGuagePos();
+        }
+
         public void ShowDamage(long[] damages, Vector3 position)
         {
             var rectPos = WorldToAnchored(position, rectTransform);
 
             for (int i = damages.Length - 1; i >= 0; i--)
                 ShowDamageTween(damages[i], rectPos + new Vector2(0f, damageTextSpace * i));
+        }
+
+        public void RegisterHpGuage(Transform transform)
+        {
+            Debug.Log("RegisterHpGuage");
+
+            if (hpRegisterDic.ContainsKey(transform))
+                return;
+
+            if (hpRegisterQue.Count >= maxHpGuageCount)
+                RemoveHpGuage(hpRegisterQue.First.Value);
+
+            var hpGuage = inactiveHpPool.Count > 0 ? inactiveHpPool.Pop() : Instantiate(hpGuagePrefab, hpGuagePrefab.transform.parent);
+
+            if (hpGuage != null)
+            {
+                hpGuage.SetActive(true);
+                hpRegisterQue.AddLast(transform);
+                hpRegisterDic.Add(transform, hpGuage);
+            }
+        }
+
+        public void RemoveHpGuage(Transform transform)
+        {
+            Debug.Log("RemoveHpGuage");
+
+            if (hpRegisterDic.ContainsKey(transform) && hpRegisterDic[transform] != null)
+            {
+                hpRegisterDic[transform].SetActive(false);
+                inactiveHpPool.Push(hpRegisterDic[transform]);
+                hpRegisterDic.Remove(transform);
+                hpRegisterQue.Remove(transform);
+            }
+        }
+
+        void UpdateHpGuagePos()
+        { 
+            foreach (var register in hpRegisterQue)
+            {
+                var hpGuage = hpRegisterDic[register];
+                var rectPos = WorldToAnchored(register.position, rectTransform);
+                hpGuage.rectTransform.anchoredPosition = rectPos + new Vector2(0f, 100f);
+            }
         }
 
         void ShowDamageTween(long damage, Vector2 startPosition)
