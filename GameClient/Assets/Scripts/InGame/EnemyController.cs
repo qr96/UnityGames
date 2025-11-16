@@ -108,8 +108,9 @@ namespace InGame
 
         public void OnAttacked(Vector3 pushed, GameObject attacker)
         {
-            if (unitModel.IsDead())
-                Debug.Log($"OnAttacked. {gameObject.name}");
+            // 데미지 적용
+            var damage = 5L;
+            unitModel.TakeDamage(damage);
 
             // 피격 연출
             rigid.linearVelocity = new Vector3(0f, rigid.linearVelocity.y, 0f);
@@ -124,14 +125,15 @@ namespace InGame
             if (Managers.Instance.GetComponent<GameObjectManager>().TryCreate("Effect/HCFX_Hit_08", out var go))
                 go.transform.position = transform.position + new Vector3(0f, 1f, 0f);
 
-            // 데미지 적용
-            var damage = 5L;
-            unitModel.TakeDamage(damage);
-            Managers.Instance.GetComponent<UIManager>().hudLayout.ShowDamage(new long[] { damage }, transform.position + new Vector3(0f, 1.8f, 0f));
-
             // 체력바
             if (!unitModel.IsDead())
+            {
                 Managers.Instance.GetComponent<UIManager>().hudLayout.RegisterHpGuage(transform);
+                Managers.Instance.GetComponent<UIManager>().hudLayout.UpdateHpGuageValue(transform, unitModel.MaxStat.hp, unitModel.NowStat.hp);
+            }
+
+            // 데미지바
+            Managers.Instance.GetComponent<UIManager>().hudLayout.ShowDamage(new long[] { damage }, transform.position + new Vector3(0f, 1.8f, 0f));
 
             // 사망 적용
             if (unitModel.IsDead())

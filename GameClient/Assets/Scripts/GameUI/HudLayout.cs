@@ -45,8 +45,6 @@ namespace GameUI
 
         public void RegisterHpGuage(Transform transform)
         {
-            Debug.Log("RegisterHpGuage");
-
             if (hpRegisterDic.ContainsKey(transform))
                 return;
 
@@ -65,8 +63,6 @@ namespace GameUI
 
         public void RemoveHpGuage(Transform transform)
         {
-            Debug.Log("RemoveHpGuage");
-
             if (hpRegisterDic.ContainsKey(transform) && hpRegisterDic[transform] != null)
             {
                 hpRegisterDic[transform].SetActive(false);
@@ -76,13 +72,21 @@ namespace GameUI
             }
         }
 
+        public void UpdateHpGuageValue(Transform transform, long max, long now)
+        {
+            if (hpRegisterDic.ContainsKey(transform))
+            {
+                hpRegisterDic[transform].SetGuage(max, now);
+            }
+        }
+
         void UpdateHpGuagePos()
         { 
             foreach (var register in hpRegisterQue)
             {
                 var hpGuage = hpRegisterDic[register];
                 var rectPos = WorldToAnchored(register.position, rectTransform);
-                hpGuage.rectTransform.anchoredPosition = rectPos + new Vector2(0f, 100f);
+                hpGuage.rectTransform.anchoredPosition = rectPos + new Vector2(0f, 80f);
             }
         }
 
