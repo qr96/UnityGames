@@ -42,13 +42,16 @@ namespace InGame
 
         private void OnEnable()
         {
-            Managers.Instance.GetComponent<MonsterManager>().activeMonsterCount++;
+            //Managers.Instance.GetComponent<MonsterManager>().activeMonsterCount++;
+            Managers.Instance.GetComponent<MonsterManager>().enemyControllers.Add(this);
             unitModel.Reset();
         }
 
         private void OnDisable()
         {
-            Managers.Instance.GetComponent<MonsterManager>().activeMonsterCount--;
+            //Managers.Instance.GetComponent<MonsterManager>().activeMonsterCount--;
+            Managers.Instance.GetComponent<MonsterManager>().enemyControllers.Remove(this);
+            Managers.Instance.GetComponent<UIManager>().hudLayout.RemoveHpGuage(transform);
         }
 
         private void Update()
@@ -105,6 +108,9 @@ namespace InGame
 
         public void OnAttacked(Vector3 pushed, GameObject attacker)
         {
+            if (unitModel.IsDead())
+                Debug.Log($"OnAttacked. {gameObject.name}");
+
             // 피격 연출
             rigid.linearVelocity = new Vector3(0f, rigid.linearVelocity.y, 0f);
             rigid.rotation = Quaternion.LookRotation(-pushed);
@@ -122,6 +128,12 @@ namespace InGame
             var damage = 5L;
             unitModel.TakeDamage(damage);
             Managers.Instance.GetComponent<UIManager>().hudLayout.ShowDamage(new long[] { damage }, transform.position + new Vector3(0f, 1.8f, 0f));
+
+            // 체력바
+            if (!unitModel.IsDead())
+                Managers.Instance.GetComponent<UIManager>().hudLayout.RegisterHpGuage(transform);
+
+            // 사망 적용
             if (unitModel.IsDead())
                 OnDead();
         }
