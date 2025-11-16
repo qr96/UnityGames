@@ -32,7 +32,7 @@ namespace InGame
 
         private void Awake()
         {
-            unitModel = new UnitModel("한나라 병사", new Stat() { attack = 2, hp = 20 });
+            unitModel = new UnitModel("Lv. 5", new Stat() { attack = 2, hp = 20 });
         }
 
         private void Start()
@@ -42,16 +42,16 @@ namespace InGame
 
         private void OnEnable()
         {
-            //Managers.Instance.GetComponent<MonsterManager>().activeMonsterCount++;
             Managers.Instance.GetComponent<MonsterManager>().enemyControllers.Add(this);
+            Managers.Instance.GetComponent<UIManager>().hudLayout.RegisterNameTag(unitModel.name, transform);
             unitModel.Reset();
         }
 
         private void OnDisable()
         {
-            //Managers.Instance.GetComponent<MonsterManager>().activeMonsterCount--;
             Managers.Instance.GetComponent<MonsterManager>().enemyControllers.Remove(this);
             Managers.Instance.GetComponent<UIManager>().hudLayout.RemoveHpGuage(transform);
+            Managers.Instance.GetComponent<UIManager>().hudLayout.RemoveNameTag(transform);
         }
 
         private void Update()

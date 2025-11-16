@@ -11,6 +11,7 @@ namespace GameUI
     {
         public TMP_Text damagePrefab;
         public GuageBar hpGuagePrefab;
+        public TMP_Text namePrefab;
 
         public int maxHpGuageCount;
 
@@ -18,9 +19,13 @@ namespace GameUI
         RectTransform rectTransform;
 
         Stack<TMP_Text> damagePool = new Stack<TMP_Text>();
+        
         Dictionary<Transform, GuageBar> hpRegisterDic = new Dictionary<Transform, GuageBar>();
         LinkedList<Transform> hpRegisterQue = new LinkedList<Transform>();
         Stack<GuageBar> inactiveHpPool = new Stack<GuageBar>();
+
+        Dictionary<Transform, TMP_Text> nameRegisterDic = new Dictionary<Transform, TMP_Text>();
+        Stack<TMP_Text> namePool = new Stack<TMP_Text>();
 
         readonly float damageTextSpace = 36f;
 
@@ -33,6 +38,7 @@ namespace GameUI
         private void LateUpdate()
         {
             UpdateHpGuagePos();
+            UpdateNameTagPos();
         }
 
         public void ShowDamage(long[] damages, Vector3 position)
@@ -80,6 +86,27 @@ namespace GameUI
             }
         }
 
+        public void RegisterNameTag(string name, Transform transform)
+        {
+            if (!nameRegisterDic.ContainsKey(transform))
+            {
+                var nameTag = namePool.Count > 0 ? namePool.Pop() : Instantiate(namePrefab, namePrefab.transform.parent);
+                nameTag.text = name;
+                nameTag.gameObject.SetActive(true);
+
+                nameRegisterDic.Add(transform, nameTag);
+            }
+        }
+
+        public void RemoveNameTag(Transform transform)
+        {
+            if (nameRegisterDic.ContainsKey(transform))
+            {
+                nameRegisterDic[transform].gameObject.SetActive(false);
+                nameRegisterDic.Remove(transform);
+            }
+        }
+
         void UpdateHpGuagePos()
         { 
             foreach (var register in hpRegisterQue)
@@ -87,6 +114,15 @@ namespace GameUI
                 var hpGuage = hpRegisterDic[register];
                 var rectPos = WorldToAnchored(register.position, rectTransform);
                 hpGuage.rectTransform.anchoredPosition = rectPos + new Vector2(0f, 80f);
+            }
+        }
+
+        void UpdateNameTagPos()
+        {
+            foreach (var name in nameRegisterDic)
+            {
+                var anchoredPos = WorldToAnchored(name.Key.position, rectTransform);
+                name.Value.rectTransform.anchoredPosition = anchoredPos + new Vector2(0f, 106f);
             }
         }
 
