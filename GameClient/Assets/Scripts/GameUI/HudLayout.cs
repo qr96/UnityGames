@@ -102,8 +102,10 @@ namespace GameUI
         {
             if (nameRegisterDic.ContainsKey(transform))
             {
-                nameRegisterDic[transform].gameObject.SetActive(false);
+                var nameTag = nameRegisterDic[transform];
+                nameTag.gameObject.SetActive(false);
                 nameRegisterDic.Remove(transform);
+                namePool.Push(nameTag);
             }
         }
 
