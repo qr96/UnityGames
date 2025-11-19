@@ -11,17 +11,6 @@ namespace GameData
         public long hp;
         public long mp;
         public long attack;
-        public float speed;
-        public float mastery;
-
-        public void Add(Stat stat)
-        {
-            hp += stat.hp;
-            mp += stat.mp;
-            attack += stat.attack;
-            speed += stat.speed;
-            mastery += stat.mastery;
-        }
     }
 
     public class PlayerData

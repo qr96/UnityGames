@@ -264,7 +264,7 @@ GameObject:
   - component: {fileID: 185193829}
   - component: {fileID: 185193830}
   - component: {fileID: 185193831}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Attack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -959,6 +959,9 @@ MonoBehaviour:
     resource: {fileID: 0}
   - name: Effect/CFXR2 WW Enemy Explosion
     maxSize: 5
+    resource: {fileID: 0}
+  - name: Item/Coin
+    maxSize: 10
     resource: {fileID: 0}
 --- !u!4 &671542860
 Transform:
@@ -1704,7 +1707,7 @@ GameObject:
   - component: {fileID: 2118930739}
   - component: {fileID: 2118930738}
   - component: {fileID: 2118930740}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
