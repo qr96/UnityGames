@@ -122,7 +122,7 @@ namespace InGame
             knockBackEnd = DateTime.Now.AddSeconds(knockBackTime);
 
             // 피격 효과
-            if (Managers.Instance.GetComponent<GameObjectManager>().TryCreate("Effect/HCFX_Hit_08", out var go))
+            if (PoolManager.Instance.TryCreate("Prefab/Effect/HCFX_Hit_08", out var go))
                 go.transform.position = transform.position + new Vector3(0f, 1f, 0f);
 
             // 체력바
@@ -143,13 +143,13 @@ namespace InGame
         public void OnDead()
         {
             // 사망 이펙트
-            if (Managers.Instance.GetComponent<GameObjectManager>().TryCreate("Effect/CFXR2 WW Enemy Explosion", out var go))
+            if (PoolManager.Instance.TryCreate("Prefab/Effect/CFXR2 WW Enemy Explosion", out var go))
                 go.transform.position = transform.position + new Vector3(0f, 1f, 0f);
 
             // 코인 분사
             for (int i = 0; i < 5; i++)
             {
-                if (Managers.Instance.GetComponent<GameObjectManager>().TryCreate("Item/Coin", out var coin))
+                if (PoolManager.Instance.TryCreate("Prefab/Item/Coin", out var coin))
                 {
                     coin.transform.position = transform.position + new Vector3(0f, 1f, 0f);
                     coin.GetComponent<DropItemEffect>().DropItem(transform.position + new Vector3(0f, 1f, 0f), targetPlayer.transform);
@@ -160,6 +160,7 @@ namespace InGame
             // 초기화
             gameObject.SetActive(false);
             targetPlayer = null;
+            GetComponent<Poolable>().ReleaseSelf();
         }
     }
 }

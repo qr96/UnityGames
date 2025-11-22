@@ -23,17 +23,23 @@ namespace InGame
             while (Managers.Instance.GetComponent<MonsterManager>().GetActiveMonsterCount() < maxCount)
             {
                 var randomPos = new Vector3(Random.Range(-15f, 15f), 0f, Random.Range(-15f, 15f));
-                SpawnMonster(randomPos);
+                if (!TrySpawnMonster(randomPos))
+                {
+                    Debug.LogError("[MonsterSpawner] Failed to SpawnMonster");
+                    break;
+                }
             }
         }
 
-        void SpawnMonster(Vector3 position)
+        bool TrySpawnMonster(Vector3 position)
         {
-            if (Managers.Instance.GetComponent<GameObjectManager>().TryCreate("Monster/001", out var go))
+            if (PoolManager.Instance.TryCreate("Prefab/Monster/001", out var go))
             {
                 go.transform.position = position;
-                //go.GetComponent<EnemyController>()
+                return true;
             }
+
+            return false;
         }
     }
 }

@@ -947,22 +947,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddc5c2b4b129a0c4a930856beb216a85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameObjectManager
-  metaList:
-  - name: Monster/001
-    maxSize: 20
-    resource: {fileID: 0}
-  - name: Effect/HCFX_Hit_01
-    maxSize: 5
-    resource: {fileID: 0}
-  - name: Effect/HCFX_Hit_08
-    maxSize: 5
-    resource: {fileID: 0}
-  - name: Effect/CFXR2 WW Enemy Explosion
-    maxSize: 5
-    resource: {fileID: 0}
-  - name: Item/Coin
-    maxSize: 10
-    resource: {fileID: 0}
+  config: {fileID: 11400000, guid: ce326cf94afcd7240a3ca803d211914d, type: 2}
 --- !u!4 &671542860
 Transform:
   m_ObjectHideFlags: 0
