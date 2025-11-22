@@ -24,7 +24,7 @@ public class PoolManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(this.gameObject);
+            //DontDestroyOnLoad(this.gameObject);
 
             _root = new GameObject("@Pool_Root").transform;
             DontDestroyOnLoad(_root.gameObject);
@@ -158,7 +158,7 @@ public class PoolManager : MonoBehaviour
     /// <summary>
     /// 씬이 로드될 때 호출되어 모든 풀을 초기화합니다.
     /// </summary>
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    public void OnSceneLoaded()
     {
         Clear();
         InitializePoolsFromConfig(); // 새로운 씬 로드 후 풀 재초기화
