@@ -1,22 +1,39 @@
 using UnityEditor.EditorTools;
 using UnityEngine;
 
-/// <summary>
-/// 풀링된 오브젝트가 자신의 풀 키를 저장하고 스스로 풀에 반납할 수 있도록 하는 컴포넌트
-/// PoolManager에 의해 자동으로 부착되며, 직접 조작할 필요는 없습니다.
-/// </summary>
 public class Poolable : MonoBehaviour
 {
-    // 이 오브젝트의 풀 키 (예: "Monsters/Orc")
-    [HideInInspector] // 인스펙터에서 보이지 않게 처리
+    [HideInInspector]
     public string poolKey;
 
-    /// <summary>
-    /// 오브젝트를 PoolManager에 반납하는 함수
-    /// </summary>
+    private void Awake()
+    {
+        // 이 오브젝트가 파티클 시스템을 가지고 있는지 확인
+        if (TryGetComponent(out ParticleSystem ps))
+        {
+            // 파티클 시스템이 있다면, Stop Action을 Callback으로 변경
+            var main = ps.main;
+            main.stopAction = ParticleSystemStopAction.Callback;
+        }
+    }
+
+    // 파티클 시스템 전용 콜백 (파티클이 없으면 절대 호출되지 않음)
+    private void OnParticleSystemStopped()
+    {
+        ReleaseSelf();
+    }
+
+    // 공용 반납 함수 (몬스터, 투사체 등은 이걸 직접 호출)
     public void ReleaseSelf()
     {
-        // poolKey를 사용하여 PoolManager에게 반납을 요청
-        PoolManager.Instance.Release(poolKey, this.gameObject);
+        if (PoolManager.Instance != null)
+        {
+            PoolManager.Instance.Release(poolKey, this.gameObject);
+        }
+        else
+        {
+            // 혹시 매니저가 없는 상황(씬 테스트 등)이라면 그냥 파괴
+            Destroy(this.gameObject);
+        }
     }
 }
