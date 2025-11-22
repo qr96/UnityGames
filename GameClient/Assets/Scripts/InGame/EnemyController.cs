@@ -42,16 +42,16 @@ namespace InGame
 
         private void OnEnable()
         {
-            Managers.Instance.GetComponent<MonsterManager>().enemyControllers.Add(this);
-            Managers.Instance.GetComponent<UIManager>().hudLayout.RegisterNameTag(unitModel.name, transform);
+            Managers.Monster?.enemyControllers.Add(this);
+            Managers.UI?.hudLayout.RegisterNameTag(unitModel.name, transform);
             unitModel.Reset();
         }
 
         private void OnDisable()
         {
-            Managers.Instance.GetComponent<MonsterManager>().enemyControllers.Remove(this);
-            Managers.Instance.GetComponent<UIManager>().hudLayout.RemoveHpGuage(transform);
-            Managers.Instance.GetComponent<UIManager>().hudLayout.RemoveNameTag(transform);
+            Managers.Monster?.enemyControllers.Remove(this);
+            Managers.UI?.hudLayout.RemoveHpGuage(transform);
+            Managers.UI?.hudLayout.RemoveNameTag(transform);
         }
 
         private void Update()
@@ -128,12 +128,12 @@ namespace InGame
             // 체력바
             if (!unitModel.IsDead())
             {
-                Managers.Instance.GetComponent<UIManager>().hudLayout.RegisterHpGuage(transform);
-                Managers.Instance.GetComponent<UIManager>().hudLayout.UpdateHpGuageValue(transform, unitModel.MaxStat.hp, unitModel.NowStat.hp);
+                Managers.UI?.hudLayout.RegisterHpGuage(transform);
+                Managers.UI?.hudLayout.UpdateHpGuageValue(transform, unitModel.MaxStat.hp, unitModel.NowStat.hp);
             }
 
             // 데미지바
-            Managers.Instance.GetComponent<UIManager>().hudLayout.ShowDamage(new long[] { damage }, transform.position + new Vector3(0f, 1.8f, 0f));
+            Managers.UI?.hudLayout.ShowDamage(new long[] { damage }, transform.position + new Vector3(0f, 1.8f, 0f));
 
             // 사망 적용
             if (unitModel.IsDead())

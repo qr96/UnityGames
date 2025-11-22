@@ -20,7 +20,7 @@ namespace InGame
 
         void SpawnMonsters()
         {
-            while (Managers.Instance.GetComponent<MonsterManager>().GetActiveMonsterCount() < maxCount)
+            while (Managers.Monster?.GetActiveMonsterCount() < maxCount)
             {
                 var randomPos = new Vector3(Random.Range(-15f, 15f), 0f, Random.Range(-15f, 15f));
                 if (!TrySpawnMonster(randomPos))
