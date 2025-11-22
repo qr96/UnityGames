@@ -10,7 +10,7 @@ public class GuageBar : MonoBehaviour
     public TMP_Text amountText;
     public RectTransform rectTransform;
 
-    private void OnEnable()
+    private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
     }

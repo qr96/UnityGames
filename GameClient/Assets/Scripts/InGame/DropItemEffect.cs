@@ -69,8 +69,8 @@ public class DropItemEffect : MonoBehaviour
 
     void AcquireEffect()
     {
-        Debug.Log("AcquireItem()");
         gameObject.SetActive(false);
+        PlayerDataManager.Instance?.GainMoney(10);
 
         SetState(ItemState.Idle);
     }

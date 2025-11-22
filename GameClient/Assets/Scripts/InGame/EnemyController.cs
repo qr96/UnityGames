@@ -138,6 +138,9 @@ namespace InGame
             // 사망 적용
             if (unitModel.IsDead())
                 OnDead();
+
+            // 유저에게 반격
+            PlayerDataManager.Instance.TakeDamage(5);
         }
 
         public void OnDead()
@@ -154,8 +157,10 @@ namespace InGame
                     coin.transform.position = transform.position + new Vector3(0f, 1f, 0f);
                     coin.GetComponent<DropItemEffect>().DropItem(transform.position + new Vector3(0f, 1f, 0f), targetPlayer.transform);
                 }
-                    
             }
+
+            // 유저 경험치 증가
+            PlayerDataManager.Instance?.GainExp(5);
 
             // 초기화
             gameObject.SetActive(false);
