@@ -7,7 +7,7 @@ namespace GameUI
         public HudLayout hudLayout;
         public GameLayout gameLayout;
 
-        private void OnEnable()
+        private void Start()
         {
             if (PlayerDataManager.Instance != null)
             {
@@ -15,10 +15,12 @@ namespace GameUI
                 PlayerDataManager.Instance.OnMoneyChanged += gameLayout.SetMoneyText;
                 PlayerDataManager.Instance.OnExpChanged += gameLayout.SetExpGuage;
                 PlayerDataManager.Instance.OnLevelChanged += gameLayout.SetLevelText;
+
+                PlayerDataManager.Instance.InitializeUI();
             }
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
             if (PlayerDataManager.Instance != null)
             {
@@ -27,11 +29,6 @@ namespace GameUI
                 PlayerDataManager.Instance.OnExpChanged -= gameLayout.SetExpGuage;
                 PlayerDataManager.Instance.OnLevelChanged -= gameLayout.SetLevelText;
             }
-        }
-
-        private void Start()
-        {
-            PlayerDataManager.Instance.InitializeUI();
         }
     }
 }
