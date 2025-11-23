@@ -23,7 +23,8 @@ namespace InGame
         // 상태값
         State nowState;
         Vector3 moveDirection;
-        DateTime attackEnd;
+        float attackEnd;
+
         HashSet<EnemyController> enemies = new HashSet<EnemyController>();
 
         // 상수값
@@ -74,7 +75,7 @@ namespace InGame
                     // 공격 애니메이션
                     animator.SetTrigger("Attack");
                     animator.SetBool("Moving", false);
-                    attackEnd = DateTime.Now.AddSeconds(attackCoolTime);
+                    attackEnd = Time.time + attackCoolTime;
                     OnPushed(isAttack ? -inputAttackVector : -lastEnemyVector);
 
                     // 상태 변경
@@ -88,7 +89,7 @@ namespace InGame
             }
             else if (nowState == State.Attack)
             {
-                if (DateTime.Now > attackEnd)
+                if (Time.time > attackEnd)
                     nowState = State.Idle;
             }
         }

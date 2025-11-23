@@ -37,6 +37,12 @@ public class PlayerDataManager : MonoBehaviour
         OnHpChanged?.Invoke(Model.MaxStat.hp, Model.NowStat.hp);
     }
 
+    public void GainHp(long hp)
+    {
+        Model.HealHp(hp);
+        OnHpChanged?.Invoke(Model.MaxStat.hp, Model.NowStat.hp);
+    }
+
     public void GainMoney(int amount)
     {
         Data.money += amount;
