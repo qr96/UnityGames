@@ -19,11 +19,13 @@ namespace InGame
         public float speed;
         public float attackCoolTime;
         public float repulsivePower;
+        public float healCoolTime;
 
         // 상태값
         State nowState;
         Vector3 moveDirection;
         float attackEnd;
+        float healDelayEnd;
 
         HashSet<EnemyController> enemies = new HashSet<EnemyController>();
 
@@ -85,6 +87,15 @@ namespace InGame
                 {
                     // 애니메이션
                     animator.SetBool("Moving", moveDirection != Vector3.zero);
+
+                    if (Managers.Monster.GetChasingMonsterCount() <= 0)
+                    {
+                        if (Time.time > healDelayEnd)
+                        {
+                            PlayerDataManager.Instance.GainHp(5);
+                            healDelayEnd = Time.time + healCoolTime;
+                        }
+                    }
                 }
             }
             else if (nowState == State.Attack)

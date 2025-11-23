@@ -3802,6 +3802,7 @@ MonoBehaviour:
   speed: 6
   attackCoolTime: 0.2
   repulsivePower: 4
+  healCoolTime: 1
 --- !u!1 &2139969429
 GameObject:
   m_ObjectHideFlags: 0

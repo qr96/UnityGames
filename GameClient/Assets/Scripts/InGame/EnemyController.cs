@@ -72,7 +72,7 @@ namespace InGame
                     }
                     else
                     {
-                        targetPlayer = null;
+                        ChasePlayer(false);
                         nowState = State.Idle;
                     }
                 }
@@ -116,7 +116,7 @@ namespace InGame
             rigid.linearVelocity = new Vector3(0f, rigid.linearVelocity.y, 0f);
             rigid.rotation = Quaternion.LookRotation(-pushed);
             rigid.AddForce(pushed.normalized * knockBack, ForceMode.Impulse);
-            targetPlayer = attacker;
+            ChasePlayer(true, attacker);
 
             nowState = State.Damaged;
             knockBackEnd = DateTime.Now.AddSeconds(knockBackTime);
@@ -164,8 +164,22 @@ namespace InGame
 
             // 초기화
             gameObject.SetActive(false);
-            targetPlayer = null;
+            ChasePlayer(false);
             GetComponent<Poolable>().ReleaseSelf();
+        }
+
+        void ChasePlayer(bool chase, GameObject target = null)
+        {
+            if (chase)
+            {
+                targetPlayer = target;
+                Managers.Monster.chasingEnemies.Add(this);
+            }
+            else
+            {
+                targetPlayer = null;
+                Managers.Monster.chasingEnemies.Remove(this);
+            }
         }
     }
 }
