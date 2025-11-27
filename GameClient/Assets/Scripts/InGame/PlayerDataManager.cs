@@ -10,6 +10,7 @@ public class PlayerDataManager : MonoBehaviour
     public UnitModel Model { get; private set; }
 
     public event Action<long, long> OnHpChanged;
+    public event Action<long, long> OnMpChanged;
     public event Action<long, long> OnExpChanged;
     public event Action<long> OnMoneyChanged;
     public event Action<long> OnLevelChanged;
@@ -35,6 +36,12 @@ public class PlayerDataManager : MonoBehaviour
     {
         Model.TakeDamage(damage);
         OnHpChanged?.Invoke(Model.MaxStat.hp, Model.NowStat.hp);
+    }
+
+    public void ReduceMp(long mp)
+    {
+        Model.ReduceMp(mp);
+        OnMpChanged?.Invoke(Model.MaxStat.mp, Model.NowStat.mp);
     }
 
     public void GainHp(long hp)
@@ -78,6 +85,7 @@ public class PlayerDataManager : MonoBehaviour
     public void InitializeUI()
     {
         OnHpChanged?.Invoke(Model.MaxStat.hp, Model.NowStat.hp);
+        OnMpChanged?.Invoke(Model.MaxStat.mp, Model.NowStat.mp);
         OnMoneyChanged?.Invoke(Data.money);
         OnExpChanged?.Invoke(GetNeedExp(Data.level), Data.nowExp);
         OnLevelChanged?.Invoke(Data.level);

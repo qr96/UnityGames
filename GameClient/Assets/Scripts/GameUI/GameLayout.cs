@@ -8,8 +8,9 @@ namespace GameUI
         public TMP_Text levelText;
         public TMP_Text moneyText;
         public GuageBar hpGuage;
+        public GuageBar mpGuage;
         public GuageBar expGuage;
-
+        
         public void SetLevelText(long level)
         {
             levelText.text = $"Lv. {level}";
@@ -23,6 +24,11 @@ namespace GameUI
         public void SetHpGuage(long max, long now)
         {
             hpGuage.SetGuage(max, now);
+        }
+
+        public void SetMpGuage(long max, long now)
+        {
+            mpGuage.SetGuage(max, now);
         }
 
         public void SetExpGuage(long max, long now)

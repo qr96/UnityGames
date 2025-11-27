@@ -68,6 +68,10 @@ namespace InGame
                         enemyVector.Normalize();
                         isAttack = Vector3.Dot(enemyVector, inputAttackVector) > 0f;
                         enemy.OnAttacked(isAttack ? inputAttackVector : enemyVector, gameObject);
+                        PlayerDataManager.Instance.ReduceMp(1);
+
+                        if (PlayerDataManager.Instance.Model.NowStat.mp <= 0)
+                            SceneLoader.Instance.LoadScene("InGameScene");
                         lastEnemyVector = enemyVector;
                     }
 
