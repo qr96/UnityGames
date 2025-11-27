@@ -389,6 +389,14 @@ PrefabInstance:
       propertyPath: gameLayout
       value: 
       objectReference: {fileID: 56968897}
+    - target: {fileID: 3266924456603033062, guid: ea227d227a262a043a5d81a230ad07ba, type: 3}
+      propertyPath: maxLevel
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 3266924456603033062, guid: ea227d227a262a043a5d81a230ad07ba, type: 3}
+      propertyPath: minLevel
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3696642626154334787, guid: ea227d227a262a043a5d81a230ad07ba, type: 3}
       propertyPath: m_Name
       value: Managers

@@ -101,7 +101,7 @@ MonoBehaviour:
   rigid: {fileID: 2258060987227372647}
   animator: {fileID: 7901885792921025004}
   attackTrigger: {fileID: 2747619163908369224}
-  speed: 6
+  speed: 8
   attackCoolTime: 0.2
   repulsivePower: 4
   healCoolTime: 1
