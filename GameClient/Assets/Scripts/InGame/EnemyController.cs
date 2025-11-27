@@ -1,5 +1,4 @@
 using GameData;
-using GameUI;
 using System;
 using UnityEngine;
 
@@ -8,6 +7,7 @@ namespace InGame
     public class EnemyController : MonoBehaviour
     {
         UnitModel unitModel;
+        int unitLevel;
 
         public Rigidbody rigid;
         public TriggerEvent detectTrigger;
@@ -32,19 +32,12 @@ namespace InGame
 
         private void Awake()
         {
-            unitModel = new UnitModel("Lv. 12", new Stat() { attack = 2, hp = 20 });
+            unitModel = new UnitModel($"TEST_MOB", StatBalancer.GetMonsterStatsByLevel(0));
         }
 
         private void Start()
         {
             nowState = State.Idle;
-        }
-
-        private void OnEnable()
-        {
-            Managers.Monster?.enemyControllers.Add(this);
-            Managers.UI?.hudLayout.RegisterNameTag(unitModel.name, transform);
-            unitModel.Reset();
         }
 
         private void OnDisable()
@@ -105,12 +98,24 @@ namespace InGame
                 }
             }
         }
+        
+        public void SetLevel(int level)
+        {
+            unitModel.SetStat(StatBalancer.GetMonsterStatsByLevel(level));
+            unitModel.Reset();
+            unitLevel = level;
+            Managers.Monster?.enemyControllers.Add(this);
+            Managers.UI?.hudLayout.RegisterNameTag($"Lv. {unitLevel}", transform);
+
+            Debug.Log(unitModel.NowStat.hp);
+        }
 
         public void OnAttacked(Vector3 pushed, GameObject attacker)
         {
             // 데미지 적용
-            var damage = 5L;
+            var damage = BattleCalculator.GetDamage(PlayerDataManager.Instance.Model.GetAttack(), unitModel.GetDefense());
             unitModel.TakeDamage(damage);
+            Debug.Log($"{PlayerDataManager.Instance.Model.GetAttack()}, {unitModel.GetDefense()}");
 
             // 피격 연출
             rigid.linearVelocity = new Vector3(0f, rigid.linearVelocity.y, 0f);
@@ -159,8 +164,9 @@ namespace InGame
                 }
             }
 
-            // 유저 경험치 증가
-            PlayerDataManager.Instance?.GainExp(5);
+            // 유저 경험치 및 골드 증가
+            PlayerDataManager.Instance?.GainExp(StatBalancer.GetMonsterExpByLevel(unitLevel));
+            PlayerDataManager.Instance?.GainMoney(StatBalancer.GetMonsterGoldByLevel(unitLevel), false);
 
             // 초기화
             gameObject.SetActive(false);

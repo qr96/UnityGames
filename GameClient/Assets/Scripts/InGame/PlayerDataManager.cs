@@ -22,7 +22,7 @@ public class PlayerDataManager : MonoBehaviour
             Instance = this;
 
             //Test
-            Data = new PlayerData() { level = 1, pureStat = new Stat() { attack = 5, hp = 100, mp = 30 } };
+            Data = new PlayerData() { level = 1, pureStat = new Stat() { attack = 30, hp = 100, mp = 30 } };
             Model = new UnitModel("Player", Data.pureStat);
             Model.Reset();
         }
@@ -50,35 +50,33 @@ public class PlayerDataManager : MonoBehaviour
         OnHpChanged?.Invoke(Model.MaxStat.hp, Model.NowStat.hp);
     }
 
-    public void GainMoney(int amount)
+    public void GainMoney(int amount, bool doCallback = true)
     {
         Data.money += amount;
-        OnMoneyChanged?.Invoke(Data.money);
+        if (doCallback)
+            OnMoneyChanged?.Invoke(Data.money);
     }
 
     public void GainExp(long amount)
     {
-        var needExp = GetNeedExp(Data.level);
+        var needExp = StatBalancer.GetPlayerExpRequired(Data.level);
         Data.nowExp += amount;
-        OnExpChanged?.Invoke(needExp, Data.nowExp);
-
+        
         while (Data.nowExp >= needExp)
         {
             Data.nowExp -= needExp;
             Addlevel();
-            needExp = GetNeedExp(Data.level);
+            needExp = StatBalancer.GetPlayerExpRequired(Data.level);
         }
+
+        OnExpChanged?.Invoke(needExp, Data.nowExp);
     }
 
     void Addlevel()
     {
         Data.level++;
+        Model.SetStat(StatBalancer.GetPlayerStatsByLevel(Data.level, Model.MaxStat));
         OnLevelChanged?.Invoke(Data.level);
-    }
-
-    long GetNeedExp(int level)
-    {
-        return level * 100;
     }
 
     // 초기 로드 시 UI를 한 번 초기화해주는 함수 (Scene 로드 직후 호출)
@@ -87,7 +85,7 @@ public class PlayerDataManager : MonoBehaviour
         OnHpChanged?.Invoke(Model.MaxStat.hp, Model.NowStat.hp);
         OnMpChanged?.Invoke(Model.MaxStat.mp, Model.NowStat.mp);
         OnMoneyChanged?.Invoke(Data.money);
-        OnExpChanged?.Invoke(GetNeedExp(Data.level), Data.nowExp);
+        OnExpChanged?.Invoke(StatBalancer.GetPlayerExpRequired(Data.level), Data.nowExp);
         OnLevelChanged?.Invoke(Data.level);
     }
 }

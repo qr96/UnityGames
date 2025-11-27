@@ -6,6 +6,8 @@ namespace InGame
     {
         public int maxCount = 5;
         public float spawnDelay = 30f;
+        public int minLevel;
+        public int maxLevel;
 
         float nextSpawnTime;
 
@@ -36,7 +38,13 @@ namespace InGame
             if (PoolManager.Instance.TryCreate("Prefab/Monster/001", out var go))
             {
                 go.transform.position = position;
-                return true;
+                var enemy = go.GetComponent<EnemyController>();
+                if (enemy != null)
+                {
+                    var level = Random.Range(minLevel, maxLevel);
+                    enemy.SetLevel(level);
+                    return true;
+                }
             }
 
             return false;

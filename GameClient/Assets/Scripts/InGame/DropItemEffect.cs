@@ -70,7 +70,7 @@ public class DropItemEffect : MonoBehaviour
     void AcquireEffect()
     {
         gameObject.SetActive(false);
-        PlayerDataManager.Instance?.GainMoney(10);
+        PlayerDataManager.Instance?.GainMoney(0, true);
 
         SetState(ItemState.Idle);
     }

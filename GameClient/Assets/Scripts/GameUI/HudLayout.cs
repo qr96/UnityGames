@@ -29,6 +29,11 @@ namespace GameUI
 
         readonly float damageTextSpace = 36f;
 
+        private void Awake()
+        {
+            Debug.Log("Awake");
+        }
+
         private void OnEnable()
         {
             mainCamera = Camera.main;
@@ -134,7 +139,7 @@ namespace GameUI
             var damageIns = damagePool.Count > 0 ? damagePool.Pop() : Instantiate(damagePrefab, transform);
 
             damageIns.gameObject.SetActive(true);
-            damageIns.text = damage.ToString();
+            damageIns.text = damage > 0 ? damage.ToString() : "block";
             damageIns.alpha = 1f;
             damageIns.transform.SetAsLastSibling();
             damageIns.rectTransform.anchoredPosition = startPosition;
