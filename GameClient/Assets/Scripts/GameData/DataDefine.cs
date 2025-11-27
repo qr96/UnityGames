@@ -11,6 +11,7 @@ namespace GameData
         public long hp;
         public long mp;
         public long attack;
+        public long defense;
     }
 
     public class PlayerData
@@ -89,6 +90,11 @@ namespace GameData
         public long GetAttack()
         {
             return nowStat.attack;
+        }
+
+        public long GetDefense()
+        {
+            return nowStat.defense;
         }
 
         public bool IsDead()
