@@ -1,10 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
 namespace InGame
 {
@@ -64,20 +61,27 @@ namespace InGame
                     // 타겟 공격
                     foreach (var enemy in enemies)
                     {
+                        if (enemy == null)
+                        {
+                            Debug.LogError("[PlayerController] enemy is null");
+                            return;
+                        }
+
                         var enemyVector = (enemy.transform.position - transform.position);
                         enemyVector.y = 0f;
                         enemyVector.Normalize();
                         isAttack = Vector3.Dot(enemyVector, inputAttackVector) > 0f;
                         enemy.OnAttacked(isAttack ? inputAttackVector : enemyVector, gameObject);
                         PlayerDataManager.Instance.ReduceMp(1);
+                        lastEnemyVector = enemyVector;
 
                         if (PlayerDataManager.Instance.Model.NowMp <= 0)
                         {
+                            SetState(State.None);
                             PlayerDataManager.Instance.Respawn();
                             SceneLoader.Instance.LoadScene("InGameScene");
+                            return;
                         }
-                            
-                        lastEnemyVector = enemyVector;
                     }
 
                     // 비활성화된 타겟 목록에서 제거 (반드시 공격 직후에 해줘야함)
