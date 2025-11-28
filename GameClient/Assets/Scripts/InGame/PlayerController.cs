@@ -71,7 +71,11 @@ namespace InGame
                         PlayerDataManager.Instance.ReduceMp(1);
 
                         if (PlayerDataManager.Instance.Model.NowStat.mp <= 0)
+                        {
+                            PlayerDataManager.Instance.Respawn();
                             SceneLoader.Instance.LoadScene("InGameScene");
+                        }
+                            
                         lastEnemyVector = enemyVector;
                     }
 

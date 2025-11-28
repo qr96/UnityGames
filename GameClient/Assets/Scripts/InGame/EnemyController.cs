@@ -107,8 +107,6 @@ namespace InGame
             unitModel.Reset();
             Managers.Monster?.enemyControllers.Add(this);
             Managers.UI?.hudLayout.RegisterNameTag($"Lv. {unitModel.Level}", transform);
-
-            Debug.Log(unitModel.NowStat.hp);
         }
 
         public void OnAttacked(Vector3 pushed, GameObject attacker)

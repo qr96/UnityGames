@@ -23,13 +23,18 @@ public class PlayerDataManager : MonoBehaviour
 
             //Test
             Data = new PlayerData();
-            Model = new UnitModel("Player", new Stat() { attack = 30, hp = 100, mp = 50, defense = 10 });
-            Model.Reset();
+            Respawn();
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    public void Respawn()
+    {
+        Model = new UnitModel("Player", new Stat() { attack = 30, hp = 100, mp = 50, defense = 10 });
+        Model.Reset();
     }
 
     public void TakeDamage(long damage)
