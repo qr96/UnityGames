@@ -71,7 +71,7 @@ namespace InGame
                         enemy.OnAttacked(isAttack ? inputAttackVector : enemyVector, gameObject);
                         PlayerDataManager.Instance.ReduceMp(1);
 
-                        if (PlayerDataManager.Instance.Model.NowStat.mp <= 0)
+                        if (PlayerDataManager.Instance.Model.NowMp <= 0)
                         {
                             PlayerDataManager.Instance.Respawn();
                             SceneLoader.Instance.LoadScene("InGameScene");

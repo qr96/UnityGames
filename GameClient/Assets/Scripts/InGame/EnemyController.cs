@@ -112,9 +112,9 @@ namespace InGame
         public void OnAttacked(Vector3 pushed, GameObject attacker)
         {
             // 데미지 적용
-            var damage = BattleCalculator.GetDamage(PlayerDataManager.Instance.Model.GetAttack(), unitModel.GetDefense());
+            var damage = BattleCalculator.GetDamage(PlayerDataManager.Instance.Model.NowStat.attack, unitModel.GetDefense());
             unitModel.TakeDamage(damage);
-            Debug.Log($"{PlayerDataManager.Instance.Model.GetAttack()}, {unitModel.GetDefense()}");
+            Debug.Log($"{PlayerDataManager.Instance.Model.NowStat.attack}, {unitModel.NowStat.defense}");
 
             // 피격 연출
             rigid.linearVelocity = new Vector3(0f, rigid.linearVelocity.y, 0f);

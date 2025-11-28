@@ -9,7 +9,6 @@ namespace GameData
     public struct Stat
     {
         public long hp;
-        public long mp;
         public long attack;
         public long defense;
     }
@@ -25,11 +24,47 @@ namespace GameData
         public int count { get; set; }
     }
 
+    public class PlayerModel : UnitModel
+    {
+        public long Exp;
+        public long Gold;
+        public long NowMp { get; private set; }
+        public long MaxMp { get; set; }
+
+        public PlayerModel(string name, Stat stat) : base(name, stat)
+        {
+            // base
+        }
+
+        public void Respawn()
+        {
+            Exp = 0;
+            Gold = 0;
+            Level = 1;
+            NowMp = MaxMp;
+            Reset();
+        }
+
+        public void GainMp(long mp)
+        {
+            NowMp += mp;
+            if (NowMp > MaxMp)
+                NowMp = MaxMp;
+        }
+
+        public void ReduceMp(long mp)
+        {
+            NowMp -= mp;
+            if (NowMp < 0)
+                NowMp = 0;
+        }
+    }
+
     public class UnitModel
     {
-        public string name { get; private set; }
+        public string Name { get; private set; }
         public int Level;
-        public long Exp;
+
         public Stat MaxStat => maxStat;
         public Stat NowStat => nowStat;
 
@@ -38,9 +73,8 @@ namespace GameData
 
         public UnitModel(string name, Stat stat)
         {
-            this.name = name;
+            this.Name = name;
             maxStat = stat;
-            Level = 1;
         }
 
         public void Reset()
@@ -60,13 +94,6 @@ namespace GameData
                 nowStat.hp = 0;
         }
 
-        public void ReduceMp(long mp)
-        {
-            nowStat.mp -= mp;
-            if (nowStat.mp < 0)
-                nowStat.mp = 0;
-        }
-
         public void TakeDamage(long damage)
         {
             ReduceHp(damage);
@@ -77,18 +104,6 @@ namespace GameData
             nowStat.hp += hp;
             if (nowStat.hp > maxStat.hp)
                 nowStat.hp = maxStat.hp;
-        }
-
-        public void HealMp(long mp)
-        {
-            nowStat.mp += mp;
-            if (nowStat.mp > maxStat.mp)
-                nowStat.mp = maxStat.mp;
-        }
-
-        public long GetAttack()
-        {
-            return nowStat.attack;
         }
 
         public long GetDefense()

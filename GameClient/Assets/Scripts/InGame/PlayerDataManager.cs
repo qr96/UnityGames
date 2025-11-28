@@ -7,7 +7,7 @@ public class PlayerDataManager : MonoBehaviour
     public static PlayerDataManager Instance;
 
     public PlayerData Data { get; private set; }
-    public UnitModel Model { get; private set; }
+    public PlayerModel Model { get; private set; }
 
     public event Action<long, long> OnHpChanged;
     public event Action<long, long> OnMpChanged;
@@ -33,8 +33,9 @@ public class PlayerDataManager : MonoBehaviour
 
     public void Respawn()
     {
-        Model = new UnitModel("Player", new Stat() { attack = 30, hp = 100, mp = 50, defense = 10 });
-        Model.Reset();
+        Model = new PlayerModel("Player", new Stat() { attack = 30, hp = 100, defense = 10 });
+        Model.MaxMp = 50;
+        Model.Respawn();
     }
 
     public void TakeDamage(long damage)
@@ -46,7 +47,7 @@ public class PlayerDataManager : MonoBehaviour
     public void ReduceMp(long mp)
     {
         Model.ReduceMp(mp);
-        OnMpChanged?.Invoke(Model.MaxStat.mp, Model.NowStat.mp);
+        OnMpChanged?.Invoke(Model.MaxMp, Model.NowMp);
     }
 
     public void GainHp(long hp)
@@ -88,7 +89,7 @@ public class PlayerDataManager : MonoBehaviour
     public void InitializeUI()
     {
         OnHpChanged?.Invoke(Model.MaxStat.hp, Model.NowStat.hp);
-        OnMpChanged?.Invoke(Model.MaxStat.mp, Model.NowStat.mp);
+        OnMpChanged?.Invoke(Model.MaxMp, Model.NowMp);
         OnMoneyChanged?.Invoke(Data.money);
         OnExpChanged?.Invoke(StatBalancer.GetPlayerExpRequired(Model.Level), Model.Exp);
         OnLevelChanged?.Invoke(Model.Level);
