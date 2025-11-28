@@ -11,7 +11,7 @@ namespace GameUI
         public GuageBar mpGuage;
         public GuageBar expGuage;
         
-        public void SetLevelText(long level)
+        public void SetLevelText(long level, long prevLevel)
         {
             levelText.text = $"Lv. {level}";
         }

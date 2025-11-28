@@ -28,3 +28,6 @@ MonoBehaviour:
   - resourcePath: Prefab/Monster/001
     defaultCapacity: 10
     maxSize: 20
+  - resourcePath: Prefab/Effect/HCFX_Energy_08
+    defaultCapacity: 1
+    maxSize: 3

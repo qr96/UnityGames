@@ -13,7 +13,7 @@ public class PlayerDataManager : MonoBehaviour
     public event Action<long, long> OnMpChanged;
     public event Action<long, long> OnExpChanged;
     public event Action<long> OnMoneyChanged;
-    public event Action<long> OnLevelChanged;
+    public event Action<long, long> OnLevelChanged; // now, prev
 
     private void Awake()
     {
@@ -33,7 +33,7 @@ public class PlayerDataManager : MonoBehaviour
 
     public void Respawn()
     {
-        Model = new PlayerModel("Player", new Stat() { attack = 30, hp = 100, defense = 10 });
+        Model = new PlayerModel("Player", new Stat() { attack = 50, hp = 100, defense = 10 });
         Model.MaxMp = 50;
         Model.Respawn();
     }
@@ -82,7 +82,7 @@ public class PlayerDataManager : MonoBehaviour
     {
         Model.Level++;
         Model.SetStat(StatBalancer.GetPlayerStatsByLevel(Model.Level, Model.MaxStat));
-        OnLevelChanged?.Invoke(Model.Level);
+        OnLevelChanged?.Invoke(Model.Level, Model.Level - 1);
     }
 
     // 초기 로드 시 UI를 한 번 초기화해주는 함수 (Scene 로드 직후 호출)
@@ -92,6 +92,6 @@ public class PlayerDataManager : MonoBehaviour
         OnMpChanged?.Invoke(Model.MaxMp, Model.NowMp);
         OnMoneyChanged?.Invoke(Data.money);
         OnExpChanged?.Invoke(StatBalancer.GetPlayerExpRequired(Model.Level), Model.Exp);
-        OnLevelChanged?.Invoke(Model.Level);
+        OnLevelChanged?.Invoke(Model.Level, Model.Level);
     }
 }

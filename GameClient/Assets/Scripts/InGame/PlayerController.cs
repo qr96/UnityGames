@@ -42,6 +42,16 @@ namespace InGame
             SetState(State.Idle);
         }
 
+        private void OnEnable()
+        {
+            PlayerDataManager.Instance.OnLevelChanged += LevelUpEffect;
+        }
+
+        private void OnDisable()
+        {
+            PlayerDataManager.Instance.OnLevelChanged -= LevelUpEffect;
+        }
+
         private void Update()
         {
             if (nowState == State.Idle)
@@ -175,6 +185,15 @@ namespace InGame
         {
             rigid.linearVelocity = new Vector3(0f, rigid.linearVelocity.y, 0f);
             rigid.AddForce(pushed * repulsivePower, ForceMode.Impulse);
+        }
+
+        void LevelUpEffect(long level, long prevLevel)
+        {
+            if (level > prevLevel && PoolManager.Instance.TryCreate("Prefab/Effect/HCFX_Energy_08", out var effect))
+            {
+                effect.transform.parent = transform;
+                effect.transform.position = transform.position + new Vector3(0f, -1f, 0f);
+            }
         }
     }
 }
