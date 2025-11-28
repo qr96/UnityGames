@@ -16,11 +16,7 @@ namespace GameData
 
     public class PlayerData
     {
-        public int level { get; set; }
-        public long nowExp { get; set; }
         public long money { get; set; }
-        public Stat pureStat { get; set; }
-        public Stat maxStat { get; set; }
     }
 
     public class ItemData
@@ -32,6 +28,8 @@ namespace GameData
     public class UnitModel
     {
         public string name { get; private set; }
+        public int Level;
+        public long Exp;
         public Stat MaxStat => maxStat;
         public Stat NowStat => nowStat;
 
@@ -42,6 +40,7 @@ namespace GameData
         {
             this.name = name;
             maxStat = stat;
+            Level = 1;
         }
 
         public void Reset()

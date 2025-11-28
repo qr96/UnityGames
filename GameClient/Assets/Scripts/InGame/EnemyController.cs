@@ -7,7 +7,6 @@ namespace InGame
     public class EnemyController : MonoBehaviour
     {
         UnitModel unitModel;
-        int unitLevel;
 
         public Rigidbody rigid;
         public TriggerEvent detectTrigger;
@@ -65,6 +64,8 @@ namespace InGame
                     }
                     else
                     {
+                        unitModel.Reset();
+                        Managers.UI?.hudLayout.RemoveHpGuage(transform);
                         ChasePlayer(false);
                         nowState = State.Idle;
                     }
@@ -102,10 +103,10 @@ namespace InGame
         public void SetLevel(int level)
         {
             unitModel.SetStat(StatBalancer.GetMonsterStatsByLevel(level));
+            unitModel.Level = level;
             unitModel.Reset();
-            unitLevel = level;
             Managers.Monster?.enemyControllers.Add(this);
-            Managers.UI?.hudLayout.RegisterNameTag($"Lv. {unitLevel}", transform);
+            Managers.UI?.hudLayout.RegisterNameTag($"Lv. {unitModel.Level}", transform);
 
             Debug.Log(unitModel.NowStat.hp);
         }
@@ -165,8 +166,8 @@ namespace InGame
             }
 
             // 유저 경험치 및 골드 증가
-            PlayerDataManager.Instance?.GainExp(StatBalancer.GetMonsterExpByLevel(unitLevel));
-            PlayerDataManager.Instance?.GainMoney(StatBalancer.GetMonsterGoldByLevel(unitLevel), false);
+            PlayerDataManager.Instance?.GainExp(StatBalancer.GetMonsterExpByLevel(unitModel.Level));
+            PlayerDataManager.Instance?.GainMoney(StatBalancer.GetMonsterGoldByLevel(unitModel.Level), false);
 
             // 초기화
             gameObject.SetActive(false);
