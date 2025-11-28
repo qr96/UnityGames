@@ -16,13 +16,12 @@ namespace InGame
         public float speed;
         public float attackCoolTime;
         public float repulsivePower;
-        public float healCoolTime;
+        public float fullHealDuration;
 
         // 상태값
         State nowState;
         Vector3 moveDirection;
         float attackEnd;
-        float healDelayEnd;
 
         HashSet<EnemyController> enemies = new HashSet<EnemyController>();
 
@@ -103,10 +102,12 @@ namespace InGame
 
                     if (Managers.Monster.GetChasingMonsterCount() <= 0)
                     {
-                        if (Time.time > healDelayEnd)
+                        // 체력 풀충전
+                        if (fullHealDuration != 0)
                         {
-                            PlayerDataManager.Instance.GainHp(5);
-                            healDelayEnd = Time.time + healCoolTime;
+                            var healAmount = PlayerDataManager.Instance.Model.MaxStat.hp * (Time.deltaTime / fullHealDuration);
+                            healAmount = Mathf.Ceil(healAmount);
+                            PlayerDataManager.Instance.GainHp((long)healAmount);
                         }
                     }
                 }
