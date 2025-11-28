@@ -35,6 +35,7 @@ namespace InGame
 
         public enum State
         {
+            None,
             Idle,
             Attack
         }
@@ -42,7 +43,7 @@ namespace InGame
         private void Start()
         {
             attackTrigger.Set(OnEnterAttackTrigger, OnExitAttackTrigger);
-            nowState = State.Idle;
+            SetState(State.Idle);
         }
 
         private void Update()
@@ -89,7 +90,7 @@ namespace InGame
                     OnPushed(isAttack ? -inputAttackVector : -lastEnemyVector);
 
                     // 상태 변경
-                    nowState = State.Attack;
+                    SetState(State.Attack);
                 }
                 else
                 {
@@ -109,7 +110,7 @@ namespace InGame
             else if (nowState == State.Attack)
             {
                 if (Time.time > attackEnd)
-                    nowState = State.Idle;
+                    SetState(State.Idle);
             }
         }
 
@@ -139,6 +140,11 @@ namespace InGame
                 if (moveDirection != Vector3.zero)
                     rigid.rotation = Quaternion.LookRotation(moveDirection);
             }
+        }
+
+        public void SetState(State state)
+        {
+            nowState = state;
         }
 
         void OnEnterAttackTrigger(Collider col)
