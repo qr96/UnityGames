@@ -19,6 +19,8 @@ public class PoolManager : MonoBehaviour
     // 하이어라키 창 정리를 위한 최상위 부모 트랜스폼
     private Transform _root;
 
+    int id;
+
     private void Awake()
     {
         if (Instance == null)
@@ -128,7 +130,7 @@ public class PoolManager : MonoBehaviour
             createFunc: () =>
             {
                 var obj = Instantiate(prefab, poolGroup);
-                obj.name = prefab.name;
+                obj.name = $"{prefab.name} {id++}";
 
                 var poolable = obj.GetComponent<Poolable>();
                 if (poolable == null)
