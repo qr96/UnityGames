@@ -15,14 +15,14 @@ public class StatBalancer
     private const float MonsterDefC = 10.0f;
 
     // ATK: A*L^2 + B*L + C
-    private const float MonsterAtkA = 0.4f;
-    private const float MonsterAtkB = 3.0f;
-    private const float MonsterAtkC = 30.0f;
+    private const float MonsterAtkA = 0.8f;
+    private const float MonsterAtkB = 6.0f;
+    private const float MonsterAtkC = 50.0f;
 
     // === 플레이어 레벨당 증가량 (상수) ===
     private const int PlayerHpPerLevel = 15;
     private const int PlayerDefPerLevel = 2;
-    private const int PlayerAtkPerLevel = 8;
+    private const int PlayerAtkPerLevel = 30;
 
     // === 경험치 곡선 계수 ===
     private const float MonsterExpA = 0.5f;
