@@ -38,16 +38,12 @@ namespace InGame
 
         private void Start()
         {
+            PlayerDataManager.Instance.OnLevelChanged += LevelUpEffect;
             attackTrigger.Set(OnEnterAttackTrigger, OnExitAttackTrigger);
             SetState(State.Idle);
         }
 
-        private void OnEnable()
-        {
-            PlayerDataManager.Instance.OnLevelChanged += LevelUpEffect;
-        }
-
-        private void OnDisable()
+        private void OnDestroy()
         {
             PlayerDataManager.Instance.OnLevelChanged -= LevelUpEffect;
         }
