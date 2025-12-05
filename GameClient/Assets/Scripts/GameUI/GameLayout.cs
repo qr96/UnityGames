@@ -1,5 +1,7 @@
+using InGame;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace GameUI
 {
@@ -10,7 +12,14 @@ namespace GameUI
         public GuageBar hpGuage;
         public GuageBar mpGuage;
         public GuageBar expGuage;
-        
+
+        public Button equipmentButton;
+
+        private void Start()
+        {
+            equipmentButton.onClick.AddListener(() => Managers.UI.playerInfoPopup.Show());
+        }
+
         public void SetLevelText(long level, long prevLevel)
         {
             levelText.text = $"Lv. {level}";

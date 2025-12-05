@@ -16,6 +16,7 @@ namespace GameData
     public class PlayerData
     {
         public long money { get; set; }
+        public int weaponSlot {  get; set; }
     }
 
     public class ItemData

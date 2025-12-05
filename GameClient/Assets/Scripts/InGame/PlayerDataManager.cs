@@ -15,6 +15,9 @@ public class PlayerDataManager : MonoBehaviour
     public event Action<long> OnMoneyChanged;
     public event Action<long, long> OnLevelChanged; // now, prev
 
+    public event Action<int> OnWeaponSlotChange;
+
+
     private void Awake()
     {
         if (Instance == null)
@@ -76,6 +79,17 @@ public class PlayerDataManager : MonoBehaviour
         }
 
         OnExpChanged?.Invoke(needExp, Model.Exp);
+    }
+
+    public void AddWeaponSlotLevel()
+    {
+        var price = PriceBalancer.GetInhancePrice(Data.weaponSlot);
+        if (Data.money > price)
+        {
+            Data.money -= price;
+            Data.weaponSlot++;
+            OnWeaponSlotChange?.Invoke(Data.weaponSlot);
+        }
     }
 
     void Addlevel()

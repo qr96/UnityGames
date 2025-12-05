@@ -6,6 +6,7 @@ namespace GameUI
     {
         public HudLayout hudLayout;
         public GameLayout gameLayout;
+        public PlayerInfoPopup playerInfoPopup;
 
         private void Start()
         {
