@@ -5,7 +5,7 @@ namespace InGame
 {
     public class Managers : MonoBehaviour
     {
-        public static Managers Instance;
+        static Managers Instance;
 
         public static MonsterManager Monster => Instance?.monster;
         public static UIManager UI => Instance?.ui;

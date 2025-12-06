@@ -30,8 +30,8 @@ public class StatBalancer
     private const float MonsterExpC = 50.0f;
 
     // === 골드 곡선 계수 ===
-    private const float MonsterGoldA = 0.1f;
-    private const float MonsterGoldB = 5.0f;
+    private const float MonsterGoldA = 2.0f;
+    private const float MonsterGoldB = 7.0f;
     private const float MonsterGoldC = 20.0f;
 
     // === 플레이어 필요 경험치 곡선 계수 ===
