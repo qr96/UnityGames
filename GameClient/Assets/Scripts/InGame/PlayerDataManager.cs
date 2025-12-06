@@ -14,6 +14,7 @@ public class PlayerDataManager : MonoBehaviour
     public event Action<long, long> OnExpChanged;
     public event Action<long> OnMoneyChanged;
     public event Action<long, long> OnLevelChanged; // now, prev
+    public event Action<Stat> OnStatChanged;
 
     public event Action<int> OnWeaponSlotChange;
 
@@ -97,6 +98,7 @@ public class PlayerDataManager : MonoBehaviour
         Model.Level++;
         Model.SetStat(StatBalancer.GetPlayerStatsByLevel(Model.Level, Model.MaxStat));
         OnLevelChanged?.Invoke(Model.Level, Model.Level - 1);
+        OnStatChanged?.Invoke(Model.MaxStat);
     }
 
     // 초기 로드 시 UI를 한 번 초기화해주는 함수 (Scene 로드 직후 호출)

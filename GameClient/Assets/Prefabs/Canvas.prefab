@@ -2906,7 +2906,7 @@ MonoBehaviour:
   belt: {fileID: 0}
   shoe: {fileID: 0}
   ring: {fileID: 0}
-  info: {fileID: 6464919340421266612}
+  statInfo: {fileID: 6464919340421266612}
   closeButton: {fileID: 4567794409912566556}
 --- !u!1 &6984126323624495576
 GameObject:
