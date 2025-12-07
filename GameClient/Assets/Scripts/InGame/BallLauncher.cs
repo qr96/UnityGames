@@ -46,6 +46,18 @@ namespace InGame
             }
         }
 
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (collision.transform.CompareTag("Enemy"))
+            {
+                if (PoolManager.Instance.TryCreate("Effects/HCFX_Hit_08", out var effect))
+                {
+                    effect.transform.position = collision.transform.position;
+                    animator.SetTrigger("Attack");
+                }
+            }
+        }
+
         private void HandleMouseDown()
         {
             // UI 위에 포인터가 있으면 입력을 무시 (UI 가로채기 방지)
