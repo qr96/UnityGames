@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4229114301840589527}
   - component: {fileID: 9205425087221482361}
   - component: {fileID: 5013930053828891195}
+  - component: {fileID: 645314812572856276}
   m_Layer: 0
   m_Name: Monster
   m_TagString: Enemy
@@ -82,6 +83,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!114 &645314812572856276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1712044775651684979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9db803025073fa34baae56735201cd90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.Enemy
+  animator: {fileID: 2683331418491726508}
 --- !u!1001 &2683331418482390766
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -150,5 +164,10 @@ PrefabInstance:
 --- !u!4 &2683331418482738208 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 438990, guid: bcc60fdbd3a37b44cbc0cb99db483477, type: 3}
+  m_PrefabInstance: {fileID: 2683331418482390766}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &2683331418491726508 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 9542722, guid: bcc60fdbd3a37b44cbc0cb99db483477, type: 3}
   m_PrefabInstance: {fileID: 2683331418482390766}
   m_PrefabAsset: {fileID: 0}

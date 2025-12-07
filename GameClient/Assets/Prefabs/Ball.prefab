@@ -49,7 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BallLauncher
   guideLine: {fileID: 0}
   animator: {fileID: 7798370072013816352}
-  launchPower: 5
+  launchPower: 10
   maxDragDistance: 2
 --- !u!54 &7272989344502887806
 Rigidbody:

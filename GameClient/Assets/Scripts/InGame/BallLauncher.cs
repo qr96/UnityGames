@@ -50,9 +50,11 @@ namespace InGame
         {
             if (collision.transform.CompareTag("Enemy"))
             {
-                if (PoolManager.Instance.TryCreate("Effects/HCFX_Hit_08", out var effect))
+                var enemy = collision.transform.GetComponent<Enemy>();
+                if (enemy != null && PoolManager.Instance.TryCreate("Effects/HCFX_Hit_08", out var effect))
                 {
-                    effect.transform.position = collision.transform.position;
+                    enemy.OnDamaged();
+                    effect.transform.position = collision.transform.position + new Vector3(0f, 0.5f, 0f);
                     animator.SetTrigger("Attack");
                 }
             }
