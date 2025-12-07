@@ -6,6 +6,7 @@ namespace InGame
     public class BallLauncher : MonoBehaviour
     {
         public GameObject guideLine;
+        public GameObject guideLine2;
         public Animator animator;
 
         public float launchPower = 500f;
@@ -64,9 +65,7 @@ namespace InGame
         {
             // UI 위에 포인터가 있으면 입력을 무시 (UI 가로채기 방지)
             if (EventSystem.current.IsPointerOverGameObject())
-            {
                 return;
-            }
 
             isDragging = true;
             rb.isKinematic = true; // 만약을 위해 다시 Kinematic 설정
@@ -77,6 +76,29 @@ namespace InGame
         {
             Vector3 launchDirection = GetLaunchVector();
             guideLine.transform.forward = launchDirection;
+
+            if (Physics.Raycast(initialPosition, launchDirection, out var hit, 20f, LayerMask.GetMask("Wall")))
+            {
+                var wallNormal = hit.normal;
+                var reflect = Vector3.Reflect(launchDirection, wallNormal);
+                var distance = Vector3.Magnitude(initialPosition - hit.point);
+                var newDis = 16f - distance;
+                var detailLine = guideLine2.transform.GetChild(0);
+
+                if (newDis > 0f)
+                {
+                    detailLine.transform.localScale = new Vector3(detailLine.transform.localScale.x, detailLine.transform.localScale.y, newDis);
+                    detailLine.transform.localPosition = new Vector3(detailLine.transform.localPosition.x, detailLine.transform.localPosition.y, newDis / 2f - 0.5f);
+
+                    guideLine2.gameObject.SetActive(true);
+                    guideLine2.transform.position = hit.point;
+                    guideLine2.transform.forward = reflect;
+                }
+                else
+                {
+                    guideLine2.gameObject.SetActive(false);
+                }
+            }
         }
 
         private void HandleMouseUp()
