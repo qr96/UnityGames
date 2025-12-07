@@ -1,106 +1,111 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class BallLauncher : MonoBehaviour
+namespace InGame
 {
-    public GameObject guideLine;
-
-    public float launchPower = 500f;
-    public float maxDragDistance = 2f;
-
-    private Rigidbody rb;
-    private Vector3 initialPosition; // 슈터 위치 (발사 시작 위치)
-    private bool isDragging = false; // 현재 드래그 중인지 상태
-
-    void Start()
+    public class BallLauncher : MonoBehaviour
     {
-        rb = GetComponent<Rigidbody>();
-    }
+        public GameObject guideLine;
+        public Animator animator;
 
-    void Update()
-    {
-        if (!rb.isKinematic)
+        public float launchPower = 500f;
+        public float maxDragDistance = 2f;
+
+        private Rigidbody rb;
+        private Vector3 initialPosition; // 슈터 위치 (발사 시작 위치)
+        private bool isDragging = false; // 현재 드래그 중인지 상태
+
+        void Start()
         {
-            if (rb.linearVelocity != Vector3.zero)
-                transform.forward = rb.linearVelocity.normalized;
-
-            return;
+            rb = GetComponent<Rigidbody>();
         }
 
-        if (Input.GetMouseButtonDown(0))
+        void Update()
         {
-            HandleMouseDown();
+            if (!rb.isKinematic)
+            {
+                if (rb.linearVelocity != Vector3.zero)
+                    transform.forward = rb.linearVelocity.normalized;
+
+                return;
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                HandleMouseDown();
+            }
+
+            if (isDragging)
+            {
+                HandleMouseDrag();
+            }
+
+            if (Input.GetMouseButtonUp(0))
+            {
+                HandleMouseUp();
+            }
         }
 
-        if (isDragging)
+        private void HandleMouseDown()
         {
-            HandleMouseDrag();
+            // UI 위에 포인터가 있으면 입력을 무시 (UI 가로채기 방지)
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
+            isDragging = true;
+            rb.isKinematic = true; // 만약을 위해 다시 Kinematic 설정
+            initialPosition = transform.position;
         }
 
-        if (Input.GetMouseButtonUp(0))
+        private void HandleMouseDrag()
         {
-            HandleMouseUp();
-        }
-    }
-
-    private void HandleMouseDown()
-    {
-        // UI 위에 포인터가 있으면 입력을 무시 (UI 가로채기 방지)
-        if (EventSystem.current.IsPointerOverGameObject())
-        {
-            return;
+            Vector3 launchDirection = GetLaunchVector();
+            guideLine.transform.forward = launchDirection;
         }
 
-        isDragging = true;
-        rb.isKinematic = true; // 만약을 위해 다시 Kinematic 설정
-        initialPosition = transform.position;
-    }
+        private void HandleMouseUp()
+        {
+            if (!isDragging) return;
+            isDragging = false;
 
-    private void HandleMouseDrag()
-    {
-        Vector3 launchDirection = GetLaunchVector();
-        guideLine.transform.forward = launchDirection;
-    }
+            Vector3 launchDirection = GetLaunchVector();
+            if (launchDirection.magnitude < 0.1f)
+                return;
 
-    private void HandleMouseUp()
-    {
-        if (!isDragging) return;
-        isDragging = false;
+            rb.isKinematic = false; // 물리 엔진 활성화
+            rb.AddForce(launchDirection.normalized * launchDirection.magnitude * launchPower, ForceMode.Impulse);
+            animator.SetBool("Move", true);
 
-        Vector3 launchDirection = GetLaunchVector();
-        if (launchDirection.magnitude < 0.1f)
-            return;
+            guideLine.gameObject.SetActive(false);
+        }
 
-        rb.isKinematic = false; // 물리 엔진 활성화
-        rb.AddForce(launchDirection.normalized * launchDirection.magnitude * launchPower, ForceMode.Impulse);
+        Vector3 GetMouseWolrdPos()
+        {
+            Vector3 mouseScreenPos = Input.mousePosition;
+            mouseScreenPos.z = Camera.main.nearClipPlane + 10f;
+            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
 
-        guideLine.gameObject.SetActive(false);
-    }
+            return mouseWorldPos;
+        }
 
-    Vector3 GetMouseWolrdPos()
-    {
-        Vector3 mouseScreenPos = Input.mousePosition;
-        mouseScreenPos.z = Camera.main.nearClipPlane + 10f;
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
+        Vector3 GetDragVector()
+        {
+            Vector3 dragVector = GetMouseWolrdPos() - initialPosition;
+            dragVector.y = 0f;
 
-        return mouseWorldPos;
-    }
+            return dragVector;
+        }
 
-    Vector3 GetDragVector()
-    {
-        Vector3 dragVector = GetMouseWolrdPos() - initialPosition;
-        dragVector.y = 0f;
+        Vector3 GetLaunchVector()
+        {
+            Vector3 launchDirection = GetDragVector();
 
-        return dragVector;
-    }
+            if (launchDirection.magnitude > maxDragDistance)
+                launchDirection = launchDirection.normalized * maxDragDistance;
 
-    Vector3 GetLaunchVector()
-    {
-        Vector3 launchDirection = GetDragVector();
-
-        if (launchDirection.magnitude > maxDragDistance)
-            launchDirection = launchDirection.normalized * maxDragDistance;
-
-        return launchDirection;
+            return launchDirection;
+        }
     }
 }
