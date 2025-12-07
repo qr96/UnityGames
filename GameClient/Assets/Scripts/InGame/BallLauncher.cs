@@ -25,8 +25,19 @@ namespace InGame
         {
             if (!rb.isKinematic)
             {
-                if (rb.linearVelocity != Vector3.zero)
-                    transform.forward = rb.linearVelocity.normalized;
+                if (transform.position.z < -12.5f)
+                {
+                    initialPosition = new Vector3(transform.position.x, transform.position.y, -12.5f);
+                    transform.position = initialPosition;
+                    rb.isKinematic = true;
+                    transform.forward = Vector3.forward;
+                    animator.SetBool("Move", false);
+                }
+                else
+                {
+                    if (rb.linearVelocity != Vector3.zero)
+                        transform.forward = rb.linearVelocity.normalized;
+                }
 
                 return;
             }
@@ -54,7 +65,7 @@ namespace InGame
                 var enemy = collision.transform.GetComponent<Enemy>();
                 if (enemy != null && PoolManager.Instance.TryCreate("Effects/HCFX_Hit_08", out var effect))
                 {
-                    enemy.OnDamaged();
+                    enemy.OnDamaged(5);
                     effect.transform.position = collision.transform.position + new Vector3(0f, 0.5f, 0f);
                     animator.SetTrigger("Attack");
                 }
@@ -69,7 +80,11 @@ namespace InGame
 
             isDragging = true;
             rb.isKinematic = true; // 만약을 위해 다시 Kinematic 설정
-            initialPosition = transform.position;
+            initialPosition = new Vector3(transform.position.x, transform.position.y, -12.5f);
+
+            // 가이드 라인 활성화
+            guideLine.SetActive(true);
+            guideLine.transform.position = transform.position;
         }
 
         private void HandleMouseDrag()
@@ -90,13 +105,13 @@ namespace InGame
                     detailLine.transform.localScale = new Vector3(detailLine.transform.localScale.x, detailLine.transform.localScale.y, newDis);
                     detailLine.transform.localPosition = new Vector3(detailLine.transform.localPosition.x, detailLine.transform.localPosition.y, newDis / 2f - 0.5f);
 
-                    guideLine2.gameObject.SetActive(true);
+                    guideLine2.SetActive(true);
                     guideLine2.transform.position = hit.point;
                     guideLine2.transform.forward = reflect;
                 }
                 else
                 {
-                    guideLine2.gameObject.SetActive(false);
+                    guideLine2.SetActive(false);
                 }
             }
         }
@@ -114,7 +129,8 @@ namespace InGame
             rb.AddForce(launchDirection.normalized * launchDirection.magnitude * launchPower, ForceMode.Impulse);
             animator.SetBool("Move", true);
 
-            guideLine.gameObject.SetActive(false);
+            guideLine.SetActive(false);
+            guideLine2.SetActive(false);
         }
 
         Vector3 GetMouseWolrdPos()

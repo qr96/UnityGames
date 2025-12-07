@@ -1,3 +1,4 @@
+using GameModel;
 using UnityEngine;
 
 namespace InGame
@@ -6,7 +7,9 @@ namespace InGame
     {
         public Animator animator;
 
-        public void OnDamaged()
+        UnitModel model;
+
+        public void OnDamaged(long damage)
         {
             animator.SetTrigger("Damage");
         }
