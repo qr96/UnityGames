@@ -18,10 +18,19 @@ namespace InGame
         public void OnDamaged(long damage)
         {
             model.SetHp(model.nowHp - damage);
-            if (model.IsDead())
-                gameObject.SetActive(false);
-
             animator.SetTrigger("Damage");
+
+            Managers.UI.hudLayout.RegisterHpGuage(transform);
+            Managers.UI.hudLayout.UpdateHpGuageValue(transform, model.maxHp, model.nowHp);
+
+            if (model.IsDead())
+                OnDead();
+        }
+
+        void OnDead()
+        {
+            gameObject.SetActive(false);
+            Managers.UI.hudLayout.RemoveHpGuage(transform);
         }
     }
 }
