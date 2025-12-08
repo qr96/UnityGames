@@ -25,9 +25,9 @@ namespace InGame
         {
             if (!rb.isKinematic)
             {
-                if (transform.position.z < -12.5f)
+                if (transform.position.z < -7f)
                 {
-                    initialPosition = new Vector3(transform.position.x, transform.position.y, -12.5f);
+                    initialPosition = new Vector3(transform.position.x, transform.position.y, -7f);
                     transform.position = initialPosition;
                     rb.isKinematic = true;
                     transform.forward = Vector3.forward;
@@ -80,7 +80,7 @@ namespace InGame
 
             isDragging = true;
             rb.isKinematic = true; // 만약을 위해 다시 Kinematic 설정
-            initialPosition = new Vector3(transform.position.x, transform.position.y, -12.5f);
+            initialPosition = new Vector3(transform.position.x, transform.position.y, -7f);
 
             // 가이드 라인 활성화
             guideLine.SetActive(true);
