@@ -86,6 +86,7 @@ GameObject:
   - component: {fileID: 8537680321633276110}
   - component: {fileID: 8701578166813967053}
   - component: {fileID: 3338510795575006538}
+  - component: {fileID: 9044240405838615171}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -134,6 +135,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameUI.UIManager
   hudLayout: {fileID: 1217822435354954671}
+--- !u!114 &9044240405838615171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3248194342057942795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ef7a7796faaa0f44a4ce3503bc5b926, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.MonsterSpawner
+  monsterPrefab: {fileID: 0}
+  size: {x: 8, y: 8}
+  startPos: {x: -5.25, y: -0.5, z: 6}
+  gap: {x: 1.5, y: 0, z: 1.5}
+  spawnPercent: 0.8
 --- !u!1 &5080998784265066741
 GameObject:
   m_ObjectHideFlags: 0

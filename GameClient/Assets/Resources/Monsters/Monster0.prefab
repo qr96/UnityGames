@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1712044775651684979
+--- !u!1 &2921195036320526044
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,40 +8,40 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4229114301840589527}
-  - component: {fileID: 9205425087221482361}
-  - component: {fileID: 5013930053828891195}
-  - component: {fileID: 645314812572856276}
+  - component: {fileID: 4158443457706219383}
+  - component: {fileID: 2452480548071149187}
+  - component: {fileID: 1866225898934783285}
+  - component: {fileID: 2700342589103913853}
   m_Layer: 8
-  m_Name: Monster
+  m_Name: Monster0
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4229114301840589527
+  m_IsActive: 0
+--- !u!4 &4158443457706219383
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1712044775651684979}
+  m_GameObject: {fileID: 2921195036320526044}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.5, z: 5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2683331418482738208}
+  - {fileID: 2635278505931325460}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &9205425087221482361
+--- !u!54 &2452480548071149187
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1712044775651684979}
+  m_GameObject: {fileID: 2921195036320526044}
   serializedVersion: 5
   m_Mass: 1
   m_LinearDamping: 0
@@ -62,13 +62,13 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!65 &5013930053828891195
+--- !u!65 &1866225898934783285
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1712044775651684979}
+  m_GameObject: {fileID: 2921195036320526044}
   m_Material: {fileID: 13400000, guid: 96a2422fb821ee044b8f42d2df9b700d, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
@@ -81,28 +81,28 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1.5, y: 1, z: 1.5}
   m_Center: {x: 0, y: 0.5, z: 0}
---- !u!114 &645314812572856276
+--- !u!114 &2700342589103913853
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1712044775651684979}
+  m_GameObject: {fileID: 2921195036320526044}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9db803025073fa34baae56735201cd90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.Enemy
-  animator: {fileID: 2683331418491726508}
---- !u!1001 &2683331418482390766
+  animator: {fileID: 2635278505940971160}
+--- !u!1001 &2635278505931502298
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 4229114301840589527}
+    m_TransformParent: {fileID: 4158443457706219383}
     m_Modifications:
     - target: {fileID: 155132, guid: bcc60fdbd3a37b44cbc0cb99db483477, type: 3}
       propertyPath: m_Name
@@ -161,13 +161,13 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bcc60fdbd3a37b44cbc0cb99db483477, type: 3}
---- !u!4 &2683331418482738208 stripped
+--- !u!4 &2635278505931325460 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 438990, guid: bcc60fdbd3a37b44cbc0cb99db483477, type: 3}
-  m_PrefabInstance: {fileID: 2683331418482390766}
+  m_PrefabInstance: {fileID: 2635278505931502298}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &2683331418491726508 stripped
+--- !u!95 &2635278505940971160 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 9542722, guid: bcc60fdbd3a37b44cbc0cb99db483477, type: 3}
-  m_PrefabInstance: {fileID: 2683331418482390766}
+  m_PrefabInstance: {fileID: 2635278505931502298}
   m_PrefabAsset: {fileID: 0}

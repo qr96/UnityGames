@@ -16,3 +16,6 @@ MonoBehaviour:
   - resourcePath: Effects/HCFX_Hit_08
     defaultCapacity: 5
     maxSize: 10
+  - resourcePath: Monsters/Monster0
+    defaultCapacity: 64
+    maxSize: 64

@@ -9,9 +9,9 @@ namespace InGame
 
         UnitModel model;
 
-        private void Start()
+        public void Spawn(UnitModel model)
         {
-            model = new UnitModel() { maxHp = 20 };
+            this.model = model;
             model.Spawn();
         }
 
