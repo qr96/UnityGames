@@ -151,7 +151,7 @@ MonoBehaviour:
   size: {x: 8, y: 8}
   startPos: {x: -5.25, y: -0.5, z: 6}
   gap: {x: 1.5, y: 0, z: 1.5}
-  spawnPercent: 0.8
+  spawnPercent: 0.6
 --- !u!1 &5080998784265066741
 GameObject:
   m_ObjectHideFlags: 0

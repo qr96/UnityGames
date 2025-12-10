@@ -92,12 +92,12 @@ namespace InGame
             Vector3 launchDirection = GetLaunchVector();
             guideLine.transform.forward = launchDirection;
 
-            if (Physics.Raycast(initialPosition, launchDirection, out var hit, 20f, LayerMask.GetMask("Wall")))
+            if (Physics.Raycast(initialPosition, launchDirection, out var hit, 26f, LayerMask.GetMask("Wall")))
             {
                 var wallNormal = hit.normal;
                 var reflect = Vector3.Reflect(launchDirection, wallNormal);
                 var distance = Vector3.Magnitude(initialPosition - hit.point);
-                var newDis = 16f - distance;
+                var newDis = 26f - distance;
                 var detailLine = guideLine2.transform.GetChild(0);
 
                 if (newDis > 0f)
@@ -126,7 +126,8 @@ namespace InGame
                 return;
 
             rb.isKinematic = false; // 물리 엔진 활성화
-            rb.AddForce(launchDirection.normalized * launchDirection.magnitude * launchPower, ForceMode.Impulse);
+            rb.AddForce(launchDirection.normalized * launchPower, ForceMode.Impulse);
+            Debug.Log(launchDirection.normalized * launchPower);
             animator.SetBool("Move", true);
 
             guideLine.SetActive(false);
