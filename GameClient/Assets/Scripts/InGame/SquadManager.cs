@@ -5,19 +5,31 @@ namespace InGame
 {
     public class SquadManager : MonoBehaviour
     {
+        public Rigidbody2D playerA;
+        public Rigidbody2D playerB;
+
         public GameObject soldierPrefab;
         public int totalSoldiers = 9;
 
         void Start()
         {
-            SpawnSquad();
+            SpawnSquad(1, playerA);
+            SpawnSquad(2, playerB);
         }
 
-        void SpawnSquad()
+        void SpawnSquad(int teamId, Rigidbody2D leader)
         {
             for (int i = 0; i < totalSoldiers; i++)
             {
-                Instantiate(soldierPrefab, transform.position, Quaternion.identity);
+                var unit = Instantiate(soldierPrefab, transform.position, Quaternion.identity);
+                var soldier = unit.GetComponent<SoldierUnit>();
+                if (soldier != null)
+                {
+                    soldier.gameObject.SetActive(true);
+                    soldier.TeamId = teamId;
+                    soldier.SetLeader(leader);
+                    soldier.transform.position = leader.position;
+                }
             }
         }
     }
