@@ -11,9 +11,11 @@ namespace InGame
 
         public int TeamId;
 
+        public SpriteRenderer sr;
+
         FollowLeader follow;
         SmoothMover mover;
-
+        
         SoldierUnit attackTarget;
 
         State state;
@@ -42,6 +44,7 @@ namespace InGame
                     state = State.Chase;
 
                     follow.enabled = false;
+                    sr.color = Color.blue;
                 }
             }
             else if (state == State.Chase)
@@ -54,6 +57,7 @@ namespace InGame
 
                     mover.MoveStop();
                     attackEnd = Time.time + attackCool;
+                    sr.color = Color.red;
                 }
                 else if (!IsDetectEnemy(out attackTarget))
                 {

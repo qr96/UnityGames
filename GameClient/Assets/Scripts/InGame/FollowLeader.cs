@@ -43,10 +43,10 @@ namespace InGame
 
                 mover.MoveTo(leader.position, needSlow ? maxSpeed / 2f : maxSpeed);
 
-                if (needSlow)
-                    sr.color = Color.pink;
-                else
-                    sr.color = Color.gray;
+                //if (needSlow)
+                //    sr.color = Color.pink;
+                //else
+                //    sr.color = Color.gray;
             }
         }
 
