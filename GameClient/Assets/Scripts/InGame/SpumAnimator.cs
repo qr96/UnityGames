@@ -47,12 +47,12 @@ namespace InGame
 
         void OnStartIdle()
         {
-            animator.SetBool("1_Move", false);
+            animator.SetBool("Move", false);
         }
 
         void OnStartAttack()
         {
-            animator.SetTrigger("2_Attack");
+            animator.SetTrigger("Attack");
         }
 
         void OnUpdateMove()
@@ -83,7 +83,7 @@ namespace InGame
                         animator.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
                 }
 
-                animator.SetBool("1_Move", rb.linearVelocity != Vector2.zero);
+                animator.SetBool("Move", rb.linearVelocity != Vector2.zero);
 
                 prevLinearVelX = rb.linearVelocityX;
             }
