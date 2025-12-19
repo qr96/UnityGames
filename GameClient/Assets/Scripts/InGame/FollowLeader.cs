@@ -4,8 +4,12 @@ namespace InGame
 {
     public class FollowLeader : MonoBehaviour
     {
-        public SmoothMover mover;
-        public Rigidbody2D leader;
+        // Settings
+        SmoothMover mover;
+
+        // Values
+        Rigidbody2D leader;
+
         public SpriteRenderer sr;
 
         public float maxSpeed = 3.5f;
@@ -53,6 +57,11 @@ namespace InGame
         private void OnDisable()
         {
             mover.MoveStop();
+        }
+
+        public void SetLeader(Rigidbody2D rb)
+        {
+            leader = rb;
         }
 
         bool IsFrontOfCommander()

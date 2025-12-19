@@ -12,10 +12,11 @@ namespace InGame
         public int TeamId;
 
         public SpriteRenderer sr;
-
+        
         FollowLeader follow;
         SmoothMover mover;
-        
+        SpumAnimator animator;
+
         SoldierUnit attackTarget;
 
         State state;
@@ -32,6 +33,8 @@ namespace InGame
         {
             follow = GetComponent<FollowLeader>();
             mover = GetComponent<SmoothMover>();
+            animator = GetComponent<SpumAnimator>();
+
             state = State.Follow;
         }
 
@@ -44,7 +47,9 @@ namespace InGame
                     state = State.Chase;
 
                     follow.enabled = false;
-                    sr.color = Color.blue;
+
+                    if (sr != null)
+                        sr.color = Color.blue;
                 }
             }
             else if (state == State.Chase)
@@ -57,7 +62,10 @@ namespace InGame
 
                     mover.MoveStop();
                     attackEnd = Time.time + attackCool;
-                    sr.color = Color.red;
+                    animator.SetState(SpumAnimator.State.Attack);
+
+                    if (sr != null)
+                        sr.color = Color.red;
                 }
                 else if (!IsDetectEnemy(out attackTarget))
                 {
@@ -73,6 +81,7 @@ namespace InGame
                     if (IsTargetInAttackRange())
                     {
                         attackEnd = Time.time + attackCool;
+                        animator.SetState(SpumAnimator.State.Attack);
                     }
                     else if (IsDetectEnemy(out attackTarget))
                     {
@@ -84,7 +93,7 @@ namespace InGame
 
         public void SetLeader(Rigidbody2D rb)
         {
-            follow.leader = rb;
+            follow.SetLeader(rb);
         }
 
         bool IsDetectEnemy(out SoldierUnit enemy)

@@ -4,7 +4,8 @@ namespace InGame
 {
     public class SmoothMover : MonoBehaviour
     {
-        public Rigidbody2D rb;
+        Rigidbody2D rb;
+        SpumAnimator animator;
 
         public float stopRadius = 0.2f;
 
@@ -17,6 +18,7 @@ namespace InGame
         private void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
+            animator = GetComponent<SpumAnimator>();
         }
 
         private void OnDisable()
@@ -31,18 +33,24 @@ namespace InGame
 
             if (dist < stopRadius)
             {
-                rb.linearVelocity = Vector2.zero;
+                MoveStop();
             }
             else
             {
                 Vector2 desiredVel = toTarget.normalized * speed;
                 rb.linearVelocity = desiredVel;
+
+                if (animator != null)
+                    animator.SetState(SpumAnimator.State.Move);
             }
         }
 
         public void MoveStop()
         {
             rb.linearVelocity = Vector2.zero;
+
+            if (animator != null)
+                animator.SetState(SpumAnimator.State.Idle);
         }
     }
 }
