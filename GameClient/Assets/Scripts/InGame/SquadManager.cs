@@ -14,7 +14,7 @@ namespace InGame
         void Start()
         {
             SpawnSquad(1, playerA);
-            //SpawnSquad(2, playerB);
+            SpawnSquad(2, playerB);
         }
 
         void SpawnSquad(int teamId, Rigidbody2D leader)
@@ -38,7 +38,7 @@ namespace InGame
             }
 
             if (commander != null)
-                commander.SetMinionsPosition(leader.position, Vector2.up);
+                commander.SetMinionsPosition(leader.position, Vector2.right);
             else
                 Debug.LogError($"{leader.name} Failed to find MinionFormationCommander script.");
         }

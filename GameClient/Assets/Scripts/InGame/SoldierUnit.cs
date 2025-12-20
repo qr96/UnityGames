@@ -21,6 +21,8 @@ namespace InGame
 
         State state;
         float attackEnd;
+        bool needFormation;
+        Vector2 formationPos;
 
         public enum State
         {
@@ -41,40 +43,36 @@ namespace InGame
         {
             if (state == State.Follow)
             {
-                if (IsDetectEnemy(out attackTarget))
-                {
+                if (needFormation)
+                    SetState(State.Formation);
+                else if (IsDetectEnemy(out attackTarget))
                     SetState(State.Chase);
-                }
             }
             else if (state == State.Formation)
             {
                 // Controlled by commander
+                if (!needFormation)
+                    SetState(State.Follow);
+                if (IsDetectEnemy(out attackTarget))
+                    SetState(State.Chase);
             }
             else if (state == State.Chase)
             {
                 mover.MoveTo(attackTarget.transform.position, moveSpeed);
 
                 if (IsTargetInAttackRange())
-                {
                     SetState(State.Attack);
-                }
                 else if (!IsDetectEnemy(out attackTarget))
-                {
                     SetState(State.Follow);
-                }
             }
             else if (state == State.Attack)
             {
                 if (Time.time > attackEnd)
                 {
                     if (IsTargetInAttackRange())
-                    {
                         SetState(State.Attack);
-                    }
                     else if (IsDetectEnemy(out attackTarget))
-                    {
                         SetState(State.Chase);
-                    }
                 }
             }
         }
@@ -84,19 +82,24 @@ namespace InGame
             follow.SetLeader(rb);
         }
 
-        public void SetState(State state)
+        public void SetNeedFormation(bool reserve)
         {
-            OnEndState(this.state);
-            this.state = state;
-            OnStartState(state);
+            needFormation = reserve;
+
+            if (!needFormation)
+                formationPos = mover.position;
         }
 
         public void MoveCommand(Vector2 position)
         {
-            if (state == State.Formation)
-            {
-                mover.MoveTo(position, moveSpeed);
-            }
+            formationPos = position;
+        }
+
+        void SetState(State state)
+        {
+            OnEndState(this.state);
+            this.state = state;
+            OnStartState(state);
         }
 
         void OnStartState(State state)
@@ -104,6 +107,10 @@ namespace InGame
             if (state == State.Follow)
             {
                 follow.enabled = true;
+            }
+            else if (state == State.Formation)
+            {
+                mover.MoveTo(formationPos, moveSpeed);
             }
             else if (state == State.Attack)
             {

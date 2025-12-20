@@ -13,6 +13,9 @@ public class MinionFormationCommander : MonoBehaviour
 
     public void SetMinionsPosition(Vector2 leaderPos, Vector3 leaderDir)
     {
+        if (minions.Count == 0)
+            return;
+
         // 열 수보다 병력 적은 경우 처리. (병력 수에 따라 열 조정)
         var nowColumn = minions.Count + 1 > 9 ? 5 : 3;
         if (nowColumn > 15) nowColumn = Mathf.Max(nowColumn, maxColumn);
@@ -41,7 +44,7 @@ public class MinionFormationCommander : MonoBehaviour
             var closeUnit = FindCloseUnit(absPos);
             if (closeUnit != null)
             {
-                closeUnit.SetState(SoldierUnit.State.Formation);
+                closeUnit.SetNeedFormation(true);
                 closeUnit.MoveCommand(absPos);
                 commanded[closeUnit] = true;
             }
@@ -62,7 +65,7 @@ public class MinionFormationCommander : MonoBehaviour
     {
         foreach (var unit in minions)
         {
-            unit.SetState(SoldierUnit.State.Follow);
+            unit.SetNeedFormation(false);
         }
     }
 
