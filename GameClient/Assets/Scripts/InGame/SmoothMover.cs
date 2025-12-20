@@ -48,6 +48,7 @@ namespace InGame
         {
             rb.linearVelocity = Vector2.zero;
             hasDes = false;
+            moveTimeout = 0f;
 
             if (animator != null)
                 animator.SetState(SpumAnimator.State.Idle);
@@ -59,7 +60,7 @@ namespace InGame
                 return;
             else if (Time.time > moveTimeout)
             {
-                hasDes = false;
+                MoveStop();
                 return;
             }
 
