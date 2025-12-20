@@ -12,6 +12,7 @@ namespace InGame
         Vector2 des;
         float speed;
         bool hasDes;
+        float moveTimeout;
 
         public Vector2 position
         {
@@ -40,6 +41,7 @@ namespace InGame
             des = position;
             this.speed = speed;
             hasDes = true;
+            moveTimeout = Time.time + (position - rb.position).magnitude / speed;
         }
 
         public void MoveStop()
@@ -55,6 +57,11 @@ namespace InGame
         {
             if (!hasDes)
                 return;
+            else if (Time.time > moveTimeout)
+            {
+                hasDes = false;
+                return;
+            }
 
             var toTarget = des - rb.position;
             var distance = toTarget.magnitude;
