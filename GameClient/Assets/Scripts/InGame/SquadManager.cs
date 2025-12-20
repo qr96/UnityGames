@@ -14,11 +14,13 @@ namespace InGame
         void Start()
         {
             SpawnSquad(1, playerA);
-            SpawnSquad(2, playerB);
+            //SpawnSquad(2, playerB);
         }
 
         void SpawnSquad(int teamId, Rigidbody2D leader)
         {
+            var commander = leader.GetComponent<MinionFormationCommander>();
+
             for (int i = 0; i < totalSoldiers; i++)
             {
                 var unit = Instantiate(soldierPrefab, transform.position, Quaternion.identity);
@@ -29,8 +31,16 @@ namespace InGame
                     soldier.TeamId = teamId;
                     soldier.SetLeader(leader);
                     soldier.transform.position = leader.position;
+
+                    if (commander != null)
+                        commander.AddMinion(soldier);
                 }
             }
+
+            if (commander != null)
+                commander.SetMinionsPosition(leader.position, Vector2.up);
+            else
+                Debug.LogError($"{leader.name} Failed to find MinionFormationCommander script.");
         }
     }
 }

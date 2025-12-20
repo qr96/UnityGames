@@ -19,7 +19,7 @@ namespace InGame
             mover = GetComponent<SmoothMover>();
         }
 
-        void FixedUpdate()
+        void Update()
         {
             if (!leader) return;
 
@@ -54,14 +54,14 @@ namespace InGame
             }
         }
 
-        private void OnDisable()
-        {
-            mover.MoveStop();
-        }
-
         public void SetLeader(Rigidbody2D rb)
         {
             leader = rb;
+        }
+
+        public Rigidbody2D GetLeader()
+        {
+            return leader;
         }
 
         bool IsFrontOfCommander()

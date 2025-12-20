@@ -677,6 +677,7 @@ GameObject:
   - component: {fileID: 122471680}
   - component: {fileID: 122471679}
   - component: {fileID: 122471682}
+  - component: {fileID: 122471683}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -776,6 +777,20 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!114 &122471683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122471676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07a64e9e06e54f649b2119651279b862, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MinionFormationCommander
+  gap: {x: 1.2, y: 1.2}
+  maxColumn: 7
 --- !u!1 &152424183
 GameObject:
   m_ObjectHideFlags: 0
@@ -3948,6 +3963,7 @@ GameObject:
   - component: {fileID: 666050449}
   - component: {fileID: 666050448}
   - component: {fileID: 666050446}
+  - component: {fileID: 666050451}
   m_Layer: 0
   m_Name: Player (1)
   m_TagString: Player
@@ -3998,7 +4014,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 666050445}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7742e95b53b31ed48bca6b668cfaeb75, type: 3}
   m_Name: 
@@ -4047,6 +4063,20 @@ Transform:
   - {fileID: 71072975}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &666050451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 666050445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07a64e9e06e54f649b2119651279b862, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MinionFormationCommander
+  gap: {x: 1.2, y: 1.2}
+  maxColumn: 7
 --- !u!1 &670807427
 GameObject:
   m_ObjectHideFlags: 0

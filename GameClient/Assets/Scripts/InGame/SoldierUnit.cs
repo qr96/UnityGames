@@ -25,6 +25,7 @@ namespace InGame
         public enum State
         {
             Follow,
+            Formation,
             Chase,
             Attack
         }
@@ -44,6 +45,10 @@ namespace InGame
                 {
                     SetState(State.Chase);
                 }
+            }
+            else if (state == State.Formation)
+            {
+                // Controlled by commander
             }
             else if (state == State.Chase)
             {
@@ -81,8 +86,17 @@ namespace InGame
 
         public void SetState(State state)
         {
+            OnEndState(this.state);
             this.state = state;
             OnStartState(state);
+        }
+
+        public void MoveCommand(Vector2 position)
+        {
+            if (state == State.Formation)
+            {
+                mover.MoveTo(position, moveSpeed);
+            }
         }
 
         void OnStartState(State state)
@@ -91,16 +105,19 @@ namespace InGame
             {
                 follow.enabled = true;
             }
-            else if (state == State.Chase)
-            {
-                follow.enabled = false;
-            }
             else if (state == State.Attack)
             {
-                follow.enabled = false;
                 mover.MoveStop();
                 attackEnd = Time.time + attackCool;
                 animator.SetState(SpumAnimator.State.Attack);
+            }
+        }
+
+        void OnEndState(State state)
+        {
+            if (state == State.Follow)
+            {
+                follow.enabled = false;
             }
         }
 
