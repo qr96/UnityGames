@@ -22,7 +22,7 @@ namespace InGame
         State state;
         float attackEnd;
 
-        enum State
+        public enum State
         {
             Follow,
             Chase,
@@ -34,8 +34,6 @@ namespace InGame
             follow = GetComponent<FollowLeader>();
             mover = GetComponent<SmoothMover>();
             animator = GetComponent<SpumAnimator>();
-
-            state = State.Follow;
         }
 
         private void Update()
@@ -44,12 +42,7 @@ namespace InGame
             {
                 if (IsDetectEnemy(out attackTarget))
                 {
-                    state = State.Chase;
-
-                    follow.enabled = false;
-
-                    if (sr != null)
-                        sr.color = Color.blue;
+                    SetState(State.Chase);
                 }
             }
             else if (state == State.Chase)
@@ -58,20 +51,11 @@ namespace InGame
 
                 if (IsTargetInAttackRange())
                 {
-                    state = State.Attack;
-
-                    mover.MoveStop();
-                    attackEnd = Time.time + attackCool;
-                    animator.SetState(SpumAnimator.State.Attack);
-
-                    if (sr != null)
-                        sr.color = Color.red;
+                    SetState(State.Attack);
                 }
                 else if (!IsDetectEnemy(out attackTarget))
                 {
-                    state = State.Follow;
-
-                    follow.enabled = true;
+                    SetState(State.Follow);
                 }
             }
             else if (state == State.Attack)
@@ -80,12 +64,11 @@ namespace InGame
                 {
                     if (IsTargetInAttackRange())
                     {
-                        attackEnd = Time.time + attackCool;
-                        animator.SetState(SpumAnimator.State.Attack);
+                        SetState(State.Attack);
                     }
                     else if (IsDetectEnemy(out attackTarget))
                     {
-                        state = State.Chase;
+                        SetState(State.Chase);
                     }
                 }
             }
@@ -94,6 +77,31 @@ namespace InGame
         public void SetLeader(Rigidbody2D rb)
         {
             follow.SetLeader(rb);
+        }
+
+        public void SetState(State state)
+        {
+            this.state = state;
+            OnStartState(state);
+        }
+
+        void OnStartState(State state)
+        {
+            if (state == State.Follow)
+            {
+                follow.enabled = true;
+            }
+            else if (state == State.Chase)
+            {
+                follow.enabled = false;
+            }
+            else if (state == State.Attack)
+            {
+                follow.enabled = false;
+                mover.MoveStop();
+                attackEnd = Time.time + attackCool;
+                animator.SetState(SpumAnimator.State.Attack);
+            }
         }
 
         bool IsDetectEnemy(out SoldierUnit enemy)
