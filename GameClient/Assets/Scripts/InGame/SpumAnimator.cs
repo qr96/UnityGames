@@ -9,7 +9,7 @@ namespace InGame
         Rigidbody2D rb;
 
         // Settings
-        float flipIgnoreTime = 0.1f;
+        float flipIgnoreTime = 0f;
 
         // Values
         float afterFlipTime;
@@ -41,6 +41,8 @@ namespace InGame
 
             if (state == State.Idle)
                 OnStartIdle();
+            else if (state == State.Move)
+                OnStartMove();
             else if (state == State.Attack)
                 OnStartAttack();
         }
@@ -48,6 +50,11 @@ namespace InGame
         void OnStartIdle()
         {
             animator.SetBool("Move", false);
+        }
+
+        void OnStartMove()
+        {
+            animator.SetBool("Move", true);
         }
 
         void OnStartAttack()
@@ -59,33 +66,41 @@ namespace InGame
         {
             if (rb != null)
             {
-                // 캐릭터 방향 전환 감지
-                if (prevLinearVelX * rb.linearVelocityX < 0)
+                if (flipIgnoreTime > 0f)
                 {
-                    isFlipped = true;
-                    afterFlipTime = 0f;
+                    // 캐릭터 방향 전환 감지
+                    if (prevLinearVelX * rb.linearVelocityX < 0)
+                    {
+                        isFlipped = true;
+                        afterFlipTime = 0f;
+                    }
+                    else
+                    {
+                        if (isFlipped)
+                            afterFlipTime += Time.deltaTime;
+                    }
+
+                    // 일정 시간 이상 같은 방향으로 이동 시 플립
+                    if (afterFlipTime > flipIgnoreTime)
+                    {
+                        afterFlipTime = 0f;
+                        isFlipped = false;
+
+                        if (rb.linearVelocityX < 0)
+                            animator.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+                        else if (rb.linearVelocityX > 0)
+                            animator.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                    }
+
+                    prevLinearVelX = rb.linearVelocityX;
                 }
                 else
                 {
-                    if (isFlipped)
-                        afterFlipTime += Time.deltaTime;
-                }
-
-                // 일정 시간 이상 같은 방향으로 이동 시 플립
-                if (afterFlipTime > flipIgnoreTime)
-                {
-                    afterFlipTime = 0f;
-                    isFlipped = false;
-
                     if (rb.linearVelocityX < 0)
                         animator.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
                     else if (rb.linearVelocityX > 0)
                         animator.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
                 }
-
-                animator.SetBool("Move", rb.linearVelocity != Vector2.zero);
-
-                prevLinearVelX = rb.linearVelocityX;
             }
         }
     }

@@ -5,8 +5,8 @@ namespace InGame
 {
     public class SquadManager : MonoBehaviour
     {
-        public Rigidbody2D playerA;
-        public Rigidbody2D playerB;
+        public LeaderUnit playerA;
+        public LeaderUnit playerB;
 
         public GameObject soldierPrefab;
         public int totalSoldiers = 9;
@@ -17,9 +17,10 @@ namespace InGame
             SpawnSquad(2, playerB);
         }
 
-        void SpawnSquad(int teamId, Rigidbody2D leader)
+        void SpawnSquad(int teamId, LeaderUnit leader)
         {
             var commander = leader.GetComponent<MinionFormationCommander>();
+            leader.TeamId = teamId;
 
             for (int i = 0; i < totalSoldiers; i++)
             {
@@ -29,8 +30,8 @@ namespace InGame
                 {
                     soldier.gameObject.SetActive(true);
                     soldier.TeamId = teamId;
-                    soldier.SetLeader(leader);
-                    soldier.transform.position = leader.position;
+                    soldier.SetLeader(leader.GetComponent<Rigidbody2D>());
+                    soldier.transform.position = leader.transform.position;
 
                     if (commander != null)
                         commander.AddMinion(soldier);
@@ -38,7 +39,7 @@ namespace InGame
             }
 
             if (commander != null)
-                commander.SetMinionsPosition(leader.position, Vector2.right);
+                commander.SetMinionsPosition(leader.transform.position, Vector2.right);
             else
                 Debug.LogError($"{leader.name} Failed to find MinionFormationCommander script.");
         }

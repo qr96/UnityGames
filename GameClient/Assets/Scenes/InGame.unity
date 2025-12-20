@@ -675,9 +675,11 @@ GameObject:
   m_Component:
   - component: {fileID: 122471681}
   - component: {fileID: 122471680}
-  - component: {fileID: 122471679}
   - component: {fileID: 122471682}
+  - component: {fileID: 122471685}
   - component: {fileID: 122471683}
+  - component: {fileID: 122471684}
+  - component: {fileID: 122471679}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -697,7 +699,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7742e95b53b31ed48bca6b668cfaeb75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.PlayerMover
-  moveSpeed: 5
 --- !u!50 &122471680
 Rigidbody2D:
   serializedVersion: 5
@@ -791,6 +792,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MinionFormationCommander
   gap: {x: 1.2, y: 1.2}
   maxColumn: 7
+--- !u!114 &122471684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122471676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b0cbfe0783a2045ad181bab767a857, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.LeaderUnit
+  moveSpeed: 5
+  TeamId: 0
+--- !u!114 &122471685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122471676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52cdb261f91215f4988aa1f38dd122ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.SpumAnimator
+  animator: {fileID: 8511562950913336384}
 --- !u!1 &152424183
 GameObject:
   m_ObjectHideFlags: 0
@@ -930,7 +958,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7742e95b53b31ed48bca6b668cfaeb75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.PlayerMover
-  moveSpeed: 5
 --- !u!70 &184062708
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -3961,9 +3988,10 @@ GameObject:
   m_Component:
   - component: {fileID: 666050450}
   - component: {fileID: 666050449}
-  - component: {fileID: 666050448}
   - component: {fileID: 666050446}
+  - component: {fileID: 666050453}
   - component: {fileID: 666050451}
+  - component: {fileID: 666050452}
   m_Layer: 0
   m_Name: Player (1)
   m_TagString: Player
@@ -4007,19 +4035,6 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
---- !u!114 &666050448
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 666050445}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7742e95b53b31ed48bca6b668cfaeb75, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InGame.PlayerMover
-  moveSpeed: 5
 --- !u!50 &666050449
 Rigidbody2D:
   serializedVersion: 5
@@ -4077,6 +4092,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MinionFormationCommander
   gap: {x: 1.2, y: 1.2}
   maxColumn: 7
+--- !u!114 &666050452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 666050445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b0cbfe0783a2045ad181bab767a857, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.LeaderUnit
+  moveSpeed: 5
+  TeamId: 0
+--- !u!114 &666050453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 666050445}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52cdb261f91215f4988aa1f38dd122ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.SpumAnimator
+  animator: {fileID: 71072976}
 --- !u!1 &670807427
 GameObject:
   m_ObjectHideFlags: 0
@@ -6180,8 +6222,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d37ac3d622ca3c4ab5e7934f303e1a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.SquadManager
-  playerA: {fileID: 122471680}
-  playerB: {fileID: 666050449}
+  playerA: {fileID: 122471684}
+  playerB: {fileID: 666050452}
   soldierPrefab: {fileID: 233399312}
   totalSoldiers: 9
 --- !u!1 &1006830027
