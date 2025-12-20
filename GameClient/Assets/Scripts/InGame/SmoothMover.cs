@@ -4,10 +4,14 @@ namespace InGame
 {
     public class SmoothMover : MonoBehaviour
     {
+        public float stopRadius = 0.2f;
+
         Rigidbody2D rb;
         SpumAnimator animator;
 
-        public float stopRadius = 0.2f;
+        Vector2 des;
+        float speed;
+        bool hasDes;
 
         public Vector2 position
         {
@@ -26,12 +30,36 @@ namespace InGame
             MoveStop();
         }
 
+        private void Update()
+        {
+            MoveRb();
+        }
+
         public void MoveTo(Vector2 position, float speed)
         {
-            Vector2 toTarget = position - rb.position;
-            float dist = toTarget.magnitude;
+            des = position;
+            this.speed = speed;
+            hasDes = true;
+        }
 
-            if (dist < stopRadius)
+        public void MoveStop()
+        {
+            rb.linearVelocity = Vector2.zero;
+            hasDes = false;
+
+            if (animator != null)
+                animator.SetState(SpumAnimator.State.Idle);
+        }
+
+        void MoveRb()
+        {
+            if (!hasDes)
+                return;
+
+            var toTarget = des - rb.position;
+            var distance = toTarget.magnitude;
+
+            if (distance < stopRadius)
             {
                 MoveStop();
             }
@@ -43,14 +71,6 @@ namespace InGame
                 if (animator != null)
                     animator.SetState(SpumAnimator.State.Move);
             }
-        }
-
-        public void MoveStop()
-        {
-            rb.linearVelocity = Vector2.zero;
-
-            if (animator != null)
-                animator.SetState(SpumAnimator.State.Idle);
         }
     }
 }
