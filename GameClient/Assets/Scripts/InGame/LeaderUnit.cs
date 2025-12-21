@@ -59,7 +59,7 @@ namespace InGame
 
         public void SetRegroup()
         {
-            formationCommander.SetRegroup(rb.position, lastDir);
+            formationCommander.SetRegroup();
         }
     }
 }

@@ -24,7 +24,6 @@ namespace InGame
         bool isLeaderMoving;
         bool needRegroup; // trigger
         Vector2 formationPos;
-        Vector2 regroupPos;
 
         public enum State
         {
@@ -80,10 +79,9 @@ namespace InGame
             isLeaderMoving = isMoving;
         }
 
-        public void SetNeedRegroup(Vector2 position)
+        public void SetNeedRegroup()
         {
             needRegroup = true;
-            regroupPos = position;
         }
 
         public void MoveCommand(Vector2 position)
