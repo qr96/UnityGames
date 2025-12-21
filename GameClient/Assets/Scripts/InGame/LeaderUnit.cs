@@ -42,8 +42,8 @@ namespace InGame
             {
                 if (!alreadyStop)
                 {
-                    formationCommander.SetMinionsPosition(rb.position, lastDir);
                     alreadyStop = true;
+                    formationCommander.SetMinionsPosition(rb.position, lastDir);
                     animator.SetState(SpumAnimator.State.Idle);
                 }
             }
@@ -56,6 +56,10 @@ namespace InGame
             if (input != Vector2.zero)
                 lastDir = input;
         }
+
+        public void SetRegroup()
+        {
+            formationCommander.SetRegroup(rb.position, lastDir);
+        }
     }
 }
-

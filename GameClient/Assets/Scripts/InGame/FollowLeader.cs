@@ -59,9 +59,9 @@ namespace InGame
             leader = rb;
         }
 
-        public Rigidbody2D GetLeader()
+        public float GetLeaderDis()
         {
-            return leader;
+            return (leader.position - mover.position).magnitude;
         }
 
         bool IsFrontOfCommander()

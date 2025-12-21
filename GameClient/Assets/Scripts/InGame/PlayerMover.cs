@@ -21,6 +21,9 @@ namespace InGame
 
             if (unit != null)
                 unit.SetInput(input);
+
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+                unit.SetRegroup();
         }
     }
 }

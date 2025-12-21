@@ -21,15 +21,18 @@ namespace InGame
 
         State state;
         float attackEnd;
-        bool needFormation;
+        bool isLeaderMoving;
+        bool needRegroup; // trigger
         Vector2 formationPos;
+        Vector2 regroupPos;
 
         public enum State
         {
             Follow,
             Formation,
             Chase,
-            Attack
+            Attack,
+            Regroup,
         }
 
         private void Awake()
@@ -41,40 +44,30 @@ namespace InGame
 
         private void Update()
         {
-            if (state == State.Follow)
+            if (needRegroup)
             {
-                if (needFormation)
-                    SetState(State.Formation);
-                else if (IsDetectEnemy(out attackTarget))
-                    SetState(State.Chase);
-            }
-            else if (state == State.Formation)
-            {
-                // Controlled by commander
-                if (!needFormation)
-                    SetState(State.Follow);
-                if (IsDetectEnemy(out attackTarget))
-                    SetState(State.Chase);
-            }
-            else if (state == State.Chase)
-            {
-                mover.MoveTo(attackTarget.transform.position, moveSpeed);
-
-                if (IsTargetInAttackRange())
-                    SetState(State.Attack);
-                else if (!IsDetectEnemy(out attackTarget))
-                    SetState(State.Follow);
-            }
-            else if (state == State.Attack)
-            {
-                if (Time.time > attackEnd)
+                if (state == State.Attack)
                 {
-                    if (IsTargetInAttackRange())
-                        SetState(State.Attack);
-                    else if (IsDetectEnemy(out attackTarget))
-                        SetState(State.Chase);
+                    if (!IsAttacking())
+                    {
+                        needRegroup = false;
+                        SetState(State.Regroup);
+                        return;
+                    }
+                }
+                else if (state == State.Chase)
+                {
+                    needRegroup = false;
+                    SetState(State.Regroup);
+                    return;
+                }
+                else
+                {
+                    needRegroup = false;
                 }
             }
+
+            OnUpdateState(state);
         }
 
         public void SetLeader(Rigidbody2D rb)
@@ -82,12 +75,15 @@ namespace InGame
             follow.SetLeader(rb);
         }
 
-        public void SetNeedFormation(bool reserve)
+        public void SetLeaderMoving(bool isMoving)
         {
-            needFormation = reserve;
+            isLeaderMoving = isMoving;
+        }
 
-            if (!needFormation)
-                formationPos = mover.position;
+        public void SetNeedRegroup(Vector2 position)
+        {
+            needRegroup = true;
+            regroupPos = position;
         }
 
         public void MoveCommand(Vector2 position)
@@ -118,11 +114,71 @@ namespace InGame
                 attackEnd = Time.time + attackCool;
                 animator.SetState(SpumAnimator.State.Attack);
             }
+            else if (state == State.Regroup)
+            {
+                follow.enabled = true;
+            }
+        }
+
+        void OnUpdateState(State state)
+        {
+            if (state == State.Follow)
+            {
+                if (!isLeaderMoving)
+                    SetState(State.Formation);
+                else if (IsDetectEnemy(out attackTarget))
+                    SetState(State.Chase);
+            }
+            else if (state == State.Formation)
+            {
+                // Controlled by commander
+                if (isLeaderMoving)
+                    SetState(State.Follow);
+                else if (IsDetectEnemy(out attackTarget))
+                    SetState(State.Chase);
+            }
+            else if (state == State.Chase)
+            {
+                mover.MoveTo(attackTarget.transform.position, moveSpeed);
+
+                if (IsTargetInAttackRange())
+                    SetState(State.Attack);
+                else if (!IsDetectEnemy(out attackTarget))
+                    SetState(State.Follow);
+            }
+            else if (state == State.Attack)
+            {
+                if (!IsAttacking())
+                {
+                    if (IsTargetInAttackRange())
+                        SetState(State.Attack);
+                    else if (IsDetectEnemy(out attackTarget))
+                        SetState(State.Chase);
+                }
+            }
+            else if (state == State.Regroup)
+            {
+                // Controlled by commander
+                if (isLeaderMoving)
+                {
+                    if (follow.GetLeaderDis() < 2f)
+                        SetState(State.Follow);
+                }
+                else
+                {
+                    if ((formationPos - mover.position).magnitude < 0.1f)
+                        SetState(State.Formation);
+                }
+            }
         }
 
         void OnEndState(State state)
         {
             if (state == State.Follow)
+            {
+                follow.enabled = false;
+            }
+            else if (state == State.Regroup)
             {
                 follow.enabled = false;
             }
@@ -164,6 +220,11 @@ namespace InGame
             }
 
             return false;
+        }
+
+        bool IsAttacking()
+        {
+            return Time.time < attackEnd;
         }
 
         // 에디터에서 범위를 보기 위한 기즈모
