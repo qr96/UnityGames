@@ -1306,8 +1306,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 900bd773ab1e68d4fb68201197fae721, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FollowQueueUnit
-  sr: {fileID: 0}
   maxSpeed: 5
+  frameDelay: 0.2
 --- !u!50 &233399317
 Rigidbody2D:
   serializedVersion: 5
@@ -1324,7 +1324,7 @@ Rigidbody2D:
   m_LinearDamping: 5
   m_AngularDamping: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 6200000, guid: d65fbda2223f332418ca368f5b68bd20, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -11551,8 +11551,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 900bd773ab1e68d4fb68201197fae721, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FollowQueueUnit
-  sr: {fileID: 1786217864}
   maxSpeed: 5
+  frameDelay: 0.5
 --- !u!114 &2111985980
 MonoBehaviour:
   m_ObjectHideFlags: 0
