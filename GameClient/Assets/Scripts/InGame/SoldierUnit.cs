@@ -9,6 +9,7 @@ namespace InGame
         public float attackRange;
         public float moveSpeed = 5f;
         public float attackCool;
+        public float destroyTime;
 
         public int TeamId;
 
@@ -25,6 +26,7 @@ namespace InGame
         bool isLeaderMoving;
         bool needRegroup; // trigger
         Vector2 formationPos;
+        float destroyTimer;
 
         UnitModel model;
 
@@ -142,6 +144,7 @@ namespace InGame
                 mover.MoveStop();
                 mover.EnableRigidbody(false);
                 animator.SetState(SpumAnimator.State.Dead);
+                destroyTimer = Time.time + destroyTime;
             }
         }
 
@@ -195,6 +198,13 @@ namespace InGame
                 {
                     if ((formationPos - mover.position).magnitude < 0.1f)
                         SetState(State.Formation);
+                }
+            }
+            else if (state == State.Dead)
+            {
+                if (Time.time > destroyTimer)
+                {
+                    gameObject.SetActive(false);
                 }
             }
         }
