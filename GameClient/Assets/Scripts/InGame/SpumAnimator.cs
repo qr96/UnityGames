@@ -9,7 +9,7 @@ namespace InGame
         Rigidbody2D rb;
 
         // Settings
-        float flipIgnoreTime = 0f;
+        public float flipIgnoreTime = 0f;
 
         // Values
         float afterFlipTime;

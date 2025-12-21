@@ -819,6 +819,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.SpumAnimator
   animator: {fileID: 8511562950913336384}
+  flipIgnoreTime: 0
 --- !u!1 &152424183
 GameObject:
   m_ObjectHideFlags: 0
@@ -1250,11 +1251,11 @@ GameObject:
   m_Component:
   - component: {fileID: 233399318}
   - component: {fileID: 233399317}
-  - component: {fileID: 233399316}
-  - component: {fileID: 233399315}
-  - component: {fileID: 233399314}
   - component: {fileID: 233399319}
   - component: {fileID: 233399320}
+  - component: {fileID: 233399314}
+  - component: {fileID: 233399316}
+  - component: {fileID: 233399315}
   m_Layer: 0
   m_Name: Soldier
   m_TagString: Minion
@@ -1399,6 +1400,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.SpumAnimator
   animator: {fileID: 812380969}
+  flipIgnoreTime: 0.1
 --- !u!1 &239007454
 GameObject:
   m_ObjectHideFlags: 0
@@ -4119,6 +4121,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.SpumAnimator
   animator: {fileID: 71072976}
+  flipIgnoreTime: 0
 --- !u!1 &670807427
 GameObject:
   m_ObjectHideFlags: 0
