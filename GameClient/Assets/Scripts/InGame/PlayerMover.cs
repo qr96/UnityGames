@@ -24,6 +24,9 @@ namespace InGame
 
             if (Input.GetKeyDown(KeyCode.Alpha1))
                 unit.SetRegroup();
+
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+                unit.CommandCharge();
         }
     }
 }

@@ -61,6 +61,12 @@ public class MinionFormationCommander : MonoBehaviour
             unit.SetNeedRegroup();
     }
 
+    public void CommandCharge(Vector2 direction)
+    {
+        foreach (var unit in minions)
+            unit.CommandCharge(direction, 5f);
+    }
+
     public void AddMinion(SoldierUnit minion)
     {
         minions.Add(minion);

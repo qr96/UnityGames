@@ -70,6 +70,11 @@ namespace InGame
             }
         }
 
+        public bool IsDestination()
+        {
+            return (des - rb.position).magnitude < stopRadius || !hasDes;
+        }
+
         void MoveRb()
         {
             if (!hasDes)

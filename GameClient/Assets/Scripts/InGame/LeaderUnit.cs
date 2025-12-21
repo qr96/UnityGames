@@ -61,5 +61,10 @@ namespace InGame
         {
             formationCommander.SetRegroup();
         }
+
+        public void CommandCharge()
+        {
+            formationCommander.CommandCharge(lastDir);
+        }
     }
 }

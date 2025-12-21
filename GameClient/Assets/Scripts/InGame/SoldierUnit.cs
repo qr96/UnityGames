@@ -27,6 +27,8 @@ namespace InGame
         bool needRegroup; // trigger
         Vector2 formationPos;
         float destroyTimer;
+        bool needCharge; // trigger
+        Vector2 chargePos;
 
         UnitModel model;
 
@@ -34,6 +36,7 @@ namespace InGame
         {
             Follow,
             Formation,
+            Charge,
             Chase,
             Attack,
             Regroup,
@@ -52,29 +55,7 @@ namespace InGame
 
         private void Update()
         {
-            if (needRegroup)
-            {
-                if (state == State.Attack)
-                {
-                    if (!IsAttacking())
-                    {
-                        needRegroup = false;
-                        SetState(State.Regroup);
-                        return;
-                    }
-                }
-                else if (state == State.Chase)
-                {
-                    needRegroup = false;
-                    SetState(State.Regroup);
-                    return;
-                }
-                else
-                {
-                    needRegroup = false;
-                }
-            }
-
+            HandleTriggers();
             OnUpdateState(state);
         }
 
@@ -98,6 +79,12 @@ namespace InGame
             formationPos = position;
         }
 
+        public void CommandCharge(Vector2 direction, float length)
+        {
+            needCharge = true;
+            chargePos = mover.position + direction * length;
+        }
+
         public void OnDamage(long damage)
         {
             model.OnDamage(damage);
@@ -118,6 +105,32 @@ namespace InGame
             OnStartState(state);
         }
 
+        void HandleTriggers()
+        {
+            if (needRegroup)
+            {
+                if (state == State.Attack)
+                {
+                    if (!IsAttacking())
+                    {
+                        needRegroup = false;
+                        SetState(State.Regroup);
+                        return;
+                    }
+                }
+                else if (state == State.Chase || state == State.Charge)
+                {
+                    needRegroup = false;
+                    SetState(State.Regroup);
+                    return;
+                }
+                else
+                {
+                    needRegroup = false;
+                }
+            }
+        }
+
         void OnStartState(State state)
         {
             if (state == State.Follow)
@@ -127,6 +140,10 @@ namespace InGame
             else if (state == State.Formation)
             {
                 mover.MoveTo(formationPos, moveSpeed);
+            }
+            else if (state == State.Charge)
+            {
+                mover.MoveTo(chargePos, moveSpeed);
             }
             else if (state == State.Attack)
             {
@@ -152,7 +169,9 @@ namespace InGame
         {
             if (state == State.Follow)
             {
-                if (!isLeaderMoving)
+                if (needCharge)
+                    SetState(State.Charge);
+                else if (!isLeaderMoving)
                     SetState(State.Formation);
                 else if (IsDetectEnemy(out attackTarget))
                     SetState(State.Chase);
@@ -160,10 +179,21 @@ namespace InGame
             else if (state == State.Formation)
             {
                 // Controlled by commander
-                if (isLeaderMoving)
+                if (needCharge)
+                    SetState(State.Charge);
+                else if (isLeaderMoving)
                     SetState(State.Follow);
                 else if (IsDetectEnemy(out attackTarget))
                     SetState(State.Chase);
+            }
+            else if (state == State.Charge)
+            {
+                if (IsTargetInAttackRange())
+                    SetState(State.Attack);
+                else if (IsDetectEnemy(out attackTarget))
+                    SetState(State.Chase);
+                else if (mover.IsDestination())
+                    SetState(State.Follow);
             }
             else if (state == State.Chase)
             {
@@ -189,15 +219,14 @@ namespace InGame
             else if (state == State.Regroup)
             {
                 // Controlled by commander
-                if (isLeaderMoving)
+                if (needCharge)
                 {
-                    if (follow.GetLeaderDis() < 2f)
-                        SetState(State.Follow);
+                    SetState(State.Charge);
                 }
                 else
                 {
-                    if ((formationPos - mover.position).magnitude < 0.1f)
-                        SetState(State.Formation);
+                    if (follow.GetLeaderDis() < 2f)
+                        SetState(State.Follow);
                 }
             }
             else if (state == State.Dead)
@@ -207,6 +236,8 @@ namespace InGame
                     gameObject.SetActive(false);
                 }
             }
+
+            needCharge = false;
         }
 
         void OnEndState(State state)
