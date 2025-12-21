@@ -7,6 +7,7 @@ namespace InGame
         public float stopRadius = 0.2f;
 
         Rigidbody2D rb;
+        Collider2D col;
         SpumAnimator animator;
 
         Vector2 des;
@@ -23,6 +24,7 @@ namespace InGame
         private void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
+            col = GetComponent<Collider2D>();
             animator = GetComponent<SpumAnimator>();
         }
 
@@ -52,6 +54,20 @@ namespace InGame
 
             if (animator != null)
                 animator.SetState(SpumAnimator.State.Idle);
+        }
+
+        public void EnableRigidbody(bool enable)
+        {
+            if (enable)
+            {
+                rb.bodyType = RigidbodyType2D.Dynamic;
+                col.isTrigger = false;
+            }
+            else
+            {
+                rb.bodyType = RigidbodyType2D.Kinematic;
+                col.isTrigger = true;
+            }
         }
 
         void MoveRb()

@@ -1,3 +1,4 @@
+using InGameModel;
 using UnityEngine;
 
 namespace InGame
@@ -25,6 +26,8 @@ namespace InGame
         bool needRegroup; // trigger
         Vector2 formationPos;
 
+        UnitModel model;
+
         public enum State
         {
             Follow,
@@ -32,6 +35,7 @@ namespace InGame
             Chase,
             Attack,
             Regroup,
+            Dead
         }
 
         private void Awake()
@@ -39,6 +43,9 @@ namespace InGame
             follow = GetComponent<FollowLeader>();
             mover = GetComponent<SmoothMover>();
             animator = GetComponent<SpumAnimator>();
+
+            model = new UnitModel() { maxHp = 10, attack = 2 };
+            model.Spawn();
         }
 
         private void Update()
@@ -89,6 +96,19 @@ namespace InGame
             formationPos = position;
         }
 
+        public void OnDamage(long damage)
+        {
+            model.OnDamage(damage);
+
+            if (!model.IsAlive())
+                SetState(State.Dead);
+        }
+
+        public bool IsAlive()
+        {
+            return model.IsAlive();
+        }
+
         void SetState(State state)
         {
             OnEndState(this.state);
@@ -111,10 +131,17 @@ namespace InGame
                 mover.MoveStop();
                 attackEnd = Time.time + attackCool;
                 animator.SetState(SpumAnimator.State.Attack);
+                Attack();
             }
             else if (state == State.Regroup)
             {
                 follow.enabled = true;
+            }
+            else if (state == State.Dead)
+            {
+                mover.MoveStop();
+                mover.EnableRigidbody(false);
+                animator.SetState(SpumAnimator.State.Dead);
             }
         }
 
@@ -152,6 +179,8 @@ namespace InGame
                         SetState(State.Attack);
                     else if (IsDetectEnemy(out attackTarget))
                         SetState(State.Chase);
+                    else
+                        SetState(State.Follow);
                 }
             }
             else if (state == State.Regroup)
@@ -190,7 +219,7 @@ namespace InGame
                 var unit = detect.GetComponent<SoldierUnit>();
                 if (unit != null)
                 {
-                    if (unit.TeamId != TeamId)
+                    if (unit.TeamId != TeamId && unit.IsAlive())
                     {
                         enemy = unit;
                         return true;
@@ -210,7 +239,7 @@ namespace InGame
                 var unit = detect.GetComponent<SoldierUnit>();
                 if (unit != null)
                 {
-                    if (unit.TeamId != TeamId)
+                    if (unit.TeamId != TeamId && unit.IsAlive())
                     {
                         return true;
                     }
@@ -223,6 +252,23 @@ namespace InGame
         bool IsAttacking()
         {
             return Time.time < attackEnd;
+        }
+
+        void Attack()
+        {
+            var detects = Physics2D.OverlapCircleAll(transform.position, attackRange);
+            foreach (var detect in detects)
+            {
+                var unit = detect.GetComponent<SoldierUnit>();
+                if (unit != null)
+                {
+                    if (unit.TeamId != TeamId && unit.IsAlive())
+                    {
+                        unit.OnDamage(model.attack);
+                        return;
+                    }
+                }
+            }
         }
 
         // 에디터에서 범위를 보기 위한 기즈모

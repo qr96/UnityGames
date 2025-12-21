@@ -21,7 +21,8 @@ namespace InGame
         {
             Idle,
             Move,
-            Attack
+            Attack,
+            Dead
         }
 
         private void Awake()
@@ -45,6 +46,8 @@ namespace InGame
                 OnStartMove();
             else if (state == State.Attack)
                 OnStartAttack();
+            else if (state == State.Dead)
+                animator.SetBool("Dead", true);
         }
 
         void OnStartIdle()
