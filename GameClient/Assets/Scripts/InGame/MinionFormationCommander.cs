@@ -55,18 +55,6 @@ public class MinionFormationCommander : MonoBehaviour
         }
     }
 
-    public void SetRegroup()
-    {
-        foreach (var unit in minions)
-            unit.SetNeedRegroup();
-    }
-
-    public void CommandCharge(Vector2 direction)
-    {
-        foreach (var unit in minions)
-            unit.CommandCharge(direction, 5f);
-    }
-
     public void AddMinion(SoldierUnit minion)
     {
         minions.Add(minion);
@@ -78,6 +66,14 @@ public class MinionFormationCommander : MonoBehaviour
         foreach (var unit in minions)
         {
             unit.SetLeaderMoving(true);
+        }
+    }
+
+    public void SetHoldMode(bool holding)
+    {
+        foreach (var unit in minions)
+        {
+            unit.SetHoldMode(holding);
         }
     }
 

@@ -13,8 +13,6 @@ namespace InGame
 
         public int TeamId;
 
-        public SpriteRenderer sr;
-        
         FollowLeader follow;
         SmoothMover mover;
         SpumAnimator animator;
@@ -24,11 +22,9 @@ namespace InGame
         State state;
         float attackEnd;
         bool isLeaderMoving;
-        bool needRegroup; // trigger
         Vector2 formationPos;
         float destroyTimer;
-        bool needCharge; // trigger
-        Vector2 chargePos;
+        bool isHoldMode;
 
         UnitModel model;
 
@@ -36,10 +32,9 @@ namespace InGame
         {
             Follow,
             Formation,
-            Charge,
             Chase,
             Attack,
-            Regroup,
+            Combat,
             Dead
         }
 
@@ -55,7 +50,6 @@ namespace InGame
 
         private void Update()
         {
-            HandleTriggers();
             OnUpdateState(state);
         }
 
@@ -64,25 +58,19 @@ namespace InGame
             follow.SetLeader(rb);
         }
 
+        public void SetHoldMode(bool holding)
+        {
+            isHoldMode = holding;
+        }
+
         public void SetLeaderMoving(bool isMoving)
         {
             isLeaderMoving = isMoving;
         }
 
-        public void SetNeedRegroup()
-        {
-            needRegroup = true;
-        }
-
         public void MoveCommand(Vector2 position)
         {
             formationPos = position;
-        }
-
-        public void CommandCharge(Vector2 direction, float length)
-        {
-            needCharge = true;
-            chargePos = mover.position + direction * length;
         }
 
         public void OnDamage(long damage)
@@ -105,32 +93,6 @@ namespace InGame
             OnStartState(state);
         }
 
-        void HandleTriggers()
-        {
-            if (needRegroup)
-            {
-                if (state == State.Attack)
-                {
-                    if (!IsAttacking())
-                    {
-                        needRegroup = false;
-                        SetState(State.Regroup);
-                        return;
-                    }
-                }
-                else if (state == State.Chase || state == State.Charge)
-                {
-                    needRegroup = false;
-                    SetState(State.Regroup);
-                    return;
-                }
-                else
-                {
-                    needRegroup = false;
-                }
-            }
-        }
-
         void OnStartState(State state)
         {
             if (state == State.Follow)
@@ -141,20 +103,12 @@ namespace InGame
             {
                 mover.MoveTo(formationPos, moveSpeed);
             }
-            else if (state == State.Charge)
-            {
-                mover.MoveTo(chargePos, moveSpeed);
-            }
             else if (state == State.Attack)
             {
                 mover.MoveStop();
                 attackEnd = Time.time + attackCool;
                 animator.SetState(SpumAnimator.State.Attack);
                 Attack();
-            }
-            else if (state == State.Regroup)
-            {
-                follow.enabled = true;
             }
             else if (state == State.Dead)
             {
@@ -169,37 +123,34 @@ namespace InGame
         {
             if (state == State.Follow)
             {
-                if (needCharge)
-                    SetState(State.Charge);
-                else if (!isLeaderMoving)
+                if (!isLeaderMoving)
                     SetState(State.Formation);
-                else if (IsDetectEnemy(out attackTarget))
+                else if (isHoldMode && IsHoldPosition() && IsTargetInAttackRange())
+                    SetState(State.Attack);
+                else if (!isHoldMode && IsTargetInAttackRange())
+                    SetState(State.Attack);
+                else if (!isHoldMode && IsDetectEnemy(out attackTarget))
                     SetState(State.Chase);
             }
             else if (state == State.Formation)
             {
                 // Controlled by commander
-                if (needCharge)
-                    SetState(State.Charge);
-                else if (isLeaderMoving)
+                if (isLeaderMoving)
                     SetState(State.Follow);
-                else if (IsDetectEnemy(out attackTarget))
-                    SetState(State.Chase);
-            }
-            else if (state == State.Charge)
-            {
-                if (IsTargetInAttackRange())
+                else if (isHoldMode && IsHoldPosition() && IsTargetInAttackRange())
                     SetState(State.Attack);
-                else if (IsDetectEnemy(out attackTarget))
+                else if (!isHoldMode && IsTargetInAttackRange())
+                    SetState(State.Attack);
+                else if (!isHoldMode && IsDetectEnemy(out attackTarget))
                     SetState(State.Chase);
-                else if (mover.IsDestination())
-                    SetState(State.Follow);
             }
             else if (state == State.Chase)
             {
                 mover.MoveTo(attackTarget.transform.position, moveSpeed);
 
-                if (IsTargetInAttackRange())
+                if (isHoldMode)
+                    SetState(State.Follow);
+                else if (IsTargetInAttackRange())
                     SetState(State.Attack);
                 else if (!IsDetectEnemy(out attackTarget))
                     SetState(State.Follow);
@@ -208,24 +159,13 @@ namespace InGame
             {
                 if (!IsAttacking())
                 {
-                    if (IsTargetInAttackRange())
+                    if (isHoldMode)
+                        SetState(State.Follow);
+                    else if (IsTargetInAttackRange())
                         SetState(State.Attack);
                     else if (IsDetectEnemy(out attackTarget))
                         SetState(State.Chase);
                     else
-                        SetState(State.Follow);
-                }
-            }
-            else if (state == State.Regroup)
-            {
-                // Controlled by commander
-                if (needCharge)
-                {
-                    SetState(State.Charge);
-                }
-                else
-                {
-                    if (follow.GetLeaderDis() < 2f)
                         SetState(State.Follow);
                 }
             }
@@ -236,17 +176,11 @@ namespace InGame
                     gameObject.SetActive(false);
                 }
             }
-
-            needCharge = false;
         }
 
         void OnEndState(State state)
         {
             if (state == State.Follow)
-            {
-                follow.enabled = false;
-            }
-            else if (state == State.Regroup)
             {
                 follow.enabled = false;
             }
@@ -293,6 +227,14 @@ namespace InGame
         bool IsAttacking()
         {
             return Time.time < attackEnd;
+        }
+
+        bool IsHoldPosition()
+        {
+            if (isLeaderMoving)
+                return follow.GetLeaderDis() < 5f;
+            else
+                return mover.IsDestination();
         }
 
         void Attack()

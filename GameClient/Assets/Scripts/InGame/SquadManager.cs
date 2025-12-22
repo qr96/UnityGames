@@ -9,6 +9,7 @@ namespace InGame
         public LeaderUnit playerB;
 
         public GameObject soldierPrefab;
+
         public int totalSoldiers = 9;
 
         void Start()

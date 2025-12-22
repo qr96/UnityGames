@@ -1294,7 +1294,6 @@ MonoBehaviour:
   attackCool: 1
   destroyTime: 3
   TeamId: 0
-  sr: {fileID: 0}
 --- !u!114 &233399316
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11572,7 +11571,6 @@ MonoBehaviour:
   attackCool: 0
   destroyTime: 0
   TeamId: 0
-  sr: {fileID: 1786217864}
 --- !u!114 &2111985981
 MonoBehaviour:
   m_ObjectHideFlags: 0

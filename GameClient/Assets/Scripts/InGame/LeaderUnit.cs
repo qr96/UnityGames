@@ -57,14 +57,10 @@ namespace InGame
                 lastDir = input;
         }
 
-        public void SetRegroup()
+        public void SetHoldMode(bool holding)
         {
-            formationCommander.SetRegroup();
-        }
-
-        public void CommandCharge()
-        {
-            formationCommander.CommandCharge(lastDir);
+            Debug.Log(holding);
+            formationCommander.SetHoldMode(holding);
         }
     }
 }

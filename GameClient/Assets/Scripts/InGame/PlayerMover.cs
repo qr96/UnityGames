@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace InGame
 {
@@ -8,9 +6,14 @@ namespace InGame
     {
         LeaderUnit unit;
 
+        bool isHoldMode;
+
         void Start()
         {
             unit = GetComponent<LeaderUnit>();
+
+            isHoldMode = false;
+            ToggleHoldMode();
         }
 
         void Update()
@@ -22,11 +25,14 @@ namespace InGame
             if (unit != null)
                 unit.SetInput(input);
 
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-                unit.SetRegroup();
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+                ToggleHoldMode();
+        }
 
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-                unit.CommandCharge();
+        void ToggleHoldMode()
+        {
+            isHoldMode = !isHoldMode;
+            unit.SetHoldMode(isHoldMode);
         }
     }
 }
