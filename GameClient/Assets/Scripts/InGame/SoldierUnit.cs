@@ -8,7 +8,8 @@ namespace InGame
         public float detectRange;
         public float attackRange;
         public float moveSpeed = 5f;
-        public float attackCool;
+        public float attackDuration; // 이게 끝나야 데미지 들어감
+        public float attackDelay;
         public float destroyTime;
 
         public int TeamId;
@@ -21,6 +22,7 @@ namespace InGame
 
         State state;
         float attackEnd;
+        float attackDelayEnd;
         bool isLeaderMoving;
         Vector2 formationPos;
         float destroyTimer;
@@ -44,7 +46,7 @@ namespace InGame
             mover = GetComponent<SmoothMover>();
             animator = GetComponent<SpumAnimator>();
 
-            model = new UnitModel() { maxHp = 10, attack = 2 };
+            model = new UnitModel() { maxHp = 1000, attack = 2 };
             model.Spawn();
         }
 
@@ -106,9 +108,9 @@ namespace InGame
             else if (state == State.Attack)
             {
                 mover.MoveStop();
-                attackEnd = Time.time + attackCool;
+                attackEnd = Time.time + attackDuration;
+                attackDelayEnd = Time.time + attackDelay;
                 animator.SetState(SpumAnimator.State.Attack);
-                Attack();
             }
             else if (state == State.Dead)
             {
@@ -125,24 +127,37 @@ namespace InGame
             {
                 if (!isLeaderMoving)
                     SetState(State.Formation);
-                else if (isHoldMode && IsHoldPosition() && IsTargetInAttackRange())
-                    SetState(State.Attack);
-                else if (!isHoldMode && IsTargetInAttackRange())
-                    SetState(State.Attack);
-                else if (!isHoldMode && IsDetectEnemy(out attackTarget))
-                    SetState(State.Chase);
+                else if (IsTargetInAttackRange())
+                {
+                    if (!isHoldMode || IsHoldPosition())
+                    {
+                        if (IsAttackDelayEnd())
+                            SetState(State.Attack);
+                    }
+                }
+                else if (IsDetectEnemy(out attackTarget))
+                {
+                    if (!isHoldMode)
+                        SetState(State.Chase);
+                }
             }
             else if (state == State.Formation)
             {
-                // Controlled by commander
                 if (isLeaderMoving)
                     SetState(State.Follow);
-                else if (isHoldMode && IsHoldPosition() && IsTargetInAttackRange())
-                    SetState(State.Attack);
-                else if (!isHoldMode && IsTargetInAttackRange())
-                    SetState(State.Attack);
-                else if (!isHoldMode && IsDetectEnemy(out attackTarget))
-                    SetState(State.Chase);
+                else if (IsTargetInAttackRange())
+                {
+                    if (!isHoldMode || IsHoldPosition())
+                    {
+                        if (IsAttackDelayEnd())
+                            SetState(State.Attack);
+                    }
+                }
+                else if (IsDetectEnemy(out attackTarget))
+                {
+                    if (!isHoldMode)
+                        SetState(State.Chase);
+                }
             }
             else if (state == State.Chase)
             {
@@ -151,23 +166,37 @@ namespace InGame
                 if (isHoldMode)
                     SetState(State.Follow);
                 else if (IsTargetInAttackRange())
-                    SetState(State.Attack);
-                else if (!IsDetectEnemy(out attackTarget))
+                {
+                    if (IsAttackDelayEnd())
+                        SetState(State.Attack);
+                }
+                else if (!IsDetectEnemy(out var attackTarget))
                     SetState(State.Follow);
             }
             else if (state == State.Attack)
             {
+                // 공격 끝나고 데미지 들어감
                 if (!IsAttacking())
                 {
-                    if (isHoldMode)
-                        SetState(State.Follow);
-                    else if (IsTargetInAttackRange())
-                        SetState(State.Attack);
-                    else if (IsDetectEnemy(out attackTarget))
-                        SetState(State.Chase);
-                    else
-                        SetState(State.Follow);
+                    Attack();
+                    SetState(State.Combat);
                 }
+                else if (isHoldMode && !IsHoldPosition())
+                    SetState(State.Follow);
+            }
+            else if (state == State.Combat)
+            {
+                if (isHoldMode)
+                    SetState(State.Follow);
+                else if (IsTargetInAttackRange())
+                {
+                    if (IsAttackDelayEnd())
+                        SetState(State.Attack);
+                }
+                else if (IsDetectEnemy(out attackTarget))
+                    SetState(State.Chase);
+                else
+                    SetState(State.Follow);
             }
             else if (state == State.Dead)
             {
@@ -227,6 +256,11 @@ namespace InGame
         bool IsAttacking()
         {
             return Time.time < attackEnd;
+        }
+
+        bool IsAttackDelayEnd()
+        {
+            return Time.time >= attackDelayEnd;
         }
 
         bool IsHoldPosition()
