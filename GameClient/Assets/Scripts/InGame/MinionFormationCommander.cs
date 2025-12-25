@@ -2,102 +2,106 @@ using InGame;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MinionFormationCommander : MonoBehaviour
+namespace InGame
 {
-    public Vector2 gap;
-    public int maxColumn;
-
-    // Values
-    List<SoldierUnit> minions = new List<SoldierUnit>();
-    Dictionary<SoldierUnit, bool> commanded = new Dictionary<SoldierUnit, bool>();
-
-    public void SetMinionsPosition(Vector2 leaderPos, Vector3 leaderDir)
+    public class MinionFormationCommander : MonoBehaviour
     {
-        if (minions.Count == 0)
-            return;
+        public Vector2 gap;
+        public int maxColumn;
 
-        // 열 수보다 병력 적은 경우 처리. (병력 수에 따라 열 조정)
-        var nowColumn = minions.Count + 1 > 9 ? 5 : 3;
-        if (nowColumn > 15) nowColumn = Mathf.Max(nowColumn, maxColumn);
+        // Values
+        List<SoldierUnit> minions = new List<SoldierUnit>();
+        Dictionary<SoldierUnit, bool> commanded = new Dictionary<SoldierUnit, bool>();
 
-        // 아래 보고 정렬함.
-        var pivot = new Vector2(-gap.x * (nowColumn - 1) / 2f, 0f);
-
-        // 명령 받은 여부 초기화
-        foreach (var unit in minions)
-            commanded[unit] = false;
-
-        for (int i = 0; i < minions.Count + 1; i++)
+        public void SetMinionsPosition(Vector2 leaderPos, Vector3 leaderDir)
         {
-            var idx = new Vector2(i % nowColumn, i / nowColumn);
+            if (minions.Count == 0)
+                return;
 
-            // 리더의 자리.
-            if (idx.x == nowColumn / 2 && idx.y == 0)
-                continue;
+            // 열 수보다 병력 적은 경우 처리. (병력 수에 따라 열 조정)
+            var nowColumn = minions.Count + 1 > 9 ? 5 : 3;
+            if (nowColumn > 15) nowColumn = Mathf.Max(nowColumn, maxColumn);
 
-            var relativePos = new Vector2(idx.x * gap.x, idx.y * gap.y) + pivot;
-            var rotation = Quaternion.FromToRotation(Vector2.down, leaderDir);
-            var rotatedPos = rotation * relativePos;
-            var absPos = (Vector2)rotatedPos + leaderPos;
+            // 아래 보고 정렬함.
+            var pivot = new Vector2(-gap.x * (nowColumn - 1) / 2f, 0f);
 
-            // 해당 위치에 가장 가까운 유닛 찾아 이동시킴.
-            var closeUnit = FindCloseUnit(absPos);
-            if (closeUnit != null)
+            // 명령 받은 여부 초기화
+            foreach (var unit in minions)
+                commanded[unit] = false;
+
+            for (int i = 0; i < minions.Count + 1; i++)
             {
-                closeUnit.SetLeaderMoving(false);
-                closeUnit.MoveCommand(absPos);
-                commanded[closeUnit] = true;
-            }
-            else
-            {
-                Debug.LogError("unit can't be null.");
-            }
-        }
-    }
+                var idx = new Vector2(i % nowColumn, i / nowColumn);
 
-    public void AddMinion(SoldierUnit minion)
-    {
-        minions.Add(minion);
-        commanded.Add(minion, false);
-    }
+                // 리더의 자리.
+                if (idx.x == nowColumn / 2 && idx.y == 0)
+                    continue;
 
-    public void ReleaseFormation()
-    {
-        foreach (var unit in minions)
-        {
-            unit.SetLeaderMoving(true);
-        }
-    }
+                var relativePos = new Vector2(idx.x * gap.x, idx.y * gap.y) + pivot;
+                var rotation = Quaternion.FromToRotation(Vector2.down, leaderDir);
+                var rotatedPos = rotation * relativePos;
+                var absPos = (Vector2)rotatedPos + leaderPos;
 
-    public void SetHoldMode(bool holding)
-    {
-        foreach (var unit in minions)
-        {
-            unit.SetHoldMode(holding);
-        }
-    }
-
-    SoldierUnit FindCloseUnit(Vector2 position)
-    {
-        if (minions.Count == 0)
-            return null;
-
-        SoldierUnit closeUnit = null;
-        float closeDis = float.MaxValue;
-
-        for (int i = 0; i < minions.Count; i++)
-        {
-            if (!commanded[minions[i]])
-            {
-                var dis = (position - (Vector2)minions[i].transform.position).sqrMagnitude;
-                if (dis < closeDis)
+                // 해당 위치에 가장 가까운 유닛 찾아 이동시킴.
+                var closeUnit = FindCloseUnit(absPos);
+                if (closeUnit != null)
                 {
-                    closeUnit = minions[i];
-                    closeDis = dis;
+                    closeUnit.SetLeaderMoving(false);
+                    closeUnit.MoveCommand(absPos);
+                    commanded[closeUnit] = true;
+                }
+                else
+                {
+                    Debug.LogError("unit can't be null.");
                 }
             }
         }
 
-        return closeUnit;
+        public void AddMinion(SoldierUnit minion)
+        {
+            minions.Add(minion);
+            commanded.Add(minion, false);
+        }
+
+        public void ReleaseFormation()
+        {
+            foreach (var unit in minions)
+            {
+                unit.SetLeaderMoving(true);
+            }
+        }
+
+        public void SetHoldMode(bool holding)
+        {
+            foreach (var unit in minions)
+            {
+                unit.SetHoldMode(holding);
+            }
+        }
+
+        SoldierUnit FindCloseUnit(Vector2 position)
+        {
+            if (minions.Count == 0)
+                return null;
+
+            SoldierUnit closeUnit = null;
+            float closeDis = float.MaxValue;
+
+            for (int i = 0; i < minions.Count; i++)
+            {
+                if (!commanded[minions[i]])
+                {
+                    var dis = (position - (Vector2)minions[i].transform.position).sqrMagnitude;
+                    if (dis < closeDis)
+                    {
+                        closeUnit = minions[i];
+                        closeDis = dis;
+                    }
+                }
+            }
+
+            return closeUnit;
+        }
     }
 }
+
