@@ -1253,6 +1253,7 @@ GameObject:
   - component: {fileID: 233399317}
   - component: {fileID: 233399319}
   - component: {fileID: 233399320}
+  - component: {fileID: 233399321}
   - component: {fileID: 233399314}
   - component: {fileID: 233399316}
   - component: {fileID: 233399315}
@@ -1402,6 +1403,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InGame.SpumAnimator
   animator: {fileID: 812380969}
   flipIgnoreTime: 0.1
+--- !u!114 &233399321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233399312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f7afbda9a663004e942543f9b4fe256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.SpumSpriter
+  match: {fileID: 394706989}
 --- !u!1 &239007454
 GameObject:
   m_ObjectHideFlags: 0

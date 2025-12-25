@@ -17,6 +17,7 @@ namespace InGame
         FollowLeader follow;
         SmoothMover mover;
         SpumAnimator animator;
+        SpumSpriter spriter;
 
         SoldierUnit attackTarget;
 
@@ -45,8 +46,9 @@ namespace InGame
             follow = GetComponent<FollowLeader>();
             mover = GetComponent<SmoothMover>();
             animator = GetComponent<SpumAnimator>();
+            spriter = GetComponent<SpumSpriter>();
 
-            model = new UnitModel() { maxHp = 1000, attack = 2 };
+            model = new UnitModel() { maxHp = 10, attack = 2 };
             model.Spawn();
         }
 
@@ -58,6 +60,11 @@ namespace InGame
         public void SetLeader(Rigidbody2D rb)
         {
             follow.SetLeader(rb);
+        }
+
+        public void SetColor(Color red)
+        {
+            spriter.SetColor(red);
         }
 
         public void SetHoldMode(bool holding)
@@ -266,7 +273,7 @@ namespace InGame
         bool IsHoldPosition()
         {
             if (isLeaderMoving)
-                return follow.GetLeaderDis() < 5f;
+                return follow.GetLeaderDis() < 3f;
             else
                 return mover.IsDestination();
         }

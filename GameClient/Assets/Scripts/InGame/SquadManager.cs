@@ -34,6 +34,9 @@ namespace InGame
                     soldier.SetLeader(leader.GetComponent<Rigidbody2D>());
                     soldier.transform.position = leader.transform.position;
 
+                    if (teamId == 2)
+                        soldier.SetColor(new Color(1f, 180f / 255f, 180f / 255f));
+
                     if (commander != null)
                         commander.AddMinion(soldier);
                 }
