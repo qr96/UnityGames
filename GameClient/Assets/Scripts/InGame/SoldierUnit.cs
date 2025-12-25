@@ -11,7 +11,7 @@ namespace InGame
         public float attackDuration; // 이게 끝나야 데미지 들어감
         public float attackDelay;
         public float destroyTime;
-
+        
         public int TeamId;
 
         FollowLeader follow;
@@ -21,6 +21,8 @@ namespace InGame
 
         SoldierUnit attackTarget;
 
+        readonly float attackAngleCos = 0.707f;
+
         State state;
         float attackEnd;
         float attackDelayEnd;
@@ -28,6 +30,7 @@ namespace InGame
         Vector2 formationPos;
         float destroyTimer;
         bool isHoldMode;
+        Vector2 attackDir;
 
         UnitModel model;
 
@@ -252,6 +255,7 @@ namespace InGame
                 {
                     if (unit.TeamId != TeamId && unit.IsAlive())
                     {
+                        attackDir = (unit.transform.position - transform.position).normalized;
                         return true;
                     }
                 }
@@ -286,13 +290,25 @@ namespace InGame
                 var unit = detect.GetComponent<SoldierUnit>();
                 if (unit != null)
                 {
+                    // 적이고 살아있음
                     if (unit.TeamId != TeamId && unit.IsAlive())
                     {
-                        unit.OnDamage(model.attack);
-                        return;
+                        // 공격 각도 체크
+                        if (CheckAttackDir(attackDir, unit.transform.position - transform.position, attackAngleCos))
+                        {
+                            unit.OnDamage(model.attack);
+                            return;
+                        }
                     }
                 }
             }
+        }
+
+        // 공격 각도 범위 체크 코드. fanCos는 코사인 값. (시계, 반시계 45도씩이면 cos45 값 입력)
+        bool CheckAttackDir(Vector2 attackDir, Vector2 targetDir, float fanCos)
+        {
+            var dot = Vector2.Dot(attackDir.normalized, targetDir.normalized);
+            return dot > fanCos;
         }
 
         // 에디터에서 범위를 보기 위한 기즈모
@@ -303,6 +319,9 @@ namespace InGame
 
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, attackRange);
+
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(transform.position, transform.position + (Vector3)attackDir * attackRange);
         }
     }
 }
