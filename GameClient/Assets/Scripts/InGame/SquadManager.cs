@@ -8,22 +8,29 @@ namespace InGame
         public LeaderUnit playerA;
         public LeaderUnit playerB;
 
-        public GameObject soldierPrefab;
+        public GameObject base1;
+        public GameObject base2;
 
-        public int totalSoldiers = 9;
+        public GameObject soldierPrefab;
 
         void Start()
         {
-            SpawnSquad(1, playerA);
-            SpawnSquad(2, playerB);
+            //SpawnSquad(1, playerA);
+            SpawnSquad(2, playerB, 9, base2.transform.position);
         }
 
-        void SpawnSquad(int teamId, LeaderUnit leader)
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+                SpawnSquad(1, playerA, 1, base1.transform.position);
+        }
+
+        void SpawnSquad(int teamId, LeaderUnit leader, int spawnCount, Vector2 spawnPos)
         {
             var commander = leader.GetComponent<MinionFormationCommander>();
             leader.TeamId = teamId;
 
-            for (int i = 0; i < totalSoldiers; i++)
+            for (int i = 0; i < spawnCount; i++)
             {
                 var unit = Instantiate(soldierPrefab, transform.position, Quaternion.identity);
                 var soldier = unit.GetComponent<SoldierUnit>();
@@ -32,7 +39,7 @@ namespace InGame
                     soldier.gameObject.SetActive(true);
                     soldier.TeamId = teamId;
                     soldier.SetLeader(leader.GetComponent<Rigidbody2D>());
-                    soldier.transform.position = leader.transform.position;
+                    soldier.transform.position = spawnPos;
 
                     if (teamId == 2)
                         soldier.SetColor(new Color(1f, 180f / 255f, 180f / 255f));
