@@ -58,6 +58,7 @@ namespace InGame
         void OnStartMove()
         {
             animator.SetBool("Move", true);
+            SetRotation(rb.linearVelocityX);
         }
 
         void OnStartAttack()
@@ -89,22 +90,24 @@ namespace InGame
                         afterFlipTime = 0f;
                         isFlipped = false;
 
-                        if (rb.linearVelocityX < 0)
-                            animator.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-                        else if (rb.linearVelocityX > 0)
-                            animator.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                        SetRotation(rb.linearVelocityX);
                     }
 
                     prevLinearVelX = rb.linearVelocityX;
                 }
                 else
                 {
-                    if (rb.linearVelocityX < 0)
-                        animator.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-                    else if (rb.linearVelocityX > 0)
-                        animator.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                    SetRotation(rb.linearVelocityX);
                 }
             }
+        }
+
+        void SetRotation(float linearVelocityX)
+        {
+            if (linearVelocityX < 0)
+                animator.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+            else if (linearVelocityX > 0)
+                animator.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
         }
     }
 }
