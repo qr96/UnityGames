@@ -13,6 +13,14 @@ namespace InGame
         Vector2 input;
         Vector2 lastDir;
 
+        State state;
+
+        enum State
+        {
+            Idle,
+            Attack,
+        }
+
         void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
@@ -45,6 +53,8 @@ namespace InGame
                     animator.SetState(SpumAnimator.State.Idle);
                 }
             }
+
+            OnUpdateState(state);
         }
 
         public void SetInput(Vector2 dir)
@@ -59,6 +69,36 @@ namespace InGame
         {
             Debug.Log(holding);
             formationCommander.SetHoldMode(holding);
+        }
+
+        void SetState(State state)
+        {
+            this.state = state;
+            OnStartState(state);
+        }
+
+        void OnStartState(State state)
+        {
+            if (state == State.Attack)
+            {
+                AttackTarget();
+                animator.SetState(SpumAnimator.State.Attack);
+                animator.SetDirection(attackDir);
+            }
+        }
+
+        void OnUpdateState(State state)
+        {
+            if (state == State.Idle)
+            {
+                if (IsAttackDelayEnd() && IsTargetInAttackRange())
+                    SetState(State.Attack);
+            }
+            else if (state == State.Attack)
+            {
+                if (!IsAttacking())
+                    SetState(State.Idle);
+            }
         }
     }
 }

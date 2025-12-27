@@ -51,26 +51,21 @@ namespace InGame
             return model.IsAlive();
         }
 
-        protected void Attack()
+        public void CancelAttack()
         {
-            var detects = Physics2D.OverlapCircleAll(transform.position, attackRange);
-            foreach (var detect in detects)
-            {
-                var unit = detect.GetComponent<BaseUnit>();
-                if (unit != null)
-                {
-                    // 적이고 살아있음
-                    if (unit.TeamId != TeamId && unit.IsAlive())
-                    {
-                        // 공격 각도 체크
-                        if (CheckAttackDir(attackDir, unit.transform.position - transform.position, attackAngleCos))
-                        {
-                            unit.OnDamage(model.attack);
-                            return;
-                        }
-                    }
-                }
-            }
+            CancelInvoke(nameof(OnAttackFinish));
+        }
+
+        protected void AttackTarget()
+        {
+            if (!IsAlive() || !IsAttackDelayEnd())
+                return;
+
+            attackEnd = Time.time + attackDuration;
+            attackDelayEnd = Time.time + attackDelay;
+
+            // 공격 끝나고 데미지 들어감
+            Invoke(nameof(OnAttackFinish), attackDuration);
         }
 
         protected bool IsAttacking()
@@ -122,8 +117,30 @@ namespace InGame
             return false;
         }
 
+        void OnAttackFinish()
+        {
+            var detects = Physics2D.OverlapCircleAll(transform.position, attackRange);
+            foreach (var detect in detects)
+            {
+                var unit = detect.GetComponent<BaseUnit>();
+                if (unit != null)
+                {
+                    // 적이고 살아있음
+                    if (unit.TeamId != TeamId && unit.IsAlive())
+                    {
+                        // 공격 각도 체크
+                        if (IsInRange(attackDir, unit.transform.position - transform.position, attackAngleCos))
+                        {
+                            unit.OnDamage(model.attack);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
         // 공격 각도 범위 체크 코드. fanCos는 코사인 값. (시계, 반시계 45도씩이면 cos45 값 입력)
-        bool CheckAttackDir(Vector2 attackDir, Vector2 targetDir, float fanCos)
+        bool IsInRange(Vector2 attackDir, Vector2 targetDir, float fanCos)
         {
             var dot = Vector2.Dot(attackDir.normalized, targetDir.normalized);
             return dot > fanCos;

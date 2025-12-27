@@ -936,8 +936,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b0cbfe0783a2045ad181bab767a857, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.LeaderUnit
-  moveSpeed: 5
   TeamId: 0
+  detectRange: 0
+  attackRange: 0.8
+  moveSpeed: 5
+  attackDuration: 0.4
+  attackDelay: 0.6
 --- !u!114 &122471685
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2066,13 +2070,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ab3112996d77c49804d885900a1b5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.SoldierUnit
+  TeamId: 0
   detectRange: 3
   attackRange: 0.8
   moveSpeed: 5
   attackDuration: 0.4
   attackDelay: 0.6
   destroyTime: 3
-  TeamId: 0
 --- !u!114 &233399316
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5077,8 +5081,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b0cbfe0783a2045ad181bab767a857, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.LeaderUnit
-  moveSpeed: 5
   TeamId: 0
+  detectRange: 0
+  attackRange: 0.8
+  moveSpeed: 5
+  attackDuration: 0.4
+  attackDelay: 0.6
 --- !u!114 &469945609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5743,8 +5751,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b0cbfe0783a2045ad181bab767a857, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.LeaderUnit
-  moveSpeed: 5
   TeamId: 0
+  detectRange: 0
+  attackRange: 0
+  moveSpeed: 5
+  attackDuration: 0
+  attackDelay: 0
 --- !u!114 &522773639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17978,13 +17990,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ab3112996d77c49804d885900a1b5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.SoldierUnit
+  TeamId: 0
   detectRange: 3
   attackRange: 0.8
   moveSpeed: 5
   attackDuration: 0.4
   attackDelay: 0.6
   destroyTime: 3
-  TeamId: 0
 --- !u!114 &1913174879
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19692,13 +19704,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ab3112996d77c49804d885900a1b5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.SoldierUnit
+  TeamId: 0
   detectRange: 3
   attackRange: 0.8
   moveSpeed: 5
   attackDuration: 0
   attackDelay: 0
   destroyTime: 0
-  TeamId: 0
 --- !u!114 &2111985981
 MonoBehaviour:
   m_ObjectHideFlags: 0

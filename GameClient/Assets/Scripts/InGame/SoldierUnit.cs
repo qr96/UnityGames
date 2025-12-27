@@ -97,9 +97,7 @@ namespace InGame
             }
             else if (state == State.Attack)
             {
-                attackEnd = Time.time + attackDuration;
-                attackDelayEnd = Time.time + attackDelay;
-
+                AttackTarget();
                 mover.MoveStop();
                 animator.SetState(SpumAnimator.State.Attack);
                 animator.SetDirection(attackDir);
@@ -167,14 +165,13 @@ namespace InGame
             }
             else if (state == State.Attack)
             {
-                // 공격 끝나고 데미지 들어감
                 if (!IsAttacking())
-                {
-                    Attack();
                     SetState(State.Combat);
-                }
                 else if (isHoldMode && !IsHoldPosition())
+                {
+                    CancelAttack();
                     SetState(State.Follow);
+                }
             }
             else if (state == State.Combat)
             {
