@@ -50,6 +50,11 @@ namespace InGame
                 animator.SetBool("Dead", true);
         }
 
+        public void SetDirection(Vector2 direction)
+        {
+            SetRotation(direction.x);
+        }
+
         void OnStartIdle()
         {
             animator.SetBool("Move", false);

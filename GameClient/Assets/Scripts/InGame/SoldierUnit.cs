@@ -121,6 +121,7 @@ namespace InGame
                 attackEnd = Time.time + attackDuration;
                 attackDelayEnd = Time.time + attackDelay;
                 animator.SetState(SpumAnimator.State.Attack);
+                animator.SetDirection(attackDir);
             }
             else if (state == State.Dead)
             {
