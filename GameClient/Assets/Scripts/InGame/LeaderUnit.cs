@@ -19,6 +19,7 @@ namespace InGame
         {
             Idle,
             Attack,
+            Dead
         }
 
         void Awake()
@@ -67,8 +68,12 @@ namespace InGame
 
         public void SetHoldMode(bool holding)
         {
-            Debug.Log(holding);
             formationCommander.SetHoldMode(holding);
+        }
+
+        public override void OnDead()
+        {
+            SetState(State.Dead);
         }
 
         void SetState(State state)
@@ -84,6 +89,11 @@ namespace InGame
                 AttackTarget();
                 animator.SetState(SpumAnimator.State.Attack);
                 animator.SetDirection(attackDir);
+            }
+            else if (state == State.Dead)
+            {
+                rb.bodyType = RigidbodyType2D.Kinematic;
+                animator.SetState(SpumAnimator.State.Dead);
             }
         }
 

@@ -5753,10 +5753,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InGame.LeaderUnit
   TeamId: 0
   detectRange: 0
-  attackRange: 0
+  attackRange: 0.8
   moveSpeed: 5
-  attackDuration: 0
-  attackDelay: 0
+  attackDuration: 0.4
+  attackDelay: 0.6
 --- !u!114 &522773639
 MonoBehaviour:
   m_ObjectHideFlags: 0
