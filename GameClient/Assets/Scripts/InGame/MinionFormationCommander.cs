@@ -13,6 +13,8 @@ namespace InGame
         List<SoldierUnit> minions = new List<SoldierUnit>();
         Dictionary<SoldierUnit, bool> commanded = new Dictionary<SoldierUnit, bool>();
 
+        bool isHoldMode;
+
         public void SetMinionsPosition(Vector2 leaderPos, Vector3 leaderDir)
         {
             if (minions.Count == 0)
@@ -61,22 +63,21 @@ namespace InGame
         {
             minions.Add(minion);
             commanded.Add(minion, false);
+            minion.SetHoldMode(isHoldMode);
         }
 
         public void ReleaseFormation()
         {
             foreach (var unit in minions)
-            {
                 unit.SetLeaderMoving(true);
-            }
         }
 
         public void SetHoldMode(bool holding)
         {
+            isHoldMode = holding;
+
             foreach (var unit in minions)
-            {
                 unit.SetHoldMode(holding);
-            }
         }
 
         SoldierUnit FindCloseUnit(Vector2 position)
