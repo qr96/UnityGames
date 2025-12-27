@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace InGame
 {
-    public class SoldierUnit : MonoBehaviour
+    public class SoldierUnit : BaseUnit
     {
         public float detectRange;
         public float attackRange;
@@ -11,8 +11,6 @@ namespace InGame
         public float attackDuration; // 이게 끝나야 데미지 들어감
         public float attackDelay;
         public float destroyTime;
-        
-        public int TeamId;
 
         FollowLeader follow;
         SmoothMover mover;
@@ -32,8 +30,6 @@ namespace InGame
         bool isHoldMode;
         Vector2 attackDir;
 
-        UnitModel model;
-
         public enum State
         {
             Follow,
@@ -51,8 +47,8 @@ namespace InGame
             animator = GetComponent<SpumAnimator>();
             spriter = GetComponent<SpumSpriter>();
 
-            model = new UnitModel() { maxHp = 10, attack = 2 };
-            model.Spawn();
+            SetModel(new UnitModel() { maxHp = 10, attack = 2 });
+            OnSpawn();
         }
 
         private void Update()
@@ -85,17 +81,9 @@ namespace InGame
             formationPos = position;
         }
 
-        public void OnDamage(long damage)
+        public override void OnDead()
         {
-            model.OnDamage(damage);
-
-            if (!model.IsAlive())
-                SetState(State.Dead);
-        }
-
-        public bool IsAlive()
-        {
-            return model.IsAlive();
+            SetState(State.Dead);
         }
 
         void SetState(State state)
@@ -288,7 +276,7 @@ namespace InGame
             var detects = Physics2D.OverlapCircleAll(transform.position, attackRange);
             foreach (var detect in detects)
             {
-                var unit = detect.GetComponent<SoldierUnit>();
+                var unit = detect.GetComponent<BaseUnit>();
                 if (unit != null)
                 {
                     // 적이고 살아있음
