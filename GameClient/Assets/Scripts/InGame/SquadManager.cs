@@ -22,7 +22,14 @@ namespace InGame
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))
-                SpawnSquad(1, playerA, 1, base1.transform.position);
+            {
+                var price = 20;
+
+                if (InGamePropertyManager.Instance.UseFood(1, price))
+                    SpawnSquad(1, playerA, 1, base1.transform.position);
+                else
+                    Debug.Log("Not enough money.");
+            }
         }
 
         void SpawnSquad(int teamId, LeaderUnit leader, int spawnCount, Vector2 spawnPos)
