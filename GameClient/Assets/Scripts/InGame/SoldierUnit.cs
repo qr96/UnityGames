@@ -97,6 +97,9 @@ namespace InGame
             }
             else if (state == State.Attack)
             {
+                attackEnd = Time.time + attackDuration;
+                attackDelayEnd = Time.time + attackDelay;
+
                 mover.MoveStop();
                 animator.SetState(SpumAnimator.State.Attack);
                 animator.SetDirection(attackDir);

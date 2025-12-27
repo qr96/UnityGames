@@ -20,8 +20,8 @@ namespace InGame
         // Values
         protected Vector2 attackDir;
 
-        float attackEnd;
-        float attackDelayEnd;
+        protected float attackEnd;
+        protected float attackDelayEnd;
 
         public void SetModel(UnitModel model)
         {
@@ -66,8 +66,6 @@ namespace InGame
                         if (CheckAttackDir(attackDir, unit.transform.position - transform.position, attackAngleCos))
                         {
                             unit.OnDamage(model.attack);
-                            attackEnd = Time.time + attackDuration;
-                            attackDelayEnd = Time.time + attackDelay;
                             return;
                         }
                     }
