@@ -27,7 +27,6 @@ namespace InGame
             Idle,
             Chase,
             Attack,
-            Combat,
             Dead
         }
 
@@ -148,26 +147,12 @@ namespace InGame
             else if (state == State.Attack)
             {
                 if (!IsAttacking())
-                    SetState(State.Combat);
+                    SetState(State.Idle);
                 else if (isHoldMode && !IsHoldPosition())
                 {
                     CancelAttack();
                     SetState(State.Idle);
                 }
-            }
-            else if (state == State.Combat)
-            {
-                if (isHoldMode)
-                    SetState(State.Idle);
-                else if (IsTargetInAttackRange())
-                {
-                    if (IsAttackDelayEnd())
-                        SetState(State.Attack);
-                }
-                else if (IsDetectEnemy(out attackTarget))
-                    SetState(State.Chase);
-                else
-                    SetState(State.Idle);
             }
             else if (state == State.Dead)
             {
