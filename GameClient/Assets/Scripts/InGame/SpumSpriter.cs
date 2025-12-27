@@ -11,7 +11,7 @@ namespace InGame
             foreach (var element in match.matchingTables)
             {
                 var partType = element.PartType;
-                if (partType != "Hair" && partType != "Eye")
+                if (partType != "Hair" && partType != "Eye" && partType != "FaceHair")
                 {
                     element.renderer.color = color;
                 }
