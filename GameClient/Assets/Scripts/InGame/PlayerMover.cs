@@ -1,12 +1,25 @@
+using System;
 using UnityEngine;
 
 namespace InGame
 {
     public class PlayerMover : MonoBehaviour
     {
+        public static PlayerMover Instance;
+
+        public Action<bool> OnChangeHoldMode;
+
         LeaderUnit unit;
 
         bool isHoldMode;
+
+        void Awake()
+        {
+            if (Instance == null)
+                Instance = this;
+            else
+                Destroy(gameObject);
+        }
 
         void Start()
         {
@@ -33,6 +46,7 @@ namespace InGame
         {
             isHoldMode = !isHoldMode;
             unit.SetHoldMode(isHoldMode);
+            OnChangeHoldMode?.Invoke(isHoldMode);
         }
     }
 }
