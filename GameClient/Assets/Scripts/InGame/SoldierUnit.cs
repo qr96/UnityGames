@@ -24,8 +24,7 @@ namespace InGame
         
         public enum State
         {
-            Follow,
-            Formation,
+            Idle,
             Chase,
             Attack,
             Combat,
@@ -87,13 +86,12 @@ namespace InGame
 
         void OnStartState(State state)
         {
-            if (state == State.Follow)
+            if (state == State.Idle)
             {
-                follow.enabled = true;
-            }
-            else if (state == State.Formation)
-            {
-                mover.MoveTo(formationPos, moveSpeed);
+                if (isLeaderMoving)
+                    follow.enabled = true;
+                else
+                    mover.MoveTo(formationPos, moveSpeed);
             }
             else if (state == State.Attack)
             {
@@ -113,28 +111,12 @@ namespace InGame
 
         void OnUpdateState(State state)
         {
-            if (state == State.Follow)
+            if (state == State.Idle)
             {
-                if (!isLeaderMoving)
-                    SetState(State.Formation);
-                else if (IsTargetInAttackRange())
-                {
-                    if (!isHoldMode || IsHoldPosition())
-                    {
-                        if (IsAttackDelayEnd())
-                            SetState(State.Attack);
-                    }
-                }
-                else if (IsDetectEnemy(out attackTarget))
-                {
-                    if (!isHoldMode)
-                        SetState(State.Chase);
-                }
-            }
-            else if (state == State.Formation)
-            {
-                if (isLeaderMoving)
-                    SetState(State.Follow);
+                if (isLeaderMoving && !follow.enabled)
+                    SetState(State.Idle);
+                else if (!isLeaderMoving && follow.enabled)
+                    SetState(State.Idle);
                 else if (IsTargetInAttackRange())
                 {
                     if (!isHoldMode || IsHoldPosition())
@@ -154,14 +136,14 @@ namespace InGame
                 mover.MoveTo(attackTarget.transform.position, moveSpeed);
 
                 if (isHoldMode)
-                    SetState(State.Follow);
+                    SetState(State.Idle);
                 else if (IsTargetInAttackRange())
                 {
                     if (IsAttackDelayEnd())
                         SetState(State.Attack);
                 }
                 else if (!IsDetectEnemy(out var attackTarget))
-                    SetState(State.Follow);
+                    SetState(State.Idle);
             }
             else if (state == State.Attack)
             {
@@ -170,13 +152,13 @@ namespace InGame
                 else if (isHoldMode && !IsHoldPosition())
                 {
                     CancelAttack();
-                    SetState(State.Follow);
+                    SetState(State.Idle);
                 }
             }
             else if (state == State.Combat)
             {
                 if (isHoldMode)
-                    SetState(State.Follow);
+                    SetState(State.Idle);
                 else if (IsTargetInAttackRange())
                 {
                     if (IsAttackDelayEnd())
@@ -185,7 +167,7 @@ namespace InGame
                 else if (IsDetectEnemy(out attackTarget))
                     SetState(State.Chase);
                 else
-                    SetState(State.Follow);
+                    SetState(State.Idle);
             }
             else if (state == State.Dead)
             {
@@ -198,7 +180,7 @@ namespace InGame
 
         void OnEndState(State state)
         {
-            if (state == State.Follow)
+            if (state == State.Idle)
             {
                 follow.enabled = false;
             }
