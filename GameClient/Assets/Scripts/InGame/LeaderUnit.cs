@@ -1,15 +1,10 @@
+using InGameModel;
 using UnityEngine;
 
 namespace InGame
 {
-    public class LeaderUnit : MonoBehaviour
+    public class LeaderUnit : BaseUnit
     {
-        // Settings
-        public float moveSpeed = 5f;
-
-        // Values
-        public int TeamId;
-
         Rigidbody2D rb;
         MinionFormationCommander formationCommander;
         SpumAnimator animator;
@@ -23,6 +18,9 @@ namespace InGame
             rb = GetComponent<Rigidbody2D>();
             formationCommander = GetComponent<MinionFormationCommander>();
             animator = GetComponent<SpumAnimator>();
+
+            SetModel(new UnitModel() { maxHp = 20, attack = 2 });
+            OnSpawn();
         }
 
         void Update()
