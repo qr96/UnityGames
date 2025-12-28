@@ -8276,6 +8276,7 @@ GameObject:
   - component: {fileID: 765472731}
   - component: {fileID: 765472732}
   - component: {fileID: 765472733}
+  - component: {fileID: 765472734}
   m_Layer: 0
   m_Name: Building002
   m_TagString: Untagged
@@ -8393,6 +8394,20 @@ CapsuleCollider2D:
   m_Offset: {x: 0.12, y: 0.3}
   m_Size: {x: 2.8, y: 1.4}
   m_Direction: 1
+--- !u!114 &765472734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 765472730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea731bc1e312adb4c8f8700d1dc20173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.CapturePoint
+  OwnTeamId: 0
+  foodProduction: 5
 --- !u!1 &772607549
 GameObject:
   m_ObjectHideFlags: 0
@@ -10498,11 +10513,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 992066153}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2946e6ec9f58f0d4aab814d79f0e4211, type: 3}
+  m_Script: {fileID: 11500000, guid: c90ad63aab18d664e98c0a2ee43c026a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InGamePropertyManager
-  produceFoodPerSec: 5
-  currentFood: 0
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.FieldManager
+  squad: {fileID: 992066155}
+  leaders:
+  - {fileID: 122471684}
+  - {fileID: 469945608}
+  - {fileID: 522773638}
+  capturePoints:
+  - {fileID: 1594983586}
+  - {fileID: 1606501291}
+  - {fileID: 765472734}
 --- !u!1 &1004580859
 GameObject:
   m_ObjectHideFlags: 0
@@ -14991,7 +15013,7 @@ SpriteMask:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1584661828}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -15347,6 +15369,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2714134568356822659, guid: 0ba9504bb2ffa0e42bd9ae208a6a179b, type: 3}
   m_PrefabInstance: {fileID: 1594983583}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1594983586 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3004629280599065030, guid: 0ba9504bb2ffa0e42bd9ae208a6a179b, type: 3}
+  m_PrefabInstance: {fileID: 1594983583}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1594983585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea731bc1e312adb4c8f8700d1dc20173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.CapturePoint
 --- !u!1 &1603617485
 GameObject:
   m_ObjectHideFlags: 0
@@ -15447,6 +15480,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2714134568356822659, guid: 0ba9504bb2ffa0e42bd9ae208a6a179b, type: 3}
   m_PrefabInstance: {fileID: 1606501288}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1606501291 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3004629280599065030, guid: 0ba9504bb2ffa0e42bd9ae208a6a179b, type: 3}
+  m_PrefabInstance: {fileID: 1606501288}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606501290}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea731bc1e312adb4c8f8700d1dc20173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.CapturePoint
 --- !u!1 &1608143469
 GameObject:
   m_ObjectHideFlags: 0
@@ -16762,7 +16806,7 @@ SpriteMask:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1835522133}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -21119,7 +21163,7 @@ SpriteMask:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2056892896836647935}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -25114,7 +25158,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingOrder: 0
   m_SortAtRoot: 0
 --- !u!1 &5286682349657284297
 GameObject:
@@ -28683,7 +28727,7 @@ SpriteMask:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7445757388120972031}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1

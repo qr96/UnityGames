@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3375952390964107617}
   - component: {fileID: 5983230813533829245}
   - component: {fileID: 1275983093392027738}
+  - component: {fileID: 3004629280599065030}
   m_Layer: 0
   m_Name: Building001
   m_TagString: Untagged
@@ -128,3 +129,17 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0.43}
   m_Size: {x: 3.4, y: 2.4}
   m_Direction: 1
+--- !u!114 &3004629280599065030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2714134568356822659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea731bc1e312adb4c8f8700d1dc20173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGame.CapturePoint
+  OwnTeamId: 0
+  foodProduction: 5

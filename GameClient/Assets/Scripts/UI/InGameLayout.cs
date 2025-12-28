@@ -12,13 +12,16 @@ namespace GameUI
 
         private void Start()
         {
-            InGamePropertyManager.Instance.OnChangeFoodEvent += OnChangeFood;
+            // 로딩 끝나면 호출되도록 수정 예정
+            if (FieldManager.Instance.TryGetProperty(1, out var property))
+                property.OnChangeFoodEvent += OnChangeFood;
             PlayerMover.Instance.OnChangeHoldMode += OnChangeHoldMode;
         }
 
         private void OnDestroy()
         {
-            InGamePropertyManager.Instance.OnChangeFoodEvent -= OnChangeFood;
+            if (FieldManager.Instance.TryGetProperty(1, out var property))
+                property.OnChangeFoodEvent -= OnChangeFood;
             PlayerMover.Instance.OnChangeHoldMode -= OnChangeHoldMode;
         }
 

@@ -4,54 +4,35 @@ using UnityEngine;
 
 namespace InGame
 {
-    public class InGamePropertyManager : MonoBehaviour
+    public class InGamePropertyManager
     {
-        public static InGamePropertyManager Instance;
-
-        public long produceFoodPerSec;
         public long currentFood;
+        public long foodProduction;
 
         public Action<long> OnChangeFoodEvent;
 
-        Coroutine produceFoodCo;
-
-        private void Awake()
+        public InGamePropertyManager(long currentFood)
         {
-            if (Instance == null)
-                Instance = this;
-            else
-                Destroy(Instance);
+            SetFood(currentFood);
         }
 
-        private void Start()
+        public void ProduceFood()
         {
-            if (produceFoodCo != null)
-                StopCoroutine(produceFoodCo);
-
-            produceFoodCo = StartCoroutine(ProduceFoodCo());
+            SetFood(currentFood + foodProduction);
         }
 
-        public void AddFood(int teamId, long food)
+        public void AddFood(long food)
         {
             SetFood(currentFood + food);
         }
 
-        public bool UseFood(int teamId, long food)
+        public bool TryUseFood(long food)
         {
             if (currentFood < food)
                 return false;
 
             SetFood(currentFood - food);
             return true;
-        }
-
-        IEnumerator ProduceFoodCo()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(1f);
-                AddFood(1, produceFoodPerSec);
-            }
         }
 
         void SetFood(long food)
