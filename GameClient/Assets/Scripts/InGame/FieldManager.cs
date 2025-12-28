@@ -26,10 +26,7 @@ namespace InGame
                 Instance = this;
             else
                 Destroy(this);
-        }
 
-        private void Start()
-        {
             // Settings
             foreach (var point in capturePoints)
                 point.OnChangeOwner += OnChangeCapturePoint;
@@ -54,6 +51,7 @@ namespace InGame
 
         public void AddTeam(int teamId, long currentFood, LeaderUnit leader)
         {
+            leader.TeamId = teamId;
             propertyDic.Add(teamId, new InGamePropertyManager(currentFood));
             squad.AddTeam(teamId, leader);
         }

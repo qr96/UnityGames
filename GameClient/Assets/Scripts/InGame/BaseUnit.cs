@@ -6,7 +6,7 @@ namespace InGame
     public class BaseUnit : MonoBehaviour
     {
         // Settings
-        public int TeamId;
+        public int TeamId {  get; set; }
 
         public float detectRange;
         public float attackRange;

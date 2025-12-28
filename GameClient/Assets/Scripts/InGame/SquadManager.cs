@@ -53,7 +53,6 @@ namespace InGame
 
             var leader = leaderDic[teamId];
             var commander = leader.GetComponent<MinionFormationCommander>();
-            leader.TeamId = teamId;
 
             for (int i = 0; i < spawnCount; i++)
             {
