@@ -112,22 +112,52 @@ namespace InGame
         {
             if (state == State.Idle)
             {
-                if (isLeaderMoving && !follow.enabled)
-                    SetState(State.Idle);
-                else if (!isLeaderMoving && follow.enabled)
-                    SetState(State.Idle);
-                else if (IsTargetInAttackRange())
+                if (isHoldMode)
                 {
-                    if (!isHoldMode || IsHoldPosition())
+                    if (isLeaderMoving)
+                    {
+                        if (!follow.enabled)
+                            SetState(State.Idle);
+                        else if (follow.GetLeaderDis() > 3f)
+                        {
+                            // must go to leader.
+                        }
+                        else if (IsTargetInAttackRange())
+                        {
+                            if (IsAttackDelayEnd())
+                                SetState(State.Attack);
+                        }
+                    }
+                    else
+                    {
+                        if (follow.enabled)
+                            SetState(State.Idle);
+                        else if ((formationPos - mover.position).magnitude > 0.2f)
+                        {
+                            // must go to formation position.
+                            if (mover.IsDestination())
+                                SetState(State.Idle);
+                        }
+                        else if (IsTargetInAttackRange())
+                        {
+                            if (IsAttackDelayEnd())
+                                SetState(State.Attack);
+                        }
+                    }
+                }
+                else
+                {
+                    if ((isLeaderMoving && !follow.enabled) || (!isLeaderMoving && follow.enabled))
+                        SetState(State.Idle);
+                    else if (IsTargetInAttackRange())
                     {
                         if (IsAttackDelayEnd())
                             SetState(State.Attack);
                     }
-                }
-                else if (IsDetectEnemy(out attackTarget))
-                {
-                    if (!isHoldMode)
+                    else if (IsDetectEnemy(out attackTarget))
+                    {
                         SetState(State.Chase);
+                    }
                 }
             }
             else if (state == State.Chase)
