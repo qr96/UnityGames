@@ -21,7 +21,8 @@ namespace InGame
         Vector2 formationPos;
         float destroyTimer;
         bool isHoldMode;
-        
+        bool commandExecuted;
+
         public enum State
         {
             Idle,
@@ -69,6 +70,7 @@ namespace InGame
         public void MoveCommand(Vector2 position)
         {
             formationPos = position;
+            commandExecuted = false;
         }
 
         public override void OnDead()
@@ -135,8 +137,11 @@ namespace InGame
                         else if ((formationPos - mover.position).magnitude > 0.2f)
                         {
                             // must go to formation position.
-                            if (mover.IsDestination())
+                            if (!commandExecuted)
+                            {
                                 SetState(State.Idle);
+                                commandExecuted = true;
+                            }
                         }
                         else if (IsTargetInAttackRange())
                         {
