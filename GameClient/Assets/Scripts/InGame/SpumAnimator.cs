@@ -22,7 +22,8 @@ namespace InGame
             Idle,
             Move,
             Attack,
-            Dead
+            Dead,
+            Respawn
         }
 
         private void Awake()
@@ -34,6 +35,8 @@ namespace InGame
         {
             if (state == State.Move)
                 OnUpdateMove();
+            else if (state == State.Respawn)
+                SetState(State.Idle);
         }
 
         public void SetState(State state)
@@ -48,6 +51,8 @@ namespace InGame
                 OnStartAttack();
             else if (state == State.Dead)
                 animator.SetBool("Dead", true);
+            else if (state == State.Respawn)
+                animator.SetBool("Dead", false);
         }
 
         public void SetDirection(Vector2 direction)

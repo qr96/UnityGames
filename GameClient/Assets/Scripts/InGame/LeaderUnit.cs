@@ -13,9 +13,11 @@ namespace InGame
         MinionFormationCommander formationCommander;
         SpumAnimator animator;
 
-        bool alreadyStop;
+        bool isMovePrevFrame; // 이전 프레임에서 움직임 여부
         Vector2 input;
         Vector2 lastDir;
+        float respawnTime = 5f;
+        float respawnTimeEnd;
 
         State state;
 
@@ -59,6 +61,14 @@ namespace InGame
             formationCommander.SetHoldMode(holding);
         }
 
+        public void Spawn()
+        {
+            OnSpawn();
+            rb.GetComponent<Collider2D>().enabled = true;
+            animator.SetState(SpumAnimator.State.Respawn);
+            isMovePrevFrame = false;
+        }
+
         public override void OnDead()
         {
             SetState(State.Dead);
@@ -91,11 +101,11 @@ namespace InGame
             }
             else if (state == State.Dead)
             {
-                rb.bodyType = RigidbodyType2D.Kinematic;
                 rb.GetComponent<Collider2D>().enabled = false;
                 rb.linearVelocity = Vector2.zero;
                 animator.SetState(SpumAnimator.State.Dead);
                 formationCommander.SetMinionsPosition(rb.position, lastDir);
+                respawnTimeEnd = Time.time + respawnTime;
             }
         }
 
@@ -115,6 +125,14 @@ namespace InGame
                 else
                     MoveLogic();
             }
+            else if (state == State.Dead)
+            {
+                if (Time.time > respawnTimeEnd)
+                {
+                    if (RespawnLogic())
+                        SetState(State.Idle);
+                }
+            }
         }
 
         void MoveLogic()
@@ -123,22 +141,55 @@ namespace InGame
 
             if (input != Vector2.zero)
             {
-                if (alreadyStop)
+                // 이동 시 한 번만 호출
+                if (!isMovePrevFrame)
                 {
-                    alreadyStop = false;
                     formationCommander.ReleaseFormation();
                     animator.SetState(SpumAnimator.State.Move);
                 }
+
+                isMovePrevFrame = true;
             }
             else
             {
-                if (!alreadyStop)
+                // 정지 시 한 번만 호출
+                if (isMovePrevFrame)
                 {
-                    alreadyStop = true;
                     formationCommander.SetMinionsPosition(rb.position, lastDir);
                     animator.SetState(SpumAnimator.State.Idle);
                 }
+
+                isMovePrevFrame = false;
             }
+        }
+
+        bool RespawnLogic()
+        {
+            var capturePoints = FieldManager.Instance.capturePoints;
+            CapturePoint nearPoint = null;
+            float nearDis = float.MaxValue;
+
+            foreach (var point in capturePoints)
+            {
+                if (point.OwnTeamId == TeamId)
+                {
+                    var dis = (point.transform.position - transform.position).magnitude;
+                    if (dis < nearDis)
+                    {
+                        nearDis = dis;
+                        nearPoint = point;
+                    }
+                }
+            }
+
+            if (nearPoint != null)
+            {
+                rb.position = nearPoint.transform.position + new Vector3(0f, -2f, 0f);
+                Spawn();
+                return true;
+            }
+
+            return false;
         }
     }
 }
