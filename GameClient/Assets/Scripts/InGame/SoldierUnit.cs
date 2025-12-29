@@ -104,7 +104,7 @@ namespace InGame
             else if (state == State.Dead)
             {
                 mover.MoveStop();
-                mover.EnableRigidbody(false);
+                mover.EnableCollider(false);
                 animator.SetState(SpumAnimator.State.Dead);
                 destroyTimer = Time.time + destroyTime;
             }

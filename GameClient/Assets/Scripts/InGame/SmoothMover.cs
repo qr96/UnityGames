@@ -56,18 +56,17 @@ namespace InGame
                 animator.SetState(SpumAnimator.State.Idle);
         }
 
-        public void EnableRigidbody(bool enable)
+        public void EnableCollider(bool enable)
         {
             if (enable)
             {
-                rb.bodyType = RigidbodyType2D.Dynamic;
-                col.isTrigger = false;
+                //rb.bodyType = RigidbodyType2D.Dynamic;
             }
             else
             {
-                rb.bodyType = RigidbodyType2D.Kinematic;
-                col.isTrigger = true;
+                //rb.bodyType = RigidbodyType2D.Kinematic;
             }
+            col.enabled = enable;
         }
 
         public bool IsDestination()
