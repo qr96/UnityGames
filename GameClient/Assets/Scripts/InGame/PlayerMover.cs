@@ -12,6 +12,7 @@ namespace InGame
         LeaderUnit unit;
 
         bool isHoldMode;
+        bool isProduceUnitZone;
 
         void Awake()
         {
@@ -27,6 +28,13 @@ namespace InGame
 
             isHoldMode = false;
             ToggleHoldMode();
+
+            unit.OnZoneChanged += OnZoneChangeEvent;
+        }
+
+        void OnDestroy()
+        {
+            unit.OnZoneChanged -= OnZoneChangeEvent;
         }
 
         void Update()
@@ -40,6 +48,9 @@ namespace InGame
 
             if (Input.GetKeyDown(KeyCode.Alpha3))
                 ToggleHoldMode();
+
+            if (isProduceUnitZone && Input.GetKeyDown(KeyCode.Alpha1))
+                unit.ExecuteZoneEvent(1);
         }
 
         void ToggleHoldMode()
@@ -47,6 +58,14 @@ namespace InGame
             isHoldMode = !isHoldMode;
             unit.SetHoldMode(isHoldMode);
             OnChangeHoldMode?.Invoke(isHoldMode);
+        }
+
+        void OnZoneChangeEvent(IEventZone eventZone)
+        {
+            if (eventZone is ProduceUnitZone)
+                isProduceUnitZone = true;
+            else
+                isProduceUnitZone = false;
         }
     }
 }

@@ -86,6 +86,21 @@ namespace InGame
             return false;
         }
 
+        public bool TryProduceUnit(int teamId, int unitCode, Vector2 spawnPos)
+        {
+            if (TryGetProperty(teamId, out var property))
+            {
+                var price = 20;
+                if (property.TryUseFood(price))
+                {
+                    squad.SpawnSquad(teamId, 1, spawnPos, unitCode);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         void OnChangeCapturePoint(CapturePoint point, int prevTeamId, int nowOwnTeamId)
         {
             if (TryGetProperty(prevTeamId, out var propertyPrev))

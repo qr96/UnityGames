@@ -1,10 +1,14 @@
 using InGameModel;
+using System;
 using UnityEngine;
 
 namespace InGame
 {
     public class LeaderUnit : BaseUnit
     {
+        public IEventZone currentZone;
+        public event Action<IEventZone> OnZoneChanged;
+
         Rigidbody2D rb;
         MinionFormationCommander formationCommander;
         SpumAnimator animator;
@@ -66,6 +70,11 @@ namespace InGame
                 lastDir = input;
         }
 
+        public bool IsStop()
+        {
+            return input == Vector2.zero;
+        }
+
         public void SetHoldMode(bool holding)
         {
             formationCommander.SetHoldMode(holding);
@@ -74,6 +83,17 @@ namespace InGame
         public override void OnDead()
         {
             SetState(State.Dead);
+        }
+
+        public void SetEventZone(IEventZone eventZone)
+        {
+            currentZone = eventZone;
+            OnZoneChanged?.Invoke(currentZone);
+        }
+
+        public void ExecuteZoneEvent(int index)
+        {
+            currentZone?.ExecuteEvent(index);
         }
 
         void SetState(State state)
@@ -93,6 +113,7 @@ namespace InGame
             else if (state == State.Dead)
             {
                 rb.bodyType = RigidbodyType2D.Kinematic;
+                rb.GetComponent<Collider2D>().enabled = false;
                 animator.SetState(SpumAnimator.State.Dead);
             }
         }
