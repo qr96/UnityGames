@@ -327,6 +327,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.CapturePoint
   flag: {fileID: 3235433933545928065}
+  produceUnitZone: {fileID: 8670286261990737012}
   PointId: 0
   OwnTeamId: 0
   foodProduction: 5
