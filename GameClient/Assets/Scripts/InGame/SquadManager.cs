@@ -5,38 +5,9 @@ namespace InGame
 {
     public class SquadManager : MonoBehaviour
     {
-        public LeaderUnit playerA;
-        public LeaderUnit playerB;
-        public LeaderUnit playerC;
-
-        public List<GameObject> bases;
-
         public List<GameObject> soldiers;
 
         Dictionary<int, LeaderUnit> leaderDic = new Dictionary<int, LeaderUnit>();
-
-        void Start()
-        {
-            //SpawnSquad(1, playerB, 9, GetBaseCamp(1).transform.position, 0);
-            //SpawnSquad(2, playerC, 5, GetBaseCamp(2).transform.position, 1);
-        }
-
-        private void Update()
-        {
-            //if (Input.GetKeyDown(KeyCode.Alpha1))
-            //{
-            //    var price = 20;
-            //    var teamId = 1;
-
-            //    if (FieldManager.Instance.TryGetProperty(teamId, out var property))
-            //    {
-            //        if (property.TryUseFood(price))
-            //            SpawnSquad(teamId, 1, GetBaseCamp(teamId).transform.position, 0);
-            //        else
-            //            Debug.Log("Not enough money.");
-            //    }
-            //}
-        }
 
         public void AddTeam(int teamId, LeaderUnit leader)
         {
