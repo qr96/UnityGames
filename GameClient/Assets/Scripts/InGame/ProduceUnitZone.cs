@@ -9,6 +9,7 @@ namespace InGame
         public CapturePoint point;
 
         LeaderUnit nowLeader;
+        bool used;
 
         void Start()
         {
@@ -24,10 +25,10 @@ namespace InGame
         {
             if (nowLeader != null)
             {
-                if (nowLeader.IsStop())
+                if (!used && nowLeader.IsStop())
                 {
                     nowLeader.SetEventZone(this);
-                    nowLeader = null;
+                    used = true;
                 }
             }
         }
@@ -42,6 +43,7 @@ namespace InGame
             {
                 sr.transform.localScale = Vector3.one * 0.9f;
                 nowLeader = leader;
+                used = false;
             }
         }
 

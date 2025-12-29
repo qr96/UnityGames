@@ -95,6 +95,7 @@ namespace InGame
                 rb.GetComponent<Collider2D>().enabled = false;
                 rb.linearVelocity = Vector2.zero;
                 animator.SetState(SpumAnimator.State.Dead);
+                formationCommander.SetMinionsPosition(rb.position, lastDir);
             }
         }
 
