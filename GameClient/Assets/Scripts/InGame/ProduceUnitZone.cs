@@ -25,7 +25,10 @@ namespace InGame
             if (nowLeader != null)
             {
                 if (nowLeader.IsStop())
+                {
                     nowLeader.SetEventZone(this);
+                    nowLeader = null;
+                }
             }
         }
 
