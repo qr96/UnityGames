@@ -28,8 +28,11 @@ namespace InGame
                 Destroy(this);
 
             // Settings
-            foreach (var point in capturePoints)
-                point.OnChangeOwner += OnChangeCapturePoint;
+            for (int i = 0; i < capturePoints.Count; i++)
+            {
+                capturePoints[i].PointId = i + 1;
+                capturePoints[i].OnChangeOwner += OnChangeCapturePoint;
+            }
 
             for (int i = 0; i < leaders.Count; i++)
                 AddTeam(teamIdCounter++, 100, leaders[i]);
@@ -81,18 +84,6 @@ namespace InGame
 
             property = null;
             return false;
-        }
-
-        public void OccupyPoint(int teamId, CapturePoint occupy)
-        {
-            foreach (var point in capturePoints)
-            {
-                if (point == occupy)
-                {
-                    point.ChangeOwner(teamId);
-                    break;
-                }
-            }
         }
 
         void OnChangeCapturePoint(CapturePoint point, int prevTeamId, int nowOwnTeamId)

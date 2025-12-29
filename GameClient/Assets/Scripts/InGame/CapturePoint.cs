@@ -10,6 +10,7 @@ namespace InGame
         // Test
         public SpriteRenderer flag;
 
+        public int PointId;
         public int OwnTeamId;
         public int foodProduction;
         public float occupySpeed;
@@ -43,7 +44,7 @@ namespace InGame
                             occupyProggress = Mathf.Min(1f, occupyProggress + occupySpeed * Time.deltaTime);
 
                             if (occupyProggress == 1f)
-                                OwnTeamId = nowTeamId;
+                                ChangeOwner(nowTeamId);
                         }
                         else // 새로운 팀 점령 시도
                         {
@@ -68,7 +69,7 @@ namespace InGame
                         occupyProggress = Mathf.Max(0f, occupyProggress - occupySpeed * Time.deltaTime);
 
                         if (occupyProggress == 0f)
-                            OwnTeamId = 0;
+                            ChangeOwner(0);
                     }
 
                     OnProgress(OwnTeamId, occupyProggress);
@@ -78,6 +79,9 @@ namespace InGame
 
         public void ChangeOwner(int ownTeamId)
         {
+            if (ownTeamId == OwnTeamId)
+                return;
+
             OnChangeOwner?.Invoke(this, OwnTeamId, ownTeamId);
             OwnTeamId = ownTeamId;
         }
@@ -140,5 +144,10 @@ namespace InGame
 
             flag.color = flagColors[teamId];
         }
+    }
+
+    public interface IEventZone
+    {
+        void ExecuteEvent(int index);
     }
 }
