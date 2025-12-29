@@ -9,6 +9,7 @@ namespace InGame
     {
         // Test
         public SpriteRenderer flag;
+        public ProduceUnitZone produceUnitZone;
 
         public int PointId;
         public int OwnTeamId;

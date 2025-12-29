@@ -97,7 +97,7 @@ namespace InGame
             return false;
         }
 
-        protected bool IsDetectEnemy(out BaseUnit enemy)
+        public bool IsDetectEnemy(out BaseUnit enemy)
         {
             var detects = Physics2D.OverlapCircleAll(transform.position, detectRange);
             foreach (var detect in detects)
