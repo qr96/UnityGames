@@ -38,27 +38,6 @@ namespace InGame
 
         void Update()
         {
-            rb.linearVelocity = input * moveSpeed;
-
-            if (input != Vector2.zero)
-            {
-                if (alreadyStop)
-                {
-                    alreadyStop = false;
-                    formationCommander.ReleaseFormation();
-                    animator.SetState(SpumAnimator.State.Move);
-                }
-            }
-            else
-            {
-                if (!alreadyStop)
-                {
-                    alreadyStop = true;
-                    formationCommander.SetMinionsPosition(rb.position, lastDir);
-                    animator.SetState(SpumAnimator.State.Idle);
-                }
-            }
-
             OnUpdateState(state);
         }
 
@@ -114,6 +93,7 @@ namespace InGame
             {
                 rb.bodyType = RigidbodyType2D.Kinematic;
                 rb.GetComponent<Collider2D>().enabled = false;
+                rb.linearVelocity = Vector2.zero;
                 animator.SetState(SpumAnimator.State.Dead);
             }
         }
@@ -124,11 +104,39 @@ namespace InGame
             {
                 if (IsAttackDelayEnd() && IsTargetInAttackRange())
                     SetState(State.Attack);
+                else
+                    MoveLogic();
             }
             else if (state == State.Attack)
             {
                 if (!IsAttacking())
                     SetState(State.Idle);
+                else
+                    MoveLogic();
+            }
+        }
+
+        void MoveLogic()
+        {
+            rb.linearVelocity = input * moveSpeed;
+
+            if (input != Vector2.zero)
+            {
+                if (alreadyStop)
+                {
+                    alreadyStop = false;
+                    formationCommander.ReleaseFormation();
+                    animator.SetState(SpumAnimator.State.Move);
+                }
+            }
+            else
+            {
+                if (!alreadyStop)
+                {
+                    alreadyStop = true;
+                    formationCommander.SetMinionsPosition(rb.position, lastDir);
+                    animator.SetState(SpumAnimator.State.Idle);
+                }
             }
         }
     }
