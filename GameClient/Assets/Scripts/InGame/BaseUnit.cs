@@ -28,7 +28,7 @@ namespace InGame
             this.model = model;
         }
 
-        public void OnSpawn()
+        public virtual void OnSpawn()
         {
             model.Spawn();
         }

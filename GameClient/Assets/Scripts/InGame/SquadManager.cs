@@ -1,3 +1,4 @@
+using InGameModel;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,6 +39,8 @@ namespace InGame
                         soldier.SetLeader(leader.GetComponent<Rigidbody2D>());
                         soldier.transform.position = spawnPos;
                         soldier.SetColor(GameUtil.GetTeamUnitColor(teamId));
+                        soldier.SetModel(new UnitModel() { maxHp = 10, attack = 2 });
+                        soldier.OnSpawn();
 
                         if (commander != null)
                             commander.AddMinion(soldier);

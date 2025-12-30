@@ -39,9 +39,6 @@ namespace InGame
             mover = GetComponent<SmoothMover>();
             animator = GetComponent<SpumAnimator>();
             spriter = GetComponent<SpumSpriter>();
-
-            SetModel(new UnitModel() { maxHp = 10, attack = 2 });
-            OnSpawn();
         }
 
         private void Update()
@@ -78,6 +75,14 @@ namespace InGame
         {
             formationPos = position;
             commandExecuted = false;
+        }
+
+        public override void OnSpawn()
+        {
+            base.OnSpawn();
+            animator.SetState(SpumAnimator.State.Respawn);
+            mover.EnableCollider(true);
+            SetState(State.Idle);
         }
 
         public override void OnDead()
