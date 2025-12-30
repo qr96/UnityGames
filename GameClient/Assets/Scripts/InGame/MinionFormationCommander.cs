@@ -61,9 +61,23 @@ namespace InGame
 
         public void AddMinion(SoldierUnit minion)
         {
+            minion.SetCommander(this);
             minions.Add(minion);
             commanded.Add(minion, false);
             minion.SetHoldMode(isHoldMode);
+        }
+
+        public void RemoveMinion(SoldierUnit minion)
+        {
+            if (minions.Contains(minion))
+                minions.Remove(minion);
+            else
+                Debug.LogError($"Failed to find key in minions. minion={minion.name}");
+
+            if (commanded.ContainsKey(minion))
+                commanded.Remove(minion);
+            else
+                Debug.LogError($"Failed to find key in commanded. minion={minion.name}");
         }
 
         public void ReleaseFormation()

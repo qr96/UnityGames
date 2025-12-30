@@ -13,6 +13,7 @@ namespace InGame
         SpumAnimator animator;
         SpumSpriter spriter;
 
+        MinionFormationCommander commander;
         BaseUnit attackTarget;
 
         State state;
@@ -28,7 +29,8 @@ namespace InGame
             Idle,
             Chase,
             Attack,
-            Dead
+            Dead,
+            Destroyed
         }
 
         private void Awake()
@@ -50,6 +52,11 @@ namespace InGame
         public void SetLeader(Rigidbody2D rb)
         {
             follow.SetLeader(rb);
+        }
+
+        public void SetCommander(MinionFormationCommander commander)
+        {
+            this.commander = commander;
         }
 
         public void SetColor(Color red)
@@ -107,6 +114,20 @@ namespace InGame
                 mover.EnableCollider(false);
                 animator.SetState(SpumAnimator.State.Dead);
                 destroyTimer = Time.time + destroyTime;
+            }
+            else if (state == State.Destroyed)
+            {
+                if (commander != null)
+                    commander.RemoveMinion(this);
+
+                var poolable = GetComponent<Poolable>();
+                if (poolable != null)
+                    poolable.ReleaseSelf();
+                else
+                {
+                    Debug.LogError("Failed to ReleaseSelf");
+                    Destroy(gameObject);
+                }
             }
         }
 
@@ -192,9 +213,7 @@ namespace InGame
             else if (state == State.Dead)
             {
                 if (Time.time > destroyTimer)
-                {
-                    gameObject.SetActive(false);
-                }
+                    SetState(State.Destroyed);
             }
         }
 

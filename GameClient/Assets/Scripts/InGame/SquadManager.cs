@@ -14,7 +14,7 @@ namespace InGame
             leaderDic.Add(teamId, leader);
         }
 
-        public void SpawnSquad(int teamId, int spawnCount, Vector2 spawnPos, int soldierCode)
+        public void SpawnSquad(int teamId, int spawnCount, Vector2 spawnPos, string unitCode)
         {
             if (!leaderDic.ContainsKey(teamId))
             {
@@ -27,18 +27,21 @@ namespace InGame
 
             for (int i = 0; i < spawnCount; i++)
             {
-                var unit = Instantiate(soldiers[soldierCode], transform.position, Quaternion.identity);
-                var soldier = unit.GetComponent<SoldierUnit>();
-                if (soldier != null)
+                //var unit = Instantiate(soldiers[soldierCode], transform.position, Quaternion.identity);
+                if (PoolManager.Instance.TryCreate($"Prefabs/Units/{unitCode}", out var unit))
                 {
-                    soldier.gameObject.SetActive(true);
-                    soldier.TeamId = teamId;
-                    soldier.SetLeader(leader.GetComponent<Rigidbody2D>());
-                    soldier.transform.position = spawnPos;
-                    soldier.SetColor(GameUtil.GetTeamUnitColor(teamId));
+                    var soldier = unit.GetComponent<SoldierUnit>();
+                    if (soldier != null)
+                    {
+                        soldier.gameObject.SetActive(true);
+                        soldier.TeamId = teamId;
+                        soldier.SetLeader(leader.GetComponent<Rigidbody2D>());
+                        soldier.transform.position = spawnPos;
+                        soldier.SetColor(GameUtil.GetTeamUnitColor(teamId));
 
-                    if (commander != null)
-                        commander.AddMinion(soldier);
+                        if (commander != null)
+                            commander.AddMinion(soldier);
+                    }
                 }
             }
 

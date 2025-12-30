@@ -69,7 +69,7 @@ namespace InGame
 
             if (index == 1)
             {
-                FieldManager.Instance.TryProduceUnit(teamId, 0, point.transform.position);
+                FieldManager.Instance.TryProduceUnit(teamId, "001", point.transform.position);
             }
         }
 

@@ -42,8 +42,8 @@ namespace InGame
             produceFoodCo = StartCoroutine(ProduceFoodCo());
 
             // Tests
-            squad.SpawnSquad(2, 10, leaders[1].transform.position, 0);
-            squad.SpawnSquad(3, 5, leaders[2].transform.position, 1);
+            squad.SpawnSquad(2, 10, leaders[1].transform.position, "001");
+            squad.SpawnSquad(3, 5, leaders[2].transform.position, "002");
         }
 
         private void OnDestroy()
@@ -86,7 +86,7 @@ namespace InGame
             return false;
         }
 
-        public bool TryProduceUnit(int teamId, int unitCode, Vector2 spawnPos)
+        public bool TryProduceUnit(int teamId, string unitCode, Vector2 spawnPos)
         {
             if (TryGetProperty(teamId, out var property))
             {
