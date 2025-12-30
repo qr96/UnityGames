@@ -135,15 +135,13 @@ namespace InGame
             return 0;
         }
 
-        Color[] flagColors = new Color[6] { Color.gray, Color.blue, Color.red, Color.yellow, Color.green, Color.purple };
-
         void OnProgress(int teamId, float progress)
         {
             var flagPos = flag.transform.localPosition;
             flagPos.y = progress * 3f;
             flag.transform.localPosition = flagPos;
 
-            flag.color = flagColors[teamId];
+            flag.color = GameUtil.GetTeamFlagColor(teamId);
         }
     }
 

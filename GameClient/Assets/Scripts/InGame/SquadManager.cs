@@ -35,9 +35,7 @@ namespace InGame
                     soldier.TeamId = teamId;
                     soldier.SetLeader(leader.GetComponent<Rigidbody2D>());
                     soldier.transform.position = spawnPos;
-
-                    if (teamId != 1)
-                        soldier.SetColor(new Color(1f, 180f / 255f, 180f / 255f));
+                    soldier.SetColor(GameUtil.GetTeamUnitColor(teamId));
 
                     if (commander != null)
                         commander.AddMinion(soldier);
