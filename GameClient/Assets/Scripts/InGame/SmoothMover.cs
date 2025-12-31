@@ -5,6 +5,9 @@ namespace InGame
     public class SmoothMover : MonoBehaviour
     {
         public float stopRadius = 0.2f;
+        public float unitRadius = 0.4f;
+        public float detectionDistance = 0.4f;
+        public LayerMask structureMask;
 
         Rigidbody2D rb;
         Collider2D col;
@@ -26,6 +29,7 @@ namespace InGame
             rb = GetComponent<Rigidbody2D>();
             col = GetComponent<Collider2D>();
             animator = GetComponent<SpumAnimator>();
+            structureMask = LayerMask.GetMask("Structure");
         }
 
         private void OnDisable()
@@ -94,11 +98,38 @@ namespace InGame
             else
             {
                 Vector2 desiredVel = toTarget.normalized * speed;
-                rb.linearVelocity = desiredVel;
+
+                // 정면에 장애물 있으면 45도 각도로 회피
+                var hit = Physics2D.CircleCast(transform.position, unitRadius, desiredVel, detectionDistance, structureMask);
+                var finalDirection = desiredVel;
+                if (hit.collider != null)
+                {
+                    var right45 = RotateVector(desiredVel, 45f);
+                    if (!Physics2D.CircleCast(transform.position, unitRadius, right45, detectionDistance, structureMask))
+                    {
+                        finalDirection = right45;
+                    }
+                    else
+                    {
+                        var left45 = RotateVector(desiredVel, -45f);
+                        finalDirection = left45;
+                    }
+                }
+
+                //rb.linearVelocity = desiredVel;
+                rb.linearVelocity = finalDirection;
 
                 if (animator != null)
                     animator.SetState(SpumAnimator.State.Move);
             }
+        }
+
+        Vector2 RotateVector(Vector2 v, float degrees)
+        {
+            float rad = degrees * Mathf.Deg2Rad;
+            float sin = Mathf.Sin(rad);
+            float cos = Mathf.Cos(rad);
+            return new Vector2(cos * v.x - sin * v.y, sin * v.x + cos * v.y);
         }
     }
 }
