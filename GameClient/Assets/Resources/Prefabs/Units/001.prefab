@@ -4461,6 +4461,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGame.SmoothMover
   stopRadius: 0.2
+  unitRadius: 0.4
+  detectionDistance: 0.4
+  structureMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &1261065446791254273
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4490,8 +4495,8 @@ MonoBehaviour:
   detectRange: 3
   attackRange: 0.8
   moveSpeed: 5
-  attackDuration: 0.4
-  attackDelay: 0.6
+  attackDuration: 1
+  attackDelay: 1.5
   destroyTime: 3
 --- !u!114 &5423081784806974983
 MonoBehaviour:

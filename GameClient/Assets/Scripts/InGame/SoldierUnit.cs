@@ -193,9 +193,9 @@ namespace InGame
             }
             else if (state == State.Chase)
             {
-                mover.MoveTo(attackTarget.transform.position, moveSpeed);
-
-                if (isHoldMode)
+                if (attackTarget == null)
+                    SetState(State.Idle);
+                else if (isHoldMode)
                     SetState(State.Idle);
                 else if (IsTargetInAttackRange())
                 {
@@ -204,6 +204,8 @@ namespace InGame
                 }
                 else if (!IsDetectEnemy(out var attackTarget))
                     SetState(State.Idle);
+                else
+                    mover.MoveTo(attackTarget.transform.position, moveSpeed);
             }
             else if (state == State.Attack)
             {
