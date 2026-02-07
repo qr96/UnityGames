@@ -1,7 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace InGame
 {
@@ -32,10 +32,14 @@ namespace InGame
         private static GameStage _instance;
 
         public Action<Common.ElementType[]> OnChangeElementSlots;
-        public Action<int, bool> OnChangeLock;
+        public Action<bool[]> OnChangeLock;
         public Action<List<BaseMagicScroll>> OnChangeScrollSlots;
+        public Action<bool> OnChangeTurn; // true = player turn
+
+        public Action<BaseUnit> OnSpawnPlayer;
+        public Action<List<BaseUnit>> OnSpawnEnemies;
         public Action<BaseUnit> OnChangePlayerUnit;
-        public Action<BaseUnit> OnChageEnemyUnit;
+        public Action<List<BaseUnit>> OnChangeEnemyUnit;
 
         // 슬롯
         int rollCount = 3;
@@ -51,11 +55,15 @@ namespace InGame
         // 유닛
         BaseUnit player;
         List<BaseUnit> enemyList = new List<BaseUnit>();
+        bool isPlayerTurn = false;
 
         private void Start()
         {
             Initialize();
             CallAllActions();
+
+            // 턴 체인지
+            ChangeTurn();
         }
 
         void Initialize()
@@ -73,20 +81,35 @@ namespace InGame
         // 모든 콜백 호출
         void CallAllActions()
         {
-            for (int i = 0; i < Common.MaxSlotCount; i++)
-            {
-                OnChangeElementSlots?.Invoke(elementSlots);
-                OnChangeLock?.Invoke(i, lockedSlot[i]);
-            }
+            OnChangeElementSlots?.Invoke(elementSlots);
+            OnChangeLock?.Invoke(lockedSlot);
 
             OnChangeScrollSlots(scrollSlots);
+            
+            OnSpawnPlayer?.Invoke(player);
+            OnSpawnEnemies?.Invoke(enemyList);
             OnChangePlayerUnit?.Invoke(player);
-            OnChageEnemyUnit?.Invoke(enemyList[0]);
+            OnChangeEnemyUnit?.Invoke(enemyList);
         }
 
         void ChangeTurn()
         {
+            isPlayerTurn = !isPlayerTurn;
+            ResetSlots();
+            OnChangeTurn?.Invoke(isPlayerTurn);
+        }
+
+        void ResetSlots()
+        {
             remainRollCount = rollCount;
+            for (int i = 0; i < Common.MaxSlotCount; i++)
+            {
+                elementSlots[i] = Common.ElementType.None;
+                lockedSlot[i] = false;
+            }
+
+            OnChangeElementSlots?.Invoke(elementSlots);
+            OnChangeLock?.Invoke(lockedSlot);
         }
 
         // 슬롯 잠금 상태 변환
@@ -102,12 +125,16 @@ namespace InGame
 
             lockedSlot[index] = !lockedSlot[index];
 
-            OnChangeLock?.Invoke(index, lockedSlot[index]);
+            OnChangeLock?.Invoke(lockedSlot);
         }
 
         // 랜덤 원소 생성
         public void RollDice()
         {
+            // 롤은 플레이어 턴에만 가능
+            if (!isPlayerTurn)
+                return;
+
             if (remainRollCount < 1)
                 return;
 
@@ -125,16 +152,55 @@ namespace InGame
             OnChangeElementSlots?.Invoke(elementSlots);
         }
 
-        // 원소 롤
-        public void UseScroll(int scrollIndex)
+        public void UseScroll(int scrollIndex, BaseUnit target)
         {
+            if (!isPlayerTurn)
+                return;
+
             if (scrollIndex >= scrollSlots.Count)
                 return;
 
-            scrollSlots[scrollIndex].Execute(elementSlots, player, enemyList);
+            var scroll = scrollSlots[scrollIndex];
+            if (scroll == null)
+                return;
+
+            if (scroll.GetTargetType() == Common.ScrollTargetType.Single)
+            {
+                scrollSlots[scrollIndex].Execute(elementSlots, player, target);
+            }
+            else if (scroll.GetTargetType() == Common.ScrollTargetType.All)
+            {
+                scrollSlots[scrollIndex].Execute(elementSlots, player, enemyList);
+            }
+            
+            OnChangePlayerUnit?.Invoke(player);
+            OnChangeEnemyUnit?.Invoke(enemyList);
+
+            // 플레이어가 행동을 끝내면 턴 전환 및 적 턴 시작
+            ChangeTurn();
+            StartCoroutine(EnemyTurnRoutine());
+        }
+
+        IEnumerator EnemyTurnRoutine()
+        {
+            // 연출 딜레이
+            yield return new WaitForSeconds(2f);
+
+            // 플레이어 공격
+            foreach (var enemy in enemyList)
+            {
+                if (enemy.nowStat.hp > 0)
+                {
+                    player.OnDamaged(enemy.nowStat.attack);
+                    break;
+                }
+            }
 
             OnChangePlayerUnit?.Invoke(player);
-            OnChageEnemyUnit?.Invoke(enemyList[0]);
+            OnChangeEnemyUnit?.Invoke(enemyList);
+
+            // 적 턴이 끝나면 다시 플레이어 턴으로 전환
+            ChangeTurn();
         }
     }
 }

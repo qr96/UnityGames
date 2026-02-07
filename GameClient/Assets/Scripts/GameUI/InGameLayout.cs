@@ -19,9 +19,15 @@ namespace GameUI
         public Button attackButton;
 
         public GuageBar playerHpBar;
-        public GuageBar enemyHpBar;
+        public List<GuageBar> enemyHpBarList;
+        public List<Button> enemyTargetButton;
+        
+        Dictionary<BaseUnit, GuageBar> enemyHpBarDic = new Dictionary<BaseUnit, GuageBar>();
 
-        int selectedScrollIndex;
+        int selectedScrollIndex = DefaultScrollIndex; // 선택된 스크롤 인덱스
+        BaseUnit selectedTarget;    // 선택된 타깃
+
+        static int DefaultScrollIndex = -1; // 선택된 스크롤이 없는 경우 인덱스
 
         private void Awake()
         {
@@ -30,10 +36,14 @@ namespace GameUI
             LoadSprites();
             
             GameStage.Instance.OnChangeElementSlots += SetElementSlots;
-            GameStage.Instance.OnChangeLock += (index, isLocked) => elementSlots[index].SetLockImage(isLocked);
+            GameStage.Instance.OnChangeLock += OnChangeLockSlots;
             GameStage.Instance.OnChangeScrollSlots += OnUpdateScrollSlots;
+            GameStage.Instance.OnChangeTurn += OnChangeTurn;
+
+            GameStage.Instance.OnSpawnPlayer += OnSpawnPlayerUnit;
+            GameStage.Instance.OnSpawnEnemies += OnSpawnEnemyUnits;
             GameStage.Instance.OnChangePlayerUnit += OnUpdatePlayerUnit;
-            GameStage.Instance.OnChageEnemyUnit += OnUpdateEnemyHp;
+            GameStage.Instance.OnChangeEnemyUnit += OnUpdateEnemyHp;
 
             rollButton.onClick.AddListener(() => GameStage.Instance.RollDice());
             for (int i = 0; i < Common.MaxSlotCount; i++)
@@ -75,10 +85,16 @@ namespace GameUI
 
         string GetElementIconPath(Common.ElementType element)
         {
-            //if (element == Common.ElementType.None)
-            //    return $"Elements000_0";
-            //return $"Elements000_{(int)element - 1}";
             return $"Icons000_{(int)element}";
+        }
+
+        void OnChangeLockSlots(bool[] lockSlots)
+        {
+            for (int i = 0; i < lockSlots.Length; i++)
+            {
+                var isLocked = lockSlots[i];
+                elementSlots[i].SetLockImage(isLocked);
+            }
         }
 
         void OnUpdateScrollSlots(List<BaseMagicScroll> list)
@@ -117,7 +133,7 @@ namespace GameUI
         void SelectScroll(int scrollIndex)
         {
             if (selectedScrollIndex == scrollIndex)
-                selectedScrollIndex = -1;
+                selectedScrollIndex = DefaultScrollIndex;
             else
                 selectedScrollIndex = scrollIndex;
 
@@ -131,9 +147,23 @@ namespace GameUI
         void UseScroll()
         {
             if (selectedScrollIndex < 0)
+            {
+                Debug.Log("[InGameLayout] UseScroll() 스크롤을 선택해주세요.");
                 return;
+            }
+            
+            if (selectedTarget == null)
+            {
+                Debug.Log("[InGameLayout] UseScroll() 타깃을 선택해주세요.");
+                return;
+            }
+            
+            GameStage.Instance.UseScroll(selectedScrollIndex, selectedTarget);
+        }
 
-            GameStage.Instance.UseScroll(selectedScrollIndex);
+        void OnChangeTurn(bool isPlayerTurn)
+        {
+            SelectScroll(DefaultScrollIndex);
         }
 
         void OnUpdatePlayerUnit(BaseUnit unit)
@@ -141,9 +171,43 @@ namespace GameUI
             playerHpBar.SetGuage(unit.originStat.hp, unit.nowStat.hp);
         }
 
-        void OnUpdateEnemyHp(BaseUnit unit)
+        void OnUpdateEnemyHp(List<BaseUnit> unitList)
         {
-            enemyHpBar.SetGuage(unit.originStat.hp, unit.nowStat.hp);
+            foreach (var unit in unitList)
+            {
+                if (enemyHpBarDic.ContainsKey(unit))
+                {
+                    enemyHpBarDic[unit].SetGuage(unit.originStat.hp, unit.nowStat.hp);
+                }
+            }
+        }
+
+        void OnSpawnPlayerUnit(BaseUnit unit)
+        {
+
+        }
+
+        void OnSpawnEnemyUnits(List<BaseUnit> enemyList)
+        {
+            enemyHpBarDic.Clear();
+
+            for (int i = 0; i < enemyHpBarList.Count; i++)
+            {
+                enemyHpBarList[i].gameObject.SetActive(false);
+                enemyTargetButton[i].onClick.RemoveAllListeners();
+                enemyTargetButton[i].gameObject.SetActive(false);
+            }
+
+            for (int i = 0; i < enemyList.Count; i++)
+            {
+                var enemy = enemyList[i];
+                var hpBar = enemyHpBarList[i];
+                var button = enemyTargetButton[i];
+                enemyHpBarDic.Add(enemy, hpBar);
+                hpBar.gameObject.SetActive(true);
+                button.onClick.AddListener(() => selectedTarget = enemy);
+                button.gameObject.SetActive(true);
+            }
         }
     }
 }

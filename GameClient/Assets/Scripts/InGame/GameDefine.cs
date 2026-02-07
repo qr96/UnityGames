@@ -26,6 +26,13 @@ public class Common
         StandardWind = 5,
         
     }
+
+    public enum ScrollTargetType
+    {
+        None = 0,
+        Single = 1,     // 단일 적
+        All = 2,        // 모든 적
+    }
 }
 
 public class GameUtil
