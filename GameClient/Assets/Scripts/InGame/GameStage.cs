@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace InGame
 {
@@ -32,20 +33,24 @@ namespace InGame
 
         public Action<Common.ElementType[]> OnChangeElementSlots;
         public Action<int, bool> OnChangeLock;
+        public Action<List<BaseMagicScroll>> OnChangeScrollSlots;
+        public Action<BaseUnit> OnChangePlayerUnit;
+        public Action<BaseUnit> OnChageEnemyUnit;
 
         // 슬롯
+        int rollCount = 3;
         int remainRollCount = 3;
         bool[] lockedSlot = new bool[Common.MaxSlotCount];
         Common.ElementType[] elementSlots = new Common.ElementType[Common.MaxSlotCount];
 
         // 스크롤
         int maxScrollCount = 10;
-        List<Common.ScrollType> scrollSlots = new List<Common.ScrollType>();
+        List<BaseMagicScroll> scrollSlots = new List<BaseMagicScroll>();
         HashSet<int> usedScrollIndexes = new HashSet<int>();
 
         // 유닛
-        Unit player;
-        Unit enemy;
+        BaseUnit player;
+        List<BaseUnit> enemyList = new List<BaseUnit>();
 
         private void Start()
         {
@@ -55,12 +60,14 @@ namespace InGame
 
         void Initialize()
         {
-            scrollSlots.Add(Common.ScrollType.StandardFire);
-            scrollSlots.Add(Common.ScrollType.StandardIce);
-            scrollSlots.Add(Common.ScrollType.StandardEarth);
+            scrollSlots.Add(new BasicFireScroll());
+            scrollSlots.Add(new BasicIceScroll());
 
-            player = new Unit(new Stat() { hp = 100, attack = 10 });
-            enemy = new Unit(new Stat() { hp = 100, attack = 10 });
+            player = new BaseUnit(new Stat() { hp = 100, attack = 10 });
+            enemyList.Add(new BaseUnit(new Stat() { hp = 100, attack = 10 }));
+            player.Spawn();
+            foreach (var enemy in enemyList)
+                enemy.Spawn();
         }
 
         // 모든 콜백 호출
@@ -71,18 +78,31 @@ namespace InGame
                 OnChangeElementSlots?.Invoke(elementSlots);
                 OnChangeLock?.Invoke(i, lockedSlot[i]);
             }
+
+            OnChangeScrollSlots(scrollSlots);
+            OnChangePlayerUnit?.Invoke(player);
+            OnChageEnemyUnit?.Invoke(enemyList[0]);
+        }
+
+        void ChangeTurn()
+        {
+            remainRollCount = rollCount;
         }
 
         // 슬롯 잠금 상태 변환
-        public void ChangeSlotLock(int slot)
+        public void ChangeSlotLock(int index)
         {
             // 슬롯 인덱스 체크
-            if (slot < 0 || slot >= Common.MaxSlotCount)
+            if (index < 0 || index >= Common.MaxSlotCount)
                 return;
 
-            lockedSlot[slot] = !lockedSlot[slot];
+            // 슬롯 None이면 잠금 불가
+            if (elementSlots[index] == Common.ElementType.None)
+                return;
 
-            OnChangeLock?.Invoke(slot, lockedSlot[slot]);
+            lockedSlot[index] = !lockedSlot[index];
+
+            OnChangeLock?.Invoke(index, lockedSlot[index]);
         }
 
         // 랜덤 원소 생성
@@ -105,27 +125,16 @@ namespace InGame
             OnChangeElementSlots?.Invoke(elementSlots);
         }
 
+        // 원소 롤
         public void UseScroll(int scrollIndex)
         {
             if (scrollIndex >= scrollSlots.Count)
                 return;
 
-            if (usedScrollIndexes.Contains(scrollIndex))
-                return;
+            scrollSlots[scrollIndex].Execute(elementSlots, player, enemyList);
 
-            usedScrollIndexes.Add(scrollIndex);
-
-            var scrollType = scrollSlots[scrollIndex];
-            UseStandardFireScroll();
-        }
-
-        void UseStandardFireScroll()
-        {
-            var fireCount = GameUtil.GetElementCount(elementSlots, Common.ElementType.Fire);
-            var damage = player.nowStat.attack * fireCount;
-
-            enemy.OnDamaged(damage);
-            Debug.Log($"[GameStage] hp:{enemy.nowStat.hp}");
+            OnChangePlayerUnit?.Invoke(player);
+            OnChageEnemyUnit?.Invoke(enemyList[0]);
         }
     }
 }

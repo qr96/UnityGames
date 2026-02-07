@@ -51,12 +51,12 @@ public struct Stat
     public long attack; // 공격력
 }
 
-public class Unit
+public class BaseUnit
 {
     public Stat originStat { get; private set; }
     public Stat nowStat;
 
-    public Unit(Stat stat)
+    public BaseUnit(Stat stat)
     {
         originStat = stat;
     }
