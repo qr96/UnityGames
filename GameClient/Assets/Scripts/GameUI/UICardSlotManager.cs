@@ -11,6 +11,8 @@ public class UICardSlotManager : MonoBehaviour
     public List<UISkillCard> cards = new List<UISkillCard>();
     public List<Button> enemies = new List<Button>();
     public Dictionary<BaseUnit, GuageBar> enemyHpBarDic = new Dictionary<BaseUnit, GuageBar>();
+    public GuageBar playerHpBar;
+
     public Button enemyPrefab;
     public GuageBar hpBarPrefab;
     public RectTransform targetMark;
@@ -26,6 +28,8 @@ public class UICardSlotManager : MonoBehaviour
         OnSelectTarget(-1, null);
 
         SkillCardManager.Instance.OnUpdateCardData += OnUpdateCardData;
+        SkillCardManager.Instance.OnSpawnPlayer += OnSpawnPlayer;
+        SkillCardManager.Instance.OnUpdatePlayer += OnUpdatePlayer;
         SkillCardManager.Instance.OnSpawnEnemies += OnSpawnEnemies;
         SkillCardManager.Instance.OnUpdateEnemies += OnUpdateEnemies;
     }
@@ -104,6 +108,24 @@ public class UICardSlotManager : MonoBehaviour
         AlignmentCard();
     }
 
+    public void OnSpawnPlayer(BaseUnit unit)
+    {
+        if (playerHpBar == null)
+            playerHpBar = Instantiate(hpBarPrefab, hpBarPrefab.transform.parent);
+
+        playerHpBar.SetPosition(new Vector2(-240f, 300f));
+        playerHpBar.gameObject.SetActive(true);
+        playerHpBar.SetGuage(unit.originStat.hp, unit.nowStat.hp);
+    }
+
+    public void OnUpdatePlayer(BaseUnit unit)
+    {
+        if (playerHpBar != null)
+        {
+            playerHpBar.SetGuage(unit.originStat.hp, unit.nowStat.hp);
+        }
+    }
+
     public void OnSpawnEnemies(List<BaseUnit> units)
     {
         foreach (var enemy in enemies)
@@ -133,7 +155,7 @@ public class UICardSlotManager : MonoBehaviour
             enemyHpBarDic.Add(units[index], enemyHpBar);
             enemyHpBar.gameObject.SetActive(true);
             enemyHpBar.SetGuage(units[index].originStat.hp, units[index].nowStat.hp);
-            enemyHpBar.GetComponent<RectTransform>().anchoredPosition = enemyButton.GetComponent<RectTransform>().anchoredPosition + new Vector2(0f, 100f);
+            enemyHpBar.SetPosition(enemyButton.GetComponent<RectTransform>().anchoredPosition + new Vector2(0f, 100f));
         }
     }
 
