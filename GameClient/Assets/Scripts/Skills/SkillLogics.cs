@@ -22,6 +22,7 @@ namespace GameDefine
             { 0, new AttackSkillLogic() },
             { 1, new AttackAndHealSkillLogic() },
             { 2, new AttackByHealthSkillLogic() },
+            { 3, new AttackLowHealthSkillLogic() }
         };
 
         SkillEffectLogic fallback = new AttackSkillLogic();
@@ -86,4 +87,21 @@ namespace GameDefine
             target.OnDamaged(damage);
         }
     }
+
+    public class AttackLowHealthSkillLogic : SkillEffectLogic
+    {
+        readonly float needHpRate = 0.5f;
+        readonly float[] attackMulti = { 1.5f, 2f, 2.5f };
+
+        public override void Execute(BaseUnit caster, List<BaseUnit> enemies, BaseUnit target, int rank)
+        {
+            var damage = caster.GetDamage();
+
+            if (target.nowStat.hp <= target.originStat.hp * needHpRate)
+                damage = GetRankMultiResult(caster.GetDamage(), attackMulti, rank);
+
+            target.OnDamaged(damage);
+        }
+    }
 }
+
