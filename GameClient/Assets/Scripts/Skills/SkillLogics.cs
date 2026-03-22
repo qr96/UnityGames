@@ -45,6 +45,9 @@ namespace GameDefine
 
         public override void Execute(BaseUnit caster, List<BaseUnit> enemies, BaseUnit target, int rank)
         {
+            if (caster == null) return;
+            if (target == null) return;
+
             var damage = GetRankMultiResult(caster.GetDamage(), attackMulti, rank);
             target.OnDamaged(damage);
         }
@@ -57,6 +60,9 @@ namespace GameDefine
 
         public override void Execute(BaseUnit caster, List<BaseUnit> enemies, BaseUnit target, int rank)
         {
+            if (caster == null) return;
+            if (target == null) return;
+
             var damage = GetRankMultiResult(caster.GetDamage(), attackMulti, rank);
 
             var prevHp = target.nowStat.hp;
@@ -76,6 +82,9 @@ namespace GameDefine
 
         public override void Execute(BaseUnit caster, List<BaseUnit> enemies, BaseUnit target, int rank)
         {
+            if (caster == null) return;
+            if (target == null) return;
+
             var needHp = GetRankMultiResult(caster.nowStat.hp, needHpMulti, rank);
             var damage = GetRankMultiResult(caster.GetDamage(), attackMulti, rank);
 
@@ -91,17 +100,21 @@ namespace GameDefine
     public class AttackLowHealthSkillLogic : SkillEffectLogic
     {
         readonly float needHpRate = 0.5f;
-        readonly float[] attackMulti = { 1.5f, 2f, 2.5f };
+        readonly float[] attackMulti = { 1f, 1.5f, 2f };
+        readonly float[] addAttackMulti = { 0.2f, 0.5f, 0.9f };
 
         public override void Execute(BaseUnit caster, List<BaseUnit> enemies, BaseUnit target, int rank)
         {
-            var damage = caster.GetDamage();
+            if (caster == null) return;
+            if (target == null) return;
 
+            var damage = GetRankMultiResult(caster.GetDamage(), attackMulti, rank);
+
+            // 일정 hp 이하의 적 공격 시 추가 데미지
             if (target.nowStat.hp <= target.originStat.hp * needHpRate)
-                damage = GetRankMultiResult(caster.GetDamage(), attackMulti, rank);
+                damage += GetRankMultiResult(caster.GetDamage(), addAttackMulti, rank);
 
             target.OnDamaged(damage);
         }
     }
 }
-
