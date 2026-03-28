@@ -1,10 +1,13 @@
+using System.Collections;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class PlayerCombat : MonoBehaviour
 {
     [Header("전투")]
     public float attackRange = 2f;
-    public float attackCooldown = 1f;
+    public float hitDelay = 0.3f;       // 데미지 들어가는 딜레이
+    public float attackCooldown = 1f;   // 공격 쿨타임
     public int attackDamage = 10;
     public LayerMask enemyLayer;
     public AttackRangeIndicator rangeIndicator;
@@ -77,12 +80,25 @@ public class PlayerCombat : MonoBehaviour
         // 데미지
         var enemy = target.GetComponent<EnemyHealth>();
         if (enemy != null)
+        {
             enemy.TakeDamage(attackDamage);
+            StartCoroutine(ShowHitEffect(target));
+        }
     }
 
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+
+    IEnumerator ShowHitEffect(Transform target)
+    {
+        yield return new WaitForSeconds(hitDelay);
+
+        if (target != null && PoolManager.Instance.TryCreate("Effects/HCFX_Hit_08", out var effect))
+        {
+            effect.transform.position = target.position + new Vector3(0f, 0.5f, 0f);
+        }
     }
 }
