@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -5,6 +6,10 @@ using UnityEngine.AI;
 public class EnemyAI : MonoBehaviour
 {
     public enum State { Idle, Chase, Attack, Die }
+
+    [Header("배회")]
+    public float wanderRadius = 5f;
+    public float wanderInterval = 3f;
 
     [Header("감지")]
     public float detectRange = 6f;
@@ -21,6 +26,7 @@ public class EnemyAI : MonoBehaviour
     Animator _anim;
     Transform _player;
     float _cooldownTimer;
+    float _wanderTimer;
 
     void Awake()
     {
@@ -53,7 +59,34 @@ public class EnemyAI : MonoBehaviour
         {
             _player = hits[0].transform;
             SetState(State.Chase);
+            return;
         }
+
+        // 배회
+        _wanderTimer -= Time.deltaTime;
+        if (_wanderTimer <= 0f)
+        {
+            _wanderTimer = wanderInterval;
+
+            var randomPoint = GetRandomNavMeshPoint();
+            if (randomPoint.HasValue)
+            {
+                _agent.isStopped = false;
+                _agent.SetDestination(randomPoint.Value);
+            }
+        }
+
+        // 이동 방향으로 회전
+        if (_agent.velocity.sqrMagnitude > 0.1f)
+        {
+            var dir = _agent.velocity.normalized;
+            dir.y = 0f;
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
+
+        // 실제로 움직일 때만 걷기 모션
+        if (_anim != null)
+            _anim.SetBool("isWalking", _agent.velocity.sqrMagnitude > 0.1f);
     }
 
     void UpdateChase()
@@ -117,7 +150,22 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    System.Collections.IEnumerator DealDamage()
+    Vector3? GetRandomNavMeshPoint()
+    {
+        // wanderRadius 내 랜덤 방향으로 포인트 시도
+        for (int i = 0; i < 5; i++)
+        {
+            var randomDir = Random.insideUnitSphere * wanderRadius;
+            randomDir.y = 0f;
+            var candidate = transform.position + randomDir;
+
+            if (NavMesh.SamplePosition(candidate, out var hit, wanderRadius, NavMesh.AllAreas))
+                return hit.position;
+        }
+        return null;
+    }
+
+    IEnumerator DealDamage()
     {
         yield return new WaitForSeconds(hitDelay);
         if (_player == null) yield break;

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
@@ -78,12 +79,7 @@ public class PlayerCombat : MonoBehaviour
             _anim.SetTrigger("attack");
 
         // 데미지
-        var enemy = target.GetComponent<EnemyHealth>();
-        if (enemy != null)
-        {
-            enemy.TakeDamage(attackDamage);
-            StartCoroutine(ShowHitEffect(target));
-        }
+        StartCoroutine(DamageCo());
     }
 
     void OnDrawGizmosSelected()
@@ -92,13 +88,35 @@ public class PlayerCombat : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 
-    IEnumerator ShowHitEffect(Transform target)
+    IEnumerator DamageCo()
     {
         yield return new WaitForSeconds(hitDelay);
+        DamageTargets(3);
+    }
 
-        if (target != null && PoolManager.Instance.TryCreate("Effects/HCFX_Hit_08", out var effect))
+    void DamageTargets(int maxTargetCount)
+    {
+        var hits = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
+        if (hits.Length == 0)
+            return;
+
+        // 가까운 적 중에서 랜덤 타격
+        var targets = hits
+            .OrderBy(h => Vector3.Distance(transform.position, h.transform.position))
+            .Take(maxTargetCount * 2)   // 가까운 적 풀 추리고
+            .OrderBy(_ => Random.value)   // 그 안에서 랜덤
+            .Take(maxTargetCount);      // 최종 타겟 수만큼
+
+        foreach (var hit in targets)
         {
-            effect.transform.position = target.position + new Vector3(0f, 0.5f, 0f);
+            var enemy = hit.GetComponent<EnemyHealth>();
+            if (enemy == null)
+                continue;
+
+            enemy.TakeDamage(attackDamage);
+
+            if (PoolManager.Instance.TryCreate("Effects/HCFX_Hit_08", out var effect))
+                effect.transform.position = hit.transform.position + new Vector3(0f, 0.5f, 0f);
         }
     }
 }
