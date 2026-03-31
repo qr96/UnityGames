@@ -16,3 +16,6 @@ MonoBehaviour:
   - resourcePath: Effects/HCFX_Hit_08
     defaultCapacity: 5
     maxSize: 10
+  - resourcePath: DroppedItems/Coin
+    defaultCapacity: 5
+    maxSize: 10

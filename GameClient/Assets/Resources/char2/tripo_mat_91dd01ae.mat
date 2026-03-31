@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: tripo_mat_91dd01ae
-  m_Shader: {fileID: 4800000, guid: 964306fdc05f24a4eadb67e1561d45d1, type: 3}
+  m_Shader: {fileID: 4800000, guid: 5a437cbf9d0f93d499b2514ced6e8fb4, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []

@@ -196,7 +196,25 @@ public class EnemyAI : MonoBehaviour
         SetState(State.Die);
         _agent.isStopped = true;
         if (_anim != null) _anim.SetTrigger("die");
-        Destroy(gameObject, 1.5f);
+        gameObject.SetActive(false);
+
+        for (int i = 0; i < 5; i++)
+            SpawnItem();
+    }
+
+    void SpawnItem()
+    {
+        if (PoolManager.Instance.TryCreate("DroppedItems/Coin", out var prefab))
+        {
+            var coin = prefab.GetComponent<DroppedItem>();
+            if (coin != null)
+            {
+                var dir = new Vector3(Random.Range(0, 1f), 1f, Random.Range(0, 1f));
+                dir *= 3f;
+                coin.rigid.position = transform.position;
+                coin.SpawnItem(0, 0, dir, null);
+            }
+        }
     }
 
     void OnDrawGizmosSelected()
