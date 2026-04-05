@@ -24,7 +24,7 @@ public class EnemyAI : MonoBehaviour
     State _state = State.Idle;
     NavMeshAgent _agent;
     Animator _anim;
-    Knockback _knockback;
+    EnemyKnockback _knockback;
     Transform _player;
     float _cooldownTimer;
     float _wanderTimer;
@@ -33,7 +33,7 @@ public class EnemyAI : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _anim = GetComponent<Animator>();
-        _knockback = GetComponent<Knockback>();
+        _knockback = GetComponent<EnemyKnockback>();
 
         _agent.updateRotation = false;
 

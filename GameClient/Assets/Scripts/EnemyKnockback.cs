@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(EnemyHealth))]
-public class Knockback : MonoBehaviour
+public class EnemyKnockback : MonoBehaviour
 {
     [Header("넉백 설정")]
     public float force = 4f;
