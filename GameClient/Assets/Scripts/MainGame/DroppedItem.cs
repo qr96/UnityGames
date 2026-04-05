@@ -11,21 +11,22 @@ public class DroppedItem : MonoBehaviour
     public float rotateSpeed = 180f;
 
     [Header("흡수 설정")]
-    public float jumpPower = 5f;
+    public float jumpPower = 2f;
     public float flyDuration = 0.5f;
     public Vector3 targetOffset = new Vector3(0f, 1.8f, 0f);
 
     [Header("착지 판정")]
-    public float landedSpeedThreshold = 0.1f;  // 이 속도 이하면 착지로 판정
+    public float landedSpeedThreshold = 0.1f;
 
     enum State { Flying, Landed, Attracting }
 
     int _itemId;
     int _itemCode;
     Action<int, int, DroppedItem> _onGetItem;
+
     Transform _attractTarget;
-    Vector3 _velocity;
-    float _flyTimer;
+    Vector3 _startPos;
+    float _elapsed;
     State _state;
 
     void Update()
@@ -38,40 +39,32 @@ public class DroppedItem : MonoBehaviour
         }
     }
 
-    // 스폰 후 물리로 날아다니는 동안
     void FlyingUpdate()
     {
-        // 속도가 충분히 줄면 착지로 전환
         if (rigid.linearVelocity.magnitude <= landedSpeedThreshold)
             _state = State.Landed;
 
         RotateModel();
     }
 
-    // 착지 후 대기 중
     void LandedUpdate()
     {
         RotateModel();
     }
 
-    // 플레이어 쪽으로 날아가는 중
     void AttractingUpdate()
     {
-        if (_attractTarget == null)
-        {
-            ReturnToPool();
-            return;
-        }
+        if (_attractTarget == null) { ReturnToPool(); return; }
 
-        _flyTimer -= Time.deltaTime;
+        _elapsed += Time.deltaTime;
+        float t = Mathf.Clamp01(_elapsed / flyDuration);
+        float eased = t * t * (3f - 2f * t);           // smoothstep
+        float arc = Mathf.Sin(t * Mathf.PI) * jumpPower; // 포물선
 
         var target = _attractTarget.position + targetOffset;
+        transform.position = Vector3.Lerp(_startPos, target, eased) + Vector3.up * arc;
 
-        _velocity += Vector3.down * 9.8f * Time.deltaTime;
-        _velocity += (target - transform.position).normalized * 15f * Time.deltaTime;
-        transform.position += _velocity * Time.deltaTime;
-
-        if (_flyTimer <= 0f)
+        if (t >= 1f)
         {
             transform.position = target;
             _onGetItem?.Invoke(_itemId, _itemCode, this);
@@ -79,20 +72,18 @@ public class DroppedItem : MonoBehaviour
         }
     }
 
-    // 플레이어가 호출 (착지 상태일 때만 흡수 시작)
     public void Attract(Transform player)
     {
-        if (_state != State.Landed) return;  // ← 착지 전엔 무시
+        if (_state != State.Landed) return;
 
         _state = State.Attracting;
         _attractTarget = player;
-        _flyTimer = flyDuration;
+        _startPos = transform.position;
+        _elapsed = 0f;
 
         rigid.isKinematic = true;
         rigid.linearVelocity = Vector3.zero;
         rigid.angularVelocity = Vector3.zero;
-
-        _velocity = Vector3.up * jumpPower;
     }
 
     public void SpawnItem(int itemId, int itemCode, Vector3 force, Action<int, int, DroppedItem> onGetItem)
@@ -102,6 +93,7 @@ public class DroppedItem : MonoBehaviour
         _onGetItem = onGetItem;
         _state = State.Flying;
         _attractTarget = null;
+        _elapsed = 0f;
 
         rigid.isKinematic = false;
         rigid.linearVelocity = Vector3.zero;
@@ -127,5 +119,6 @@ public class DroppedItem : MonoBehaviour
     {
         _state = State.Flying;
         _attractTarget = null;
+        _elapsed = 0f;
     }
 }

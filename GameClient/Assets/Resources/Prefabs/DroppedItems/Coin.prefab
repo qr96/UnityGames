@@ -155,7 +155,7 @@ MonoBehaviour:
   model: {fileID: 6569833850832445322}
   rigid: {fileID: 1751432458107972536}
   rotateSpeed: 0
-  jumpPower: 5
+  jumpPower: 1
   flyDuration: 0.5
-  targetOffset: {x: 0, y: 0.5, z: 0}
+  targetOffset: {x: 0, y: 0, z: 0}
   landedSpeedThreshold: 0.1
