@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: EffectConfig
   m_EditorClassIdentifier: Assembly-CSharp::PoolManagerConfig
   poolSettings:
-  - resourcePath: Effects/HCFX_Hit_08
+  - resourcePath: Prefabs/Effects/HCFX_Hit_08
     defaultCapacity: 5
     maxSize: 10
-  - resourcePath: DroppedItems/Coin
+  - resourcePath: Prefabs/DroppedItems/Coin
     defaultCapacity: 5
     maxSize: 10

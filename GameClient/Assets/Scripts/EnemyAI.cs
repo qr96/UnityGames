@@ -24,6 +24,7 @@ public class EnemyAI : MonoBehaviour
     State _state = State.Idle;
     NavMeshAgent _agent;
     Animator _anim;
+    Knockback _knockback;
     Transform _player;
     float _cooldownTimer;
     float _wanderTimer;
@@ -32,14 +33,18 @@ public class EnemyAI : MonoBehaviour
     {
         _agent = GetComponent<NavMeshAgent>();
         _anim = GetComponent<Animator>();
+        _knockback = GetComponent<Knockback>();
 
-        // NavMeshAgent 회전은 코드로 직접 제어
         _agent.updateRotation = false;
+
+        var health = GetComponent<EnemyHealth>();
+        health.OnDied += OnDied;
     }
 
     void Update()
     {
         if (_state == State.Die) return;
+        if (_knockback != null && _knockback.IsKnockedBack) return; // 넉백 중 스킵
 
         _cooldownTimer -= Time.deltaTime;
 
@@ -53,7 +58,6 @@ public class EnemyAI : MonoBehaviour
 
     void UpdateIdle()
     {
-        // 플레이어 감지
         var hits = Physics.OverlapSphere(transform.position, detectRange, playerLayer);
         if (hits.Length > 0)
         {
@@ -62,29 +66,19 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        // 배회
         _wanderTimer -= Time.deltaTime;
         if (_wanderTimer <= 0f)
         {
             _wanderTimer = wanderInterval;
-
-            var randomPoint = GetRandomNavMeshPoint();
-            if (randomPoint.HasValue)
+            var pt = GetRandomNavMeshPoint();
+            if (pt.HasValue)
             {
                 _agent.isStopped = false;
-                _agent.SetDestination(randomPoint.Value);
+                _agent.SetDestination(pt.Value);
             }
         }
 
-        // 이동 방향으로 회전
-        if (_agent.velocity.sqrMagnitude > 0.1f)
-        {
-            var dir = _agent.velocity.normalized;
-            dir.y = 0f;
-            transform.rotation = Quaternion.LookRotation(dir);
-        }
-
-        // 실제로 움직일 때만 걷기 모션
+        FaceVelocity();
         if (_anim != null)
             _anim.SetBool("isWalking", _agent.velocity.sqrMagnitude > 0.1f);
     }
@@ -93,55 +87,24 @@ public class EnemyAI : MonoBehaviour
     {
         if (_player == null) { SetState(State.Idle); return; }
 
-        float dist = Vector3.Distance(transform.position, _player.position);
+        float dist = HorizontalDistance(transform.position, _player.position);
 
-        // 플레이어가 감지 범위 벗어나면 Idle
-        if (dist > detectRange * 1.5f)
-        {
-            _player = null;
-            SetState(State.Idle);
-            return;
-        }
+        if (dist > detectRange * 1.5f) { _player = null; SetState(State.Idle); return; }
+        if (dist <= attackRange) { SetState(State.Attack); return; }
 
-        // 공격 범위 안에 들어오면 Attack
-        if (dist <= attackRange)
-        {
-            SetState(State.Attack);
-            return;
-        }
-
-        // 추적
         _agent.SetDestination(_player.position);
-
-        // 이동 방향으로 회전
-        if (_agent.velocity.sqrMagnitude > 0.1f)
-        {
-            var dir = _agent.velocity.normalized;
-            dir.y = 0f;
-            transform.rotation = Quaternion.LookRotation(dir);
-        }
+        FaceVelocity();
     }
 
     void UpdateAttack()
     {
         if (_player == null) { SetState(State.Idle); return; }
 
-        float dist = Vector3.Distance(transform.position, _player.position);
+        float dist = HorizontalDistance(transform.position, _player.position);
+        if (dist > attackRange) { SetState(State.Chase); return; }
 
-        // 공격 범위 벗어나면 다시 추적
-        if (dist > attackRange)
-        {
-            SetState(State.Chase);
-            return;
-        }
+        FaceTarget(_player.position);
 
-        // 플레이어 방향으로 회전
-        var lookDir = (_player.position - transform.position).normalized;
-        lookDir.y = 0f;
-        if (lookDir != Vector3.zero)
-            transform.rotation = Quaternion.LookRotation(lookDir);
-
-        // 공격
         if (_cooldownTimer <= 0f)
         {
             _cooldownTimer = attackCooldown;
@@ -150,14 +113,31 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    void FaceVelocity()
+    {
+        if (_agent.velocity.sqrMagnitude > 0.1f)
+        {
+            var dir = _agent.velocity.normalized;
+            dir.y = 0f;
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
+    }
+
+    void FaceTarget(Vector3 pos)
+    {
+        var dir = (pos - transform.position).normalized;
+        dir.y = 0f;
+        if (dir != Vector3.zero)
+            transform.rotation = Quaternion.LookRotation(dir);
+    }
+
     Vector3? GetRandomNavMeshPoint()
     {
-        // wanderRadius 내 랜덤 방향으로 포인트 시도
         for (int i = 0; i < 5; i++)
         {
-            var randomDir = Random.insideUnitSphere * wanderRadius;
-            randomDir.y = 0f;
-            var candidate = transform.position + randomDir;
+            var candidate = transform.position + new Vector3(
+                Random.Range(-wanderRadius, wanderRadius), 0f,
+                Random.Range(-wanderRadius, wanderRadius));
 
             if (NavMesh.SamplePosition(candidate, out var hit, wanderRadius, NavMesh.AllAreas))
                 return hit.position;
@@ -170,18 +150,16 @@ public class EnemyAI : MonoBehaviour
         yield return new WaitForSeconds(hitDelay);
         if (_player == null) yield break;
 
-        float dist = Vector3.Distance(transform.position, _player.position);
-        if (dist <= attackRange)
+        if (HorizontalDistance(transform.position, _player.position) <= attackRange)
         {
-            //var health = _player.GetComponent<PlayerHealth>();
-            //if (health != null) health.TakeDamage(attackDamage);
+            // var health = _player.GetComponent<PlayerHealth>();
+            // health?.TakeDamage(attackDamage);
         }
     }
 
     void SetState(State next)
     {
         _state = next;
-
         _agent.isStopped = next != State.Chase;
 
         if (_anim != null)
@@ -191,30 +169,19 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    public void Die()
+    void OnDied()
     {
         SetState(State.Die);
         _agent.isStopped = true;
         if (_anim != null) _anim.SetTrigger("die");
         gameObject.SetActive(false);
-
-        for (int i = 0; i < 5; i++)
-            SpawnItem();
     }
 
-    void SpawnItem()
+    static float HorizontalDistance(Vector3 a, Vector3 b)
     {
-        if (PoolManager.Instance.TryCreate("DroppedItems/Coin", out var prefab))
-        {
-            var coin = prefab.GetComponent<DroppedItem>();
-            if (coin != null)
-            {
-                var dir = new Vector3(Random.Range(0, 1f), 1f, Random.Range(0, 1f));
-                dir *= 3f;
-                coin.rigid.position = transform.position;
-                coin.SpawnItem(0, 0, dir, null);
-            }
-        }
+        float dx = a.x - b.x;
+        float dz = a.z - b.z;
+        return Mathf.Sqrt(dx * dx + dz * dz);
     }
 
     void OnDrawGizmosSelected()

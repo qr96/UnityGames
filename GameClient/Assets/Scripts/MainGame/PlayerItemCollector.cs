@@ -6,14 +6,9 @@ public class PlayerItemCollector : MonoBehaviour
     public float collectRange = 2.5f;
     public LayerMask itemLayer;
 
-    [Header("기준점")]
-    [SerializeField] Transform _collectOrigin; // 비워두면 transform.position 사용
-
-    Vector3 CollectOrigin => _collectOrigin != null ? _collectOrigin.position : transform.position;
-
     void Update()
     {
-        var hits = Physics.OverlapSphere(CollectOrigin, collectRange, itemLayer);
+        var hits = Physics.OverlapSphere(transform.position, collectRange, itemLayer);
         foreach (var hit in hits)
         {
             if (hit.TryGetComponent<DroppedItem>(out var item))
@@ -24,7 +19,6 @@ public class PlayerItemCollector : MonoBehaviour
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        var origin = _collectOrigin != null ? _collectOrigin.position : transform.position;
-        Gizmos.DrawWireSphere(origin, collectRange);
+        Gizmos.DrawWireSphere(transform.position, collectRange);
     }
 }
