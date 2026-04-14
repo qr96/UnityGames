@@ -17,13 +17,17 @@ public class EnemyKnockback : MonoBehaviour
     void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
-        _stats = GetComponent<EnemyStats>();
-        _stats.OnDamaged += Apply;
     }
 
-    void OnDestroy()
+    public void Init(EnemyStats stats)
     {
-        if (_stats != null) _stats.OnDamaged -= Apply;
+        StopAllCoroutines(); // 재사용 시 이전 넉백 코루틴 정리
+        IsKnockedBack = false;
+        _agent.updatePosition = true;
+        _agent.isStopped = false;
+
+        _stats = stats;
+        _stats.OnDamaged += Apply;
     }
 
     void Apply(Vector3 hitDir)
@@ -44,6 +48,9 @@ public class EnemyKnockback : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < duration)
         {
+            // 넉백 도중 사망 시 코루틴 중단 (풀 반납은 EnemyStats에서 처리)
+            if (_stats.CurrentHP <= 0) yield break;
+
             float t = 1f - (elapsed / duration);
             transform.position += dir * force * t * Time.deltaTime;
             elapsed += Time.deltaTime;

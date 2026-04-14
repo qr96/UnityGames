@@ -34,14 +34,25 @@ public class EnemyAI : MonoBehaviour
         _agent = GetComponent<NavMeshAgent>();
         _anim = GetComponent<Animator>();
         _knockback = GetComponent<EnemyKnockback>();
-        _stats = GetComponent<EnemyStats>();
 
         _agent.updateRotation = false;
+    }
+
+    public void Init(EnemyStats stats)
+    {
+        _stats = stats;
+        _state = State.Idle;
+        _player = null;
+        _cooldownTimer = 0f;
+        _wanderTimer = 0f;
+
+        _agent.isStopped = false;
         _stats.OnDied += OnDied;
     }
 
     void Update()
     {
+        if (_stats == null) return; // Init 호출 전 Update 방어
         if (_state == State.Die) return;
         if (_knockback != null && _knockback.IsKnockedBack) return;
 
@@ -139,7 +150,7 @@ public class EnemyAI : MonoBehaviour
         SetState(State.Die);
         _agent.isStopped = true;
         if (_anim != null) _anim.SetTrigger("die");
-        gameObject.SetActive(false);
+        // 풀 반납은 EnemyStats.TakeDamage()에서 Poolable.ReleaseSelf()로 처리
     }
 
     void FaceVelocity()

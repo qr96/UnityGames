@@ -9,18 +9,11 @@ public class EnemyDropper : MonoBehaviour
 
     EnemyStats _stats;
 
-    void Awake()
+    public void Init(EnemyStats stats)
     {
-        _stats = GetComponent<EnemyStats>();
+        _stats = stats;
         _stats.OnDied += GrantXP;
         _stats.OnDied += SpawnItems;
-    }
-
-    void OnDestroy()
-    {
-        if (_stats == null) return;
-        _stats.OnDied -= GrantXP;
-        _stats.OnDied -= SpawnItems;
     }
 
     void GrantXP()
