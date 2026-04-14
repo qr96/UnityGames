@@ -8,18 +8,20 @@ public class PlayerCombat : MonoBehaviour
     public float attackRange = 2f;
     public float hitDelay = 0.3f;
     public float attackCooldown = 1f;
-    public int attackDamage = 10;
     public LayerMask enemyLayer;
     public AttackRangeIndicator rangeIndicator;
     public Rigidbody rigid;
 
     [Header("공격 기준점")]
-    [SerializeField] Transform _attackOrigin; // 비워두면 transform.position 사용
+    [SerializeField] Transform _attackOrigin;
 
     Animator _anim;
     float _cooldownTimer;
 
     public bool IsAttacking { get; private set; }
+
+    // PlayerStats에서 읽기. 없으면 10으로 폴백 (씬 테스트용)
+    int AttackDamage => PlayerStats.Instance != null ? PlayerStats.Instance.TotalAttack : 10;
 
     Vector3 AttackOrigin => _attackOrigin != null ? _attackOrigin.position : transform.position;
 
@@ -95,11 +97,12 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (var hit in targets)
         {
-            var enemy = hit.GetComponent<EnemyHealth>();
-            if (enemy == null) continue;
+            // IDamageable로 추상화 — EnemyStats 타입에 의존하지 않음
+            var damageable = hit.GetComponent<IDamageable>();
+            if (damageable == null) continue;
 
             var hitDir = (hit.transform.position - transform.position).normalized;
-            enemy.TakeDamage(attackDamage, hitDir);
+            damageable.TakeDamage(AttackDamage, hitDir);
 
             if (PoolManager.Instance.TryCreate("Prefabs/Effects/HCFX_Hit_08", out var effect))
                 effect.transform.position = hit.transform.position;

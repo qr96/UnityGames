@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-[RequireComponent(typeof(EnemyHealth))]
+[RequireComponent(typeof(EnemyStats))]
 public class EnemyKnockback : MonoBehaviour
 {
     [Header("넉백 설정")]
@@ -12,18 +12,18 @@ public class EnemyKnockback : MonoBehaviour
     public bool IsKnockedBack { get; private set; }
 
     NavMeshAgent _agent;
-    EnemyHealth _health;
+    EnemyStats _stats;
 
     void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
-        _health = GetComponent<EnemyHealth>();
-        _health.OnDamaged += Apply;
+        _stats = GetComponent<EnemyStats>();
+        _stats.OnDamaged += Apply;
     }
 
     void OnDestroy()
     {
-        if (_health != null) _health.OnDamaged -= Apply;
+        if (_stats != null) _stats.OnDamaged -= Apply;
     }
 
     void Apply(Vector3 hitDir)

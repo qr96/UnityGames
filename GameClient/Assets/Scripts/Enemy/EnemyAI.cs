@@ -18,13 +18,13 @@ public class EnemyAI : MonoBehaviour
 
     [Header("전투")]
     public float attackCooldown = 1.5f;
-    public int attackDamage = 5;
     public float hitDelay = 0.3f;
 
     State _state = State.Idle;
     NavMeshAgent _agent;
     Animator _anim;
     EnemyKnockback _knockback;
+    EnemyStats _stats;
     Transform _player;
     float _cooldownTimer;
     float _wanderTimer;
@@ -34,17 +34,16 @@ public class EnemyAI : MonoBehaviour
         _agent = GetComponent<NavMeshAgent>();
         _anim = GetComponent<Animator>();
         _knockback = GetComponent<EnemyKnockback>();
+        _stats = GetComponent<EnemyStats>();
 
         _agent.updateRotation = false;
-
-        var health = GetComponent<EnemyHealth>();
-        health.OnDied += OnDied;
+        _stats.OnDied += OnDied;
     }
 
     void Update()
     {
         if (_state == State.Die) return;
-        if (_knockback != null && _knockback.IsKnockedBack) return; // 넉백 중 스킵
+        if (_knockback != null && _knockback.IsKnockedBack) return;
 
         _cooldownTimer -= Time.deltaTime;
 
@@ -88,7 +87,6 @@ public class EnemyAI : MonoBehaviour
         if (_player == null) { SetState(State.Idle); return; }
 
         float dist = HorizontalDistance(transform.position, _player.position);
-
         if (dist > detectRange * 1.5f) { _player = null; SetState(State.Idle); return; }
         if (dist <= attackRange) { SetState(State.Attack); return; }
 
@@ -111,6 +109,37 @@ public class EnemyAI : MonoBehaviour
             if (_anim != null) _anim.SetTrigger("attack");
             StartCoroutine(DealDamage());
         }
+    }
+
+    IEnumerator DealDamage()
+    {
+        yield return new WaitForSeconds(hitDelay);
+        if (_player == null) yield break;
+        if (HorizontalDistance(transform.position, _player.position) > attackRange) yield break;
+
+        // IDamageable로 추상화 — PlayerStats 타입에 직접 의존하지 않음
+        var damageable = _player.GetComponent<IDamageable>();
+        damageable?.TakeDamage(_stats.Data.attackDamage);
+    }
+
+    void SetState(State next)
+    {
+        _state = next;
+        _agent.isStopped = next != State.Chase;
+
+        if (_anim != null)
+        {
+            _anim.SetBool("isWalking", next == State.Chase);
+            _anim.SetBool("isAttacking", next == State.Attack);
+        }
+    }
+
+    void OnDied()
+    {
+        SetState(State.Die);
+        _agent.isStopped = true;
+        if (_anim != null) _anim.SetTrigger("die");
+        gameObject.SetActive(false);
     }
 
     void FaceVelocity()
@@ -143,38 +172,6 @@ public class EnemyAI : MonoBehaviour
                 return hit.position;
         }
         return null;
-    }
-
-    IEnumerator DealDamage()
-    {
-        yield return new WaitForSeconds(hitDelay);
-        if (_player == null) yield break;
-
-        if (HorizontalDistance(transform.position, _player.position) <= attackRange)
-        {
-            // var health = _player.GetComponent<PlayerHealth>();
-            // health?.TakeDamage(attackDamage);
-        }
-    }
-
-    void SetState(State next)
-    {
-        _state = next;
-        _agent.isStopped = next != State.Chase;
-
-        if (_anim != null)
-        {
-            _anim.SetBool("isWalking", next == State.Chase);
-            _anim.SetBool("isAttacking", next == State.Attack);
-        }
-    }
-
-    void OnDied()
-    {
-        SetState(State.Die);
-        _agent.isStopped = true;
-        if (_anim != null) _anim.SetTrigger("die");
-        gameObject.SetActive(false);
     }
 
     static float HorizontalDistance(Vector3 a, Vector3 b)

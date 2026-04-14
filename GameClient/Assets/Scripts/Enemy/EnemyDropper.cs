@@ -1,23 +1,36 @@
 using UnityEngine;
 
-[RequireComponent(typeof(EnemyHealth))]
+[RequireComponent(typeof(EnemyStats))]
 public class EnemyDropper : MonoBehaviour
 {
     [Header("드롭 설정")]
     public int dropCount = 5;
     public string coinPath = "Prefabs/DroppedItems/Coin";
 
-    EnemyHealth _health;
+    EnemyStats _stats;
 
     void Awake()
     {
-        _health = GetComponent<EnemyHealth>();
-        _health.OnDied += SpawnItems;
+        _stats = GetComponent<EnemyStats>();
+        _stats.OnDied += GrantXP;
+        _stats.OnDied += SpawnItems;
     }
 
     void OnDestroy()
     {
-        if (_health != null) _health.OnDied -= SpawnItems;
+        if (_stats == null) return;
+        _stats.OnDied -= GrantXP;
+        _stats.OnDied -= SpawnItems;
+    }
+
+    void GrantXP()
+    {
+        if (PlayerStats.Instance == null) return;
+
+        int xp = GameFormulas.GetXPReward(_stats.Data, PlayerStats.Instance.Level);
+        PlayerStats.Instance.AddXP(xp);
+
+        Debug.Log($"[EnemyDropper] XP +{xp} ({_stats.Data.enemyType} Lv.{_stats.Data.level})");
     }
 
     void SpawnItems()
