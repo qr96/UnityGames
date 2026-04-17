@@ -14,26 +14,33 @@ public class PlayerStats : MonoBehaviour, IDamageable
     [Header("데이터")]
     [SerializeField] CharacterGrowthData _growthData;
 
+    // ── 런타임 상태 ───────────────────────────────────────────────────────
     public int Level { get; private set; } = 1;
     public int CurrentXP { get; private set; } = 0;
     public int CurrentHP { get; private set; }
 
+    // ── 스탯 모디파이어 ───────────────────────────────────────────────────
     readonly List<StatModifier> _modifiers = new();
 
+    // ── 베이스 스탯 (레벨만 반영) ─────────────────────────────────────────
     public int BaseMaxHP => _growthData.GetMaxHP(Level);
     public int BaseAttack => _growthData.GetAttack(Level);
     public int BaseDefense => _growthData.GetDefense(Level);
 
+    // ── 토탈 스탯 (베이스 + 모디파이어 합산) ─────────────────────────────
     public int TotalMaxHP => BaseMaxHP + (int)SumModifiers(StatType.HP);
     public int TotalAttack => BaseAttack + (int)SumModifiers(StatType.Attack);
     public int TotalDefense => BaseDefense + (int)SumModifiers(StatType.Defense);
     public float TotalCritChance => SumModifiers(StatType.CriticalChance); // base 0%
     public float TotalCritDamage => _growthData.baseCritDamage + SumModifiers(StatType.CriticalDamage); // base 150%
 
+    // ── 이벤트 ────────────────────────────────────────────────────────────
     public event Action<int> OnLevelUp;   // 새 레벨
     public event Action<int, int> OnXPChanged; // 현재XP, 필요XP
     public event Action<int, int> OnHPChanged; // 현재HP, 최대HP
     public event Action OnDied;
+
+    // ─────────────────────────────────────────────────────────────────────
 
     void Awake()
     {
@@ -49,6 +56,10 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
         CurrentHP = TotalMaxHP;
     }
+
+    // ── 경험치 / 레벨업 ───────────────────────────────────────────────────
+
+    public int GetRequiredXPForCurrentLevel() => _growthData.GetRequiredXP(Level);
 
     public void AddXP(int xp)
     {
@@ -82,6 +93,8 @@ public class PlayerStats : MonoBehaviour, IDamageable
         Debug.Log($"[PlayerStats] 레벨업 → Lv.{Level} | MaxHP:{TotalMaxHP} ATK:{TotalAttack} DEF:{TotalDefense}");
     }
 
+    // ── IDamageable ───────────────────────────────────────────────────────
+
     public void TakeDamage(int damage, Vector3 hitDir = default)
     {
         if (CurrentHP <= 0) return;
@@ -106,6 +119,8 @@ public class PlayerStats : MonoBehaviour, IDamageable
         OnDied?.Invoke();
         // 마을 귀환은 GameManager에서 OnDied 구독해서 처리
     }
+
+    // ── StatModifier ──────────────────────────────────────────────────────
 
     public void AddModifier(StatModifier modifier)
     {
