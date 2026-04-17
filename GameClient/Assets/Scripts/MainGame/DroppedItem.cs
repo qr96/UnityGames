@@ -58,8 +58,8 @@ public class DroppedItem : MonoBehaviour
 
         _elapsed += Time.deltaTime;
         float t = Mathf.Clamp01(_elapsed / flyDuration);
-        float eased = t * t * (3f - 2f * t);           // smoothstep
-        float arc = Mathf.Sin(t * Mathf.PI) * jumpPower; // 포물선
+        float eased = t * t * (3f - 2f * t);
+        float arc = Mathf.Sin(t * Mathf.PI) * jumpPower;
 
         var target = _attractTarget.position + targetOffset;
         transform.position = Vector3.Lerp(_startPos, target, eased) + Vector3.up * arc;
@@ -110,9 +110,10 @@ public class DroppedItem : MonoBehaviour
         model.transform.localEulerAngles = r;
     }
 
+    // 기존: SetActive(false)만 했음 → 풀에 반납 안 됨
     void ReturnToPool()
     {
-        gameObject.SetActive(false);
+        GetComponent<Poolable>().ReleaseSelf();
     }
 
     void OnDisable()

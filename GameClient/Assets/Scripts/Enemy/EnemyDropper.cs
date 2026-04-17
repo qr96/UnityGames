@@ -41,7 +41,15 @@ public class EnemyDropper : MonoBehaviour
             Random.Range(-1f, 1f), 1f, Random.Range(-1f, 1f)
         ).normalized * 3f;
 
+        // itemCode에 코인당 골드 수량 전달
+        int goldPerCoin = _stats.Data.goldDrop / Mathf.Max(1, dropCount);
+
         coin.rigid.position = transform.position;
-        coin.SpawnItem(0, 0, dir, null);
+        coin.SpawnItem(0, goldPerCoin, dir, OnCoinCollected);
+    }
+
+    void OnCoinCollected(int itemId, int itemCode, DroppedItem item)
+    {
+        PlayerGold.Instance?.Add(itemCode); // itemCode = 골드 수량
     }
 }

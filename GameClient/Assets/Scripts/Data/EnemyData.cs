@@ -18,7 +18,9 @@ public class EnemyData : ScriptableObject
     public int attackDamage = 5;
     public int defense = 0;
 
-    [Header("경험치")]
+    [Header("경험치 / 골드")]
     [Tooltip("GameFormulas.GetXPReward()에서 레벨/타입 보정 후 실제 지급량 계산.")]
     public int baseXP = 20;
+    [Tooltip("처치 시 드롭되는 총 골드량. EnemyDropper에서 dropCount로 나눠 코인당 수량 계산.")]
+    public int goldDrop = 10;
 }
