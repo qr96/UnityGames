@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class PlayerCombat : MonoBehaviour
 {
@@ -14,6 +16,21 @@ public class PlayerCombat : MonoBehaviour
 
     [Header("공격 기준점")]
     [SerializeField] Transform _attackOrigin;
+
+    /// <summary>
+    /// 플레이어가 적에게 적중시킬 때마다 발동 (기본공격 + 스킬 투사체 모두).
+    /// 확률형 스킬, 흡혈 패시브 등의 트리거로 사용.
+    /// </summary>
+    public static event Action<IDamageable, int> OnHit;
+
+    /// <summary>
+    /// 외부(스킬 투사체 등)에서 적중을 알릴 때 호출.
+    /// C# event는 선언 클래스 외부에서 Invoke 불가하므로 헬퍼로 우회.
+    /// </summary>
+    public static void RaiseOnHit(IDamageable target, int damage)
+    {
+        OnHit?.Invoke(target, damage);
+    }
 
     Animator _anim;
     float _cooldownTimer;
@@ -103,6 +120,7 @@ public class PlayerCombat : MonoBehaviour
 
             var hitDir = (hit.transform.position - transform.position).normalized;
             damageable.TakeDamage(AttackDamage, hitDir);
+            OnHit?.Invoke(damageable, AttackDamage);
 
             if (PoolManager.Instance.TryCreate("Prefabs/Effects/HCFX_Hit_08", out var effect))
                 effect.transform.position = hit.transform.position;
