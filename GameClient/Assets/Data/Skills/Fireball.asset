@@ -30,5 +30,5 @@ MonoBehaviour:
   projectileType: 2
   homingRotateSpeed: 180
   flightDuration: 1
-  effectPrefabPath: Prefabs/Skills/Fireball2
+  effectPrefabPath: Prefabs/Skills/Fireball
   hitEffectPath: 
