@@ -45,6 +45,7 @@ public class EnemyDropper : MonoBehaviour
         int goldPerCoin = _stats.Data.goldDrop / Mathf.Max(1, dropCount);
 
         coin.rigid.position = transform.position;
+        coin.transform.position = transform.position;
         coin.SpawnItem(0, goldPerCoin, dir, OnCoinCollected);
     }
 

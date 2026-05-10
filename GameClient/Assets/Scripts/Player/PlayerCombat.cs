@@ -91,13 +91,20 @@ public class PlayerCombat : MonoBehaviour
             rigid.rotation = Quaternion.LookRotation(dir);
 
         if (_anim != null) _anim.SetTrigger("attack");
-
-        StartCoroutine(DamageCo());
+        StartCoroutine(DamageCo(dir));
     }
 
-    IEnumerator DamageCo()
+    IEnumerator DamageCo(Vector3 dir)
     {
         yield return new WaitForSeconds(hitDelay);
+
+        if (PoolManager.Instance.TryCreate("Prefabs/Skills/FX_Orange_Slash_1", out var effect))
+        {
+            if (dir != Vector3.zero)
+                effect.transform.rotation = Quaternion.LookRotation(dir) * Quaternion.Euler(40f, 100f, 0f);
+            effect.transform.position = transform.position;
+        }
+
         DamageTargets(3);
     }
 
