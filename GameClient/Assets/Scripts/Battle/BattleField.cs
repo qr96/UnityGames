@@ -31,6 +31,7 @@ namespace AutoBattler.Battle
         public event Action<bool> OnBattleEnded; // true=승, false=패
 
         private readonly List<BattleUnit> _units = new List<BattleUnit>();
+        private bool _warnedNoUnitsRoot;
 
         // ─────────────────────────────────────────────────────────
         public void StartBattle(List<Hero> heroes, List<EnemySpawn> enemies)
@@ -52,6 +53,16 @@ namespace AutoBattler.Battle
             foreach (var e in enemies) SpawnEnemy(e);
 
             State = BattleState.Running;
+
+            // [디버그] 스폰 결과 요약
+            UnityEngine.Debug.Log($"[BattleField] StartBattle 완료. _units={_units.Count}");
+            foreach (var u in _units)
+            {
+                if (u == null) { UnityEngine.Debug.Log("  - (null)"); continue; }
+                UnityEngine.Debug.Log(
+                    $"  - {u.name} team={u.Team} cell={u.Cell} pos={u.transform.position} " +
+                    $"alive={u.IsAlive} hp={u.CurrentHP}/{u.Stats.maxHp} active={u.gameObject.activeSelf}");
+            }
         }
 
         public void CleanUp()
@@ -59,6 +70,11 @@ namespace AutoBattler.Battle
             foreach (var u in _units)
             {
                 if (u == null) continue;
+
+                // 이미 풀에 반납된 유닛(=비활성 상태)은 건너뜀.
+                // 사망 처리(OnDeath → HideAfterDeath)가 ReleaseSelf 호출했을 수 있음.
+                if (!u.gameObject.activeSelf) continue;
+
                 ReturnUnit(u.gameObject);
             }
             _units.Clear();
@@ -70,12 +86,23 @@ namespace AutoBattler.Battle
         // ─────────────────────────────────────────────────────────
         private GameObject AcquireUnit()
         {
+            // unitsRoot 미연결 시 경고 (한 번만)
+            if (unitsRoot == null && !_warnedNoUnitsRoot)
+            {
+                UnityEngine.Debug.LogWarning(
+                    "[BattleField] unitsRoot가 연결되지 않았습니다. " +
+                    "유닛 정리/배치를 위해 인스펙터에서 unitsRoot 슬롯에 빈 GameObject를 연결하세요. " +
+                    "임시로 BattleField 자신을 부모로 사용합니다.");
+                _warnedNoUnitsRoot = true;
+            }
+            Transform parent = unitsRoot != null ? unitsRoot : transform;
+
             // PoolManager 가 있고 키가 지정되어 있으면 풀에서
             if (PoolManager.Instance != null && !string.IsNullOrEmpty(defaultUnitPoolKey))
             {
                 if (PoolManager.Instance.TryCreate(defaultUnitPoolKey, out var pooled))
                 {
-                    if (unitsRoot != null) pooled.transform.SetParent(unitsRoot, false);
+                    pooled.transform.SetParent(parent, false);
                     return pooled;
                 }
             }
@@ -85,12 +112,15 @@ namespace AutoBattler.Battle
                 Debug.LogError("[BattleField] PoolManager도 없고 unitPrefabFallback도 비어있습니다.");
                 return null;
             }
-            return Instantiate(unitPrefabFallback, unitsRoot);
+            return Instantiate(unitPrefabFallback, parent);
         }
 
         private void ReturnUnit(GameObject go)
         {
             if (go == null) return;
+
+            // 이미 비활성(=풀에 반납됨) 이면 무시. 이중 Release 방지.
+            if (!go.activeSelf) return;
 
             // Poolable 이 붙어있으면 풀로, 아니면 그냥 Destroy
             var poolable = go.GetComponent<Poolable>();

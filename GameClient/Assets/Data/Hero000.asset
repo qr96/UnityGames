@@ -22,9 +22,9 @@ MonoBehaviour:
     critRate: 0.1
     critDamage: 1.5
     attackSpeed: 100
-    range: 1
+    range: 0
     moveSpeed: 1
-  startingWeapon: {fileID: 11400000, guid: 8aec8bdc6dc9f3546b98021bacb7ace9, type: 2}
+  startingWeapon: {fileID: 0}
   startingSkillA: {fileID: 0}
   startingSkillB: {fileID: 0}
   advancementBranches: []

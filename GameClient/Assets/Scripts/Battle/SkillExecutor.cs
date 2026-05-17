@@ -24,7 +24,8 @@ namespace AutoBattler.Battle
                     {
                         if (u == null || !u.IsAlive) continue;
                         if (u.Team == caster.Team) continue;
-                        if (BattleGrid.Distance(u.Cell, center) <= skill.areaRadius)
+                        // 범위 공격은 대각 포함 (체비셰프 = 정사각형 범위)
+                        if (BattleGrid.ChebyshevDistance(u.Cell, center) <= skill.areaRadius)
                             DamageOne(caster, u, skill);
                     }
                     break;

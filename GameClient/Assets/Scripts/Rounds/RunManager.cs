@@ -10,9 +10,13 @@ namespace AutoBattler.Rounds
 {
     /// <summary>
     /// 한 런(30~45분, 15라운드)을 관리.
-    /// - 시작: 2명 영웅, 최대 5명까지 영입
-    /// - 라운드마다 전투 → 보상 1택 → 다음 라운드
-    /// - 라운드 단위 자동 저장 훅(SaveSystem 연결 지점 표시)
+    /// 흐름:
+    ///   StartNewRun -> StartNextRound -> [전투]
+    ///     -> 승리: OnRewardOffered(스킬 N개 자동 지급) -> ConfirmRewards()
+    ///                                                  -> OnLoadoutReady (장착/합성 화면)
+    ///                                                  -> ProceedToNextRound() -> StartNextRound
+    ///     -> 패배: OnRunFailed
+    ///   15라운드 클리어 후: OnRunCompleted
     /// </summary>
     public class RunManager : MonoBehaviour
     {
@@ -29,26 +33,34 @@ namespace AutoBattler.Rounds
         public EquipmentData[] equipmentPool;
         public SkillData[] skillPool;
 
+        [Header("보상 규칙")]
+        [Tooltip("라운드당 최소 보상 스킬 수")]
+        public int minRewardSkills = 2;
+        [Tooltip("라운드당 최대 보상 스킬 수")]
+        public int maxRewardSkills = 4;
+
         // ─────────────────────────────────────────────────────────
         // 런 상태
         // ─────────────────────────────────────────────────────────
         public List<Hero> Roster { get; } = new List<Hero>();
-        public int CurrentRound { get; private set; } = 0; // 0 = 미시작
+        public int CurrentRound { get; private set; } = 0;
         public bool IsRunOver { get; private set; }
 
-        // 인벤토리(보유 자원)
         public List<WeaponData> InventoryWeapons { get; } = new List<WeaponData>();
         public List<EquipmentData> InventoryEquipment { get; } = new List<EquipmentData>();
-        public Dictionary<SkillData, int> SkillBookCounts { get; } = new Dictionary<SkillData, int>();
+        public SkillInventory SkillInv { get; } = new SkillInventory();
 
-        // 이벤트
-        public event Action<int> OnRoundStarted;
-        public event Action<int, bool> OnRoundEnded;      // round, won
-        public event Action<List<RewardOption>> OnRewardOffered;
+        // ─────────────────────────────────────────────────────────
+        // 이벤트 — UI 가 구독
+        // ─────────────────────────────────────────────────────────
+        public event Action<int> OnRoundStarted;        // round
+        public event Action<int, bool> OnRoundEnded;          // round, won
+        public event Action<List<SkillData>> OnRewardOffered;       // 자동 지급된 스킬 목록 표시용
+        public event Action OnLoadoutReady;        // 보상 확인 후 장착 화면 열기
         public event Action OnRunCompleted;
         public event Action OnRunFailed;
 
-        private List<RewardOption> _pendingRewards;
+        private List<SkillData> _lastRewardSkills;
 
         // ─────────────────────────────────────────────────────────
         // 런 시작
@@ -58,7 +70,7 @@ namespace AutoBattler.Rounds
             Roster.Clear();
             InventoryWeapons.Clear();
             InventoryEquipment.Clear();
-            SkillBookCounts.Clear();
+            SkillInv.Clear();
             CurrentRound = 0;
             IsRunOver = false;
 
@@ -66,7 +78,11 @@ namespace AutoBattler.Rounds
             int n = Mathf.Min(2, startingPick.Length);
             for (int i = 0; i < n; i++) Roster.Add(new Hero(startingPick[i]));
 
-            if (battleField != null) battleField.OnBattleEnded += OnBattleResult;
+            if (battleField != null)
+            {
+                battleField.OnBattleEnded -= OnBattleResult;
+                battleField.OnBattleEnded += OnBattleResult;
+            }
 
             StartNextRound();
         }
@@ -85,7 +101,12 @@ namespace AutoBattler.Rounds
         {
             if (IsRunOver) return;
             CurrentRound++;
-            if (CurrentRound > TotalRounds) { IsRunOver = true; OnRunCompleted?.Invoke(); return; }
+            if (CurrentRound > TotalRounds)
+            {
+                IsRunOver = true;
+                OnRunCompleted?.Invoke();
+                return;
+            }
 
             OnRoundStarted?.Invoke(CurrentRound);
             var enemies = BuildEnemiesForRound(CurrentRound);
@@ -104,68 +125,94 @@ namespace AutoBattler.Rounds
                 return;
             }
 
-            // 보상 제시
-            _pendingRewards = BuildRewardOptions(CurrentRound);
+            // 스킬 자동 지급
+            _lastRewardSkills = RollRewardSkills(CurrentRound);
+            foreach (var s in _lastRewardSkills) SkillInv.Add(s, 1);
+
             AutoSave();
-            OnRewardOffered?.Invoke(_pendingRewards);
+            OnRewardOffered?.Invoke(_lastRewardSkills);
         }
 
-        /// <summary>
-        /// 플레이어가 보상 1개를 선택한 뒤 호출.
-        /// targetHero: 무기/스킬일 때 적용 대상. 장비는 null이면 인벤토리로.
-        /// </summary>
-        public void PickReward(int index, Hero targetHero = null)
+        /// <summary>보상 화면의 "확인" 버튼이 호출. 장착/합성 화면을 열라는 신호.</summary>
+        public void ConfirmRewards()
         {
-            if (_pendingRewards == null) return;
-            if (index < 0 || index >= _pendingRewards.Count) return;
+            _lastRewardSkills = null;
+            OnLoadoutReady?.Invoke();
+        }
 
-            ApplyReward(_pendingRewards[index], targetHero);
-            _pendingRewards = null;
-
-            // 다음 라운드로
+        /// <summary>장착/합성 화면의 "다음 전투" 버튼이 호출. 다음 라운드 시작.</summary>
+        public void ProceedToNextRound()
+        {
             StartNextRound();
         }
 
-        private void ApplyReward(RewardOption r, Hero target)
+        // ─────────────────────────────────────────────────────────
+        // 스킬 장착 — UI에서 호출
+        // ─────────────────────────────────────────────────────────
+        public enum LoadoutSlot { A, B }
+
+        /// <summary>
+        /// 인벤토리의 스킬을 영웅의 슬롯에 장착.
+        /// 슬롯이 차있으면 기존 스킬은 인벤토리로 복귀.
+        /// 전투 중에는 사용 금지 (BattleField.State 검사는 UI 측에서).
+        /// </summary>
+        public bool EquipSkill(Hero hero, SkillData skill, LoadoutSlot slot)
         {
-            switch (r.type)
-            {
-                case RewardType.Weapon:
-                    if (target != null) target.weapon = r.weapon;
-                    else                InventoryWeapons.Add(r.weapon);
-                    break;
+            if (hero == null || skill == null) return false;
+            if (SkillInv.CountOf(skill) <= 0) return false;
 
-                case RewardType.Equipment:
-                    if (target != null)
-                    {
-                        if (r.equipment.slot == EquipmentSlot.Armor)     target.armor = r.equipment;
-                        else if (r.equipment.slot == EquipmentSlot.Accessory) target.accessory = r.equipment;
-                        else InventoryEquipment.Add(r.equipment);
-                    }
-                    else InventoryEquipment.Add(r.equipment);
-                    break;
+            // 같은 스킬을 같은 슬롯에 또 넣으려는 시도 무시
+            var curInSlot = slot == LoadoutSlot.A ? hero.skillA : hero.skillB;
+            if (curInSlot == skill) return false;
 
-                case RewardType.Skill:
-                    // 스킬북 → 카운트 누적, 3개면 합성 가능 알림
-                    if (!SkillBookCounts.ContainsKey(r.skill)) SkillBookCounts[r.skill] = 0;
-                    SkillBookCounts[r.skill]++;
-                    if (target != null && SkillBookCounts[r.skill] >= 3
-                        && target.TryFuseSkill(r.skill, SkillBookCounts[r.skill]))
-                    {
-                        SkillBookCounts[r.skill] -= 3;
-                    }
-                    break;
-            }
+            // 인벤토리에서 빼서
+            SkillInv.Remove(skill, 1);
+
+            // 기존 슬롯 스킬은 인벤토리로 복귀
+            if (curInSlot != null) SkillInv.Add(curInSlot, 1);
+
+            // 장착
+            if (slot == LoadoutSlot.A) hero.skillA = skill;
+            else hero.skillB = skill;
+
+            return true;
+        }
+
+        /// <summary>슬롯에서 인벤토리로 되돌림.</summary>
+        public bool UnequipSkill(Hero hero, LoadoutSlot slot)
+        {
+            if (hero == null) return false;
+            var cur = slot == LoadoutSlot.A ? hero.skillA : hero.skillB;
+            if (cur == null) return false;
+
+            if (slot == LoadoutSlot.A) hero.skillA = null;
+            else hero.skillB = null;
+            SkillInv.Add(cur, 1);
+            return true;
         }
 
         // ─────────────────────────────────────────────────────────
-        // 콘텐츠 빌더 (스텁) — 데이터 테이블/난이도 곡선으로 교체 가능
+        // 콘텐츠 빌더
         // ─────────────────────────────────────────────────────────
+        protected virtual List<SkillData> RollRewardSkills(int round)
+        {
+            var list = new List<SkillData>();
+            if (skillPool == null || skillPool.Length == 0) return list;
+
+            int count = UnityEngine.Random.Range(minRewardSkills, maxRewardSkills + 1); // 2~4
+            for (int i = 0; i < count; i++)
+            {
+                var s = skillPool[UnityEngine.Random.Range(0, skillPool.Length)];
+                list.Add(s); // 중복 허용
+            }
+            return list;
+        }
+
         protected virtual List<EnemySpawn> BuildEnemiesForRound(int round)
         {
             var list = new List<EnemySpawn>();
             int count = Mathf.Clamp(2 + round / 2, 2, 8);
-            float hpScale  = 1f + (round - 1) * 0.15f;
+            float hpScale = 1f + (round - 1) * 0.15f;
             float atkScale = 1f + (round - 1) * 0.10f;
 
             for (int i = 0; i < count; i++)
@@ -177,14 +224,14 @@ namespace AutoBattler.Rounds
                                           BattleGrid.Height - 1 - (i / BattleGrid.Width)),
                     stats = new Stats
                     {
-                        attack      = 8  * atkScale,
-                        defense     = 1,
-                        maxHp       = 60 * hpScale,
-                        critRate    = 0.05f,
-                        critDamage  = 1.5f,
+                        attack = 8 * atkScale,
+                        defense = 1,
+                        maxHp = 60 * hpScale,
+                        critRate = 0.05f,
+                        critDamage = 1.5f,
                         attackSpeed = 100,
-                        range       = 0,
-                        moveSpeed   = 1f
+                        range = 0,
+                        moveSpeed = 1f
                     },
                     weapon = null,
                     skills = null
@@ -193,30 +240,13 @@ namespace AutoBattler.Rounds
             return list;
         }
 
-        protected virtual List<RewardOption> BuildRewardOptions(int round)
-        {
-            // 가장 단순한 규칙: 무기/장비/스킬 각 1개씩 랜덤 뽑기
-            var list = new List<RewardOption>();
-            if (weaponPool != null && weaponPool.Length > 0)
-                list.Add(new RewardOption { type = RewardType.Weapon,
-                    weapon = weaponPool[UnityEngine.Random.Range(0, weaponPool.Length)] });
-            if (equipmentPool != null && equipmentPool.Length > 0)
-                list.Add(new RewardOption { type = RewardType.Equipment,
-                    equipment = equipmentPool[UnityEngine.Random.Range(0, equipmentPool.Length)] });
-            if (skillPool != null && skillPool.Length > 0)
-                list.Add(new RewardOption { type = RewardType.Skill,
-                    skill = skillPool[UnityEngine.Random.Range(0, skillPool.Length)] });
-            return list;
-        }
-
         // ─────────────────────────────────────────────────────────
-        // 저장 훅 — SaveSystem에 연결
+        // 저장 훅
         // ─────────────────────────────────────────────────────────
         private void AutoSave()
         {
-            // TODO: JsonUtility / 별도 SaveSystem 호출
-            // 핵심: Roster, CurrentRound, 인벤토리, SkillBookCounts 직렬화
-            Debug.Log($"[AutoSave] round={CurrentRound}, heroes={Roster.Count}");
+            // TODO: 직렬화 연결
+            Debug.Log($"[AutoSave] round={CurrentRound}, heroes={Roster.Count}, skillKinds={SkillInv.Counts.Count}");
         }
     }
 }

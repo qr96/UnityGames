@@ -51,6 +51,9 @@ namespace AutoBattler.Battle
         // 행동 타이머
         private float _attackCooldown;   // 다음 공격까지 남은 시간
 
+        // 타깃 락온 — 매 프레임 새로 안 뽑고 유지하다가 무효해지면 교체
+        private BattleUnit _currentTarget;
+
         // 시각 컴포넌트
         [SerializeField] private UnitAnimator anim;   // 프리팹에 부착 (선택)
         private bool _wasMoving;                       // MoveSpeed 파라미터 변경 감지용
@@ -110,6 +113,7 @@ namespace AutoBattler.Battle
             // 이동 상태 초기화
             _isMoving = false;
             _moveElapsed = 0f;
+            _currentTarget = null;
 
             // 풀 재사용 시 이전 상태 청소
             CancelInvoke(nameof(HideAfterDeath));
@@ -152,18 +156,17 @@ namespace AutoBattler.Battle
                 {
                     SetMoving(true);
                     // 이동 중에도 타깃 방향 갱신해서 자연스럽게
-                    var t2 = _field.Grid.FindNearestEnemy(this, allUnits);
+                    var t2 = AcquireTarget(allUnits);
                     if (t2 != null) UpdateFacing(t2.Cell);
                     return;
                 }
             }
 
             // 2) 타깃 탐색
-            var target = _field.Grid.FindNearestEnemy(this, allUnits);
+            var target = AcquireTarget(allUnits);
             if (target == null) { SetMoving(false); return; }
 
             UpdateFacing(target.Cell);
-            int dist = BattleGrid.Distance(Cell, target.Cell);
 
             // 3) 스킬 우선
             if (TryCastReadySkill(target, allUnits))
@@ -174,7 +177,9 @@ namespace AutoBattler.Battle
             }
 
             // 4) 사거리 안이면 기본 공격
-            if (dist <= AttackRange)
+            //    range==1 → 맨해튼 (대각 불가)
+            //    range>=2 → 체비셰프 (대각 포함)
+            if (BattleGrid.InAttackRange(Cell, target.Cell, AttackRange))
             {
                 SetMoving(false);
                 if (_attackCooldown <= 0f)
@@ -216,6 +221,25 @@ namespace AutoBattler.Battle
             _isMoving = true;
         }
 
+        /// <summary>
+        /// 타깃 락온 로직.
+        ///   - 현재 타깃이 살아있고 사거리 안 → 계속 유지 (안정적 응시/공격)
+        ///   - 현재 타깃이 죽었거나 사거리 밖 → 새로 가까운 적 찾기
+        /// </summary>
+        private BattleUnit AcquireTarget(List<BattleUnit> allUnits)
+        {
+            // 현재 타깃이 여전히 유효(살아있고 적이고 사거리 안)이면 유지
+            if (_currentTarget != null
+                && _currentTarget.IsAlive
+                && _currentTarget.Team != Team
+                && BattleGrid.InAttackRange(Cell, _currentTarget.Cell, AttackRange))
+                return _currentTarget;
+
+            // 사거리 밖이거나 죽었으면 가장 가까운 적으로 갱신
+            _currentTarget = _field.Grid.FindNearestEnemy(this, allUnits);
+            return _currentTarget;
+        }
+
         private void UpdateFacing(Vector2Int targetCell)
         {
             // 그리드 y는 월드 z에 매핑 (BattleField.CellToWorld 와 일치)
@@ -247,7 +271,7 @@ namespace AutoBattler.Battle
                 if (_cooldownRemain[i] > 0f) continue;
                 var s = _skills[i];
                 if (s == null) continue;
-                if (BattleGrid.Distance(Cell, primaryTarget.Cell) > s.range) continue;
+                if (!BattleGrid.InAttackRange(Cell, primaryTarget.Cell, s.range)) continue;
 
                 SkillExecutor.Execute(this, s, primaryTarget, all, _field);
                 _cooldownRemain[i] = s.cooldown;

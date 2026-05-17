@@ -54,13 +54,25 @@ namespace AutoBattler.Battle
             return TryPlace(unit, dest);
         }
 
-        /// <summary>맨해튼 거리 (4방향, 대각 = 2). 기본 거리 함수.</summary>
+        /// <summary>맨해튼 거리 (4방향, 대각 = 2). 이동/탐색용 기본 거리.</summary>
         public static int Distance(Vector2Int a, Vector2Int b) =>
             Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
 
-        /// <summary>체비셰프 거리 (8방향, 대각 = 1). 필요 시 사용.</summary>
+        /// <summary>체비셰프 거리 (8방향, 대각 = 1). 원거리/범위 공격 사거리용.</summary>
         public static int ChebyshevDistance(Vector2Int a, Vector2Int b) =>
             Mathf.Max(Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
+
+        /// <summary>
+        /// 공격 사거리 판정.
+        ///   range == 1 (근접): 맨해튼 — 대각은 거리 2가 되어 자동 제외
+        ///   range >= 2 (원거리/범위): 체비셰프 — 대각도 인접으로 취급
+        /// </summary>
+        public static bool InAttackRange(Vector2Int self, Vector2Int target, int range)
+        {
+            if (range <= 1)
+                return Distance(self, target) <= range;
+            return ChebyshevDistance(self, target) <= range;
+        }
 
         /// <summary>
         /// 가장 가까운 적 반환. 동률이면 후보 중 랜덤.
@@ -91,22 +103,66 @@ namespace AutoBattler.Battle
 
         /// <summary>
         /// self 에서 target 으로 1칸 다가가는 다음 위치.
-        /// 4방향(상/하/좌/우)만 허용. 점유된 칸은 자동 제외. 동거리 후보가 여러 개면 랜덤 1개.
+        /// 4방향(상/하/좌/우)만 허용. 점유된 칸은 자동 제외.
+        ///
+        /// 우선순위:
+        ///   1. 장축(타깃과 차이가 큰 축) 방향 직진 — 갈지자 방지
+        ///   2. 장축이 막혀있으면 단축 방향으로 우회
+        ///   3. 같은 축 안에서도 막혀있으면 다른 옵션
         /// </summary>
         public Vector2Int? NextStepToward(BattleUnit self, Vector2Int target)
         {
-            int curDist = Distance(self.Cell, target);
-            var candidates = new List<Vector2Int>(4);
+            int dx = target.x - self.Cell.x;
+            int dy = target.y - self.Cell.y;
 
+            // 각 축 방향 단위 벡터 (0이면 이미 그 축은 일치)
+            int sx = dx == 0 ? 0 : (dx > 0 ? 1 : -1);
+            int sy = dy == 0 ? 0 : (dy > 0 ? 1 : -1);
+
+            // 후보를 우선순위 순으로 정렬해서 시도
+            // [장축 직진, 단축 직진, 장축 역방향, 단축 역방향]
+            // 장축은 차이가 큰 쪽
+            bool yIsLong = Mathf.Abs(dy) > Mathf.Abs(dx);
+
+            Vector2Int longStep = yIsLong ? new Vector2Int(0, sy) : new Vector2Int(sx, 0);
+            Vector2Int shortStep = yIsLong ? new Vector2Int(sx, 0) : new Vector2Int(0, sy);
+
+            // 1순위: 장축 직진
+            if (sy != 0 || sx != 0)
+            {
+                var step = TryStep(self.Cell, longStep);
+                if (step.HasValue) return step;
+
+                // 2순위: 단축 (=장축이 막혔거나 이미 정렬됨)
+                if (shortStep != Vector2Int.zero)
+                {
+                    step = TryStep(self.Cell, shortStep);
+                    if (step.HasValue) return step;
+                }
+            }
+
+            // 3순위: 어느 방향이든 거리가 줄어들고 빈 칸이면 OK
+            int curDist = Distance(self.Cell, target);
+            var fallback = new List<Vector2Int>(4);
             for (int i = 0; i < _dirs4.Length; i++)
             {
                 var next = self.Cell + _dirs4[i];
                 if (!InBounds(next) || !IsEmpty(next)) continue;
-                if (Distance(next, target) < curDist) candidates.Add(next);
+                if (Distance(next, target) < curDist) fallback.Add(next);
             }
+            if (fallback.Count > 0) return fallback[Random.Range(0, fallback.Count)];
 
-            if (candidates.Count == 0) return null;
-            return candidates[Random.Range(0, candidates.Count)];
+            // 막힘
+            return null;
+        }
+
+        /// <summary>방향 한 칸 시도. 빈 칸이면 그 위치 반환.</summary>
+        private Vector2Int? TryStep(Vector2Int from, Vector2Int dir)
+        {
+            if (dir == Vector2Int.zero) return null;
+            var next = from + dir;
+            if (!InBounds(next) || !IsEmpty(next)) return null;
+            return next;
         }
     }
 }

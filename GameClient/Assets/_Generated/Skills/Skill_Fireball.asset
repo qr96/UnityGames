@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 205396ed35d2a2e4681d4cc19e03d1f9, type: 3}
+  m_Name: Skill_Fireball
+  m_EditorClassIdentifier: Assembly-CSharp::AutoBattler.Data.SkillData
+  id: Skill_Fireball
+  displayName: Fireball
+  description: 
+  cooldown: 5
+  targetType: 1
+  range: 4
+  areaRadius: 1
+  damageMultiplier: 2.5
+  healAmount: 0
+  buffDuration: 0
+  buff:
+    attack: 0
+    defense: 0
+    maxHp: 0
+    critRate: 0
+    critDamage: 0
+    attackSpeed: 0
+    range: 0
+    moveSpeed: 0
+  upgradedVersion: {fileID: 11400000, guid: cd4836ec958baae4f86e585b3dbd128b, type: 2}
