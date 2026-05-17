@@ -33,6 +33,15 @@ namespace AutoBattler.Rounds
         public EquipmentData[] equipmentPool;
         public SkillData[] skillPool;
 
+        [Header("인카운터 (적 데이터)")]
+        public EncounterTable encounterTable;
+
+        [Header("난이도 스케일")]
+        [Tooltip("라운드 1당 적 HP 증가율")]
+        public float hpScalePerRound = 0.15f;
+        [Tooltip("라운드 1당 적 공격력 증가율")]
+        public float atkScalePerRound = 0.10f;
+
         [Header("보상 규칙")]
         [Tooltip("라운드당 최소 보상 스킬 수")]
         public int minRewardSkills = 2;
@@ -65,6 +74,15 @@ namespace AutoBattler.Rounds
         public event Action OnRunFailed;
 
         private List<SkillData> _lastRewardSkills;
+        private EncounterData _nextEncounter;        // 다음 라운드의 적 (배치 화면 진입 시 결정)
+        private int _nextEncounterRound;   // 어느 라운드용인지
+
+        /// <summary>다음 전투의 적 미리보기. 배치 화면 UI/BattleField가 사용.</summary>
+        public List<EnemySpawn> GetNextEnemySpawns()
+        {
+            EnsureNextEncounterReady();
+            return BuildEnemySpawnsFromEncounter(_nextEncounter, CurrentRound + 1);
+        }
 
         // ─────────────────────────────────────────────────────────
         // 런 시작
@@ -76,6 +94,7 @@ namespace AutoBattler.Rounds
             InventoryEquipment.Clear();
             SkillInv.Clear();
             Placement.Clear();
+            _nextEncounter = null;
             CurrentRound = 0;
             IsRunOver = false;
 
@@ -93,6 +112,7 @@ namespace AutoBattler.Rounds
             }
 
             // 첫 라운드 시작 전에도 배치 단계 거침
+            EnsureNextEncounterReady();
             OnPlacementReady?.Invoke();
         }
 
@@ -166,6 +186,9 @@ namespace AutoBattler.Rounds
             OnRoundStarted?.Invoke(CurrentRound);
             var enemies = BuildEnemiesForRound(CurrentRound);
             battleField.StartBattle(Roster, Placement, enemies);
+
+            // 이번 인카운터 소비 — 다음에 또 EnsureNextEncounterReady 호출 시 새로 추첨
+            _nextEncounter = null;
         }
 
         private void OnBattleResult(bool won)
@@ -198,6 +221,7 @@ namespace AutoBattler.Rounds
         /// <summary>장착/합성 화면의 "확인" 버튼이 호출. 배치 화면 열라는 신호.</summary>
         public void ConfirmLoadout()
         {
+            EnsureNextEncounterReady();
             OnPlacementReady?.Invoke();
         }
 
@@ -271,31 +295,77 @@ namespace AutoBattler.Rounds
 
         protected virtual List<EnemySpawn> BuildEnemiesForRound(int round)
         {
-            var list = new List<EnemySpawn>();
-            int count = Mathf.Clamp(2 + round / 2, 2, 8);
-            float hpScale = 1f + (round - 1) * 0.15f;
-            float atkScale = 1f + (round - 1) * 0.10f;
+            // 이미 추첨된 인카운터가 있으면 사용 (배치 화면에서 미리 결정)
+            if (_nextEncounter != null && _nextEncounterRound == round)
+                return BuildEnemySpawnsFromEncounter(_nextEncounter, round);
 
-            for (int i = 0; i < count; i++)
+            // 폴백: 즉석 추첨
+            EnsureNextEncounterReadyFor(round);
+            return BuildEnemySpawnsFromEncounter(_nextEncounter, round);
+        }
+
+        /// <summary>다음 라운드 인카운터가 미정이면 추첨. 이미 있으면 유지.</summary>
+        private void EnsureNextEncounterReady()
+        {
+            int next = CurrentRound + 1;
+            EnsureNextEncounterReadyFor(next);
+        }
+
+        private void EnsureNextEncounterReadyFor(int round)
+        {
+            if (_nextEncounter != null && _nextEncounterRound == round) return;
+
+            _nextEncounter = PickEncounterFor(round);
+            _nextEncounterRound = round;
+        }
+
+        protected virtual EncounterData PickEncounterFor(int round)
+        {
+            if (encounterTable == null)
             {
+                Debug.LogWarning("[RunManager] encounterTable이 비어있습니다. 빈 인카운터 사용.");
+                return null;
+            }
+
+            var candidates = encounterTable.GetCandidatesFor(round);
+            if (candidates.Count == 0)
+            {
+                Debug.LogWarning($"[RunManager] round {round}의 인카운터 후보가 없습니다.");
+                return null;
+            }
+
+            return candidates[UnityEngine.Random.Range(0, candidates.Count)];
+        }
+
+        private List<EnemySpawn> BuildEnemySpawnsFromEncounter(EncounterData enc, int round)
+        {
+            var list = new List<EnemySpawn>();
+            if (enc == null) return list;
+
+            // 난이도 스케일
+            float hpScale = enc.applyDifficultyScaling ? 1f + (round - 1) * hpScalePerRound : 1f;
+            float atkScale = enc.applyDifficultyScaling ? 1f + (round - 1) * atkScalePerRound : 1f;
+            hpScale *= enc.hpMultiplier;
+            atkScale *= enc.attackMultiplier;
+
+            int i = 0;
+            foreach (var e in enc.enemies)
+            {
+                if (e.enemyData == null) continue;
+                var s = e.enemyData.baseStats;
+                s.maxHp *= hpScale;
+                s.attack *= atkScale;
+
+                var skillList = e.enemyData.skills != null
+                    ? new List<SkillData>(e.enemyData.skills) : null;
+
                 list.Add(new EnemySpawn
                 {
-                    name = $"Enemy_{round}_{i}",
-                    cell = new Vector2Int(i % BattleGrid.Width,
-                                          BattleGrid.Height - 1 - (i / BattleGrid.Width)),
-                    stats = new Stats
-                    {
-                        attack = 8 * atkScale,
-                        defense = 1,
-                        maxHp = 60 * hpScale,
-                        critRate = 0.05f,
-                        critDamage = 1.5f,
-                        attackSpeed = 100,
-                        range = 0,
-                        moveSpeed = 1f
-                    },
-                    weapon = null,
-                    skills = null
+                    name = $"{e.enemyData.displayName}_{i++}",
+                    cell = e.cell,
+                    stats = s,
+                    weapon = e.enemyData.weapon,
+                    skills = skillList,
                 });
             }
             return list;

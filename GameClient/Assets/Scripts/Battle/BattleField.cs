@@ -57,16 +57,23 @@ namespace AutoBattler.Battle
         }
 
         /// <summary>
-        /// 전투 시작 전 영웅만 그리드에 올려두는 "미리보기" 모드.
-        /// 적도 없고 AI도 안 돎. 배치 화면에서 사용.
+        /// 전투 시작 전 영웅과 적을 그리드에 올려두는 "미리보기" 모드.
+        /// State는 Preparing이라 AI 안 돎. 배치 화면에서 사용.
+        ///
+        /// previewEnemies가 있으면 적도 함께 표시. 없으면 영웅만.
         /// </summary>
-        public void EnterPlacementPreview(List<Hero> heroes, Dictionary<Hero, Vector2Int> placement)
+        public void EnterPlacementPreview(List<Hero> heroes,
+                                          Dictionary<Hero, Vector2Int> placement,
+                                          List<EnemySpawn> previewEnemies = null)
         {
             CleanUp();
             Grid = new BattleGrid();
             State = BattleState.Preparing;
 
             SpawnHeroesWithPlacement(heroes, placement);
+
+            if (previewEnemies != null)
+                foreach (var e in previewEnemies) SpawnEnemy(e);
 
             // State는 Preparing 유지 — Update의 AI Tick은 안 돔
         }

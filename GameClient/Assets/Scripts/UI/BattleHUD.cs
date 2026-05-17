@@ -140,7 +140,11 @@ namespace AutoBattler.UI
 
         private void ShowPlacement()
         {
+            SetActive(startPanel, false);
+            SetActive(rewardPanel, false);
+            SetActive(hudPanel, false);
             SetActive(loadoutScreen?.gameObject, false);
+            SetActive(resultPanel, false);
             SetActive(placementPanel, true);
             SetActive(gridVisualizer?.gameObject, true);
             SetActive(placementController?.gameObject, true);

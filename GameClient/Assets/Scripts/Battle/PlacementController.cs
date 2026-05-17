@@ -21,10 +21,10 @@ namespace AutoBattler.Battle
     public class PlacementController : MonoBehaviour
     {
         [Header("연결")]
-        public RunManager   runManager;
-        public BattleField  battleField;
-        public Camera       cam;
-        public LayerMask    unitLayerMask = ~0; // 영웅에 부착할 레이어 (기본: 전체)
+        public RunManager runManager;
+        public BattleField battleField;
+        public Camera cam;
+        public LayerMask unitLayerMask = ~0; // 영웅에 부착할 레이어 (기본: 전체)
 
         [Header("드래그 시각")]
         public float dragLiftY = 0.6f;   // 드래그 중 살짝 띄움 (월드 Y)
@@ -32,7 +32,7 @@ namespace AutoBattler.Battle
         // 상태
         private BattleUnit _dragging;
         private Vector2Int _originalCell;
-        private Vector3    _originalWorld;
+        private Vector3 _originalWorld;
 
         private void Awake()
         {
@@ -41,9 +41,12 @@ namespace AutoBattler.Battle
 
         private void OnEnable()
         {
-            // 배치 화면 진입 시 미리보기 시작 (RunManager 영웅들을 그리드에 올림)
+            // 배치 화면 진입 시 미리보기 시작 (영웅 + 다음 전투의 적)
             if (battleField != null && runManager != null)
-                battleField.EnterPlacementPreview(runManager.Roster, runManager.Placement);
+            {
+                var enemies = runManager.GetNextEnemySpawns();
+                battleField.EnterPlacementPreview(runManager.Roster, runManager.Placement, enemies);
+            }
         }
 
         private void OnDisable()
@@ -79,8 +82,8 @@ namespace AutoBattler.Battle
                 var unit = hit.collider.GetComponentInParent<BattleUnit>();
                 if (unit != null && unit.Team == Team.Ally)
                 {
-                    _dragging      = unit;
-                    _originalCell  = unit.Cell;
+                    _dragging = unit;
+                    _originalCell = unit.Cell;
                     _originalWorld = unit.transform.position;
                 }
             }
@@ -130,8 +133,9 @@ namespace AutoBattler.Battle
             // 배치 변경 (swap 자동 처리)
             runManager.SetPlacement(_dragging.SourceHero, targetCell);
 
-            // 그리드 + 시각 위치 재구성을 가장 확실하게: 미리보기 다시 만들기
-            battleField.EnterPlacementPreview(runManager.Roster, runManager.Placement);
+            // 그리드 + 시각 위치 재구성을 가장 확실하게: 미리보기 다시 만들기 (적도 함께)
+            var enemies = runManager.GetNextEnemySpawns();
+            battleField.EnterPlacementPreview(runManager.Roster, runManager.Placement, enemies);
             _dragging = null;
         }
 

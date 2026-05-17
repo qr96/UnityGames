@@ -1,69 +1,79 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AutoBattler.Battle
 {
     /// <summary>
-    /// 아군 배치 영역(5x4)을 시각화. 배치 화면에서만 보이게 토글.
-    /// 각 셀을 외곽선으로 표시. groundY 약간 위에 그려서 z-fight 회피.
+    /// 아군 배치 영역(5x4) 시각화. 셀마다 자식 GameObject에 LineRenderer를 두고
+    /// 사각형 외곽선을 그림. (단일 LineRenderer는 셀 사이 대각선이 생기므로 분리.)
     ///
-    /// 사용: 빈 GameObject에 부착 → field 슬롯에 BattleField 드래그.
-    ///       기본적으론 비활성(SetActive false)으로 두고, 배치 화면 진입 시 활성.
+    /// 부착 위치: BattleField와 무관한 빈 GameObject (씬 어디든).
+    /// 활성/비활성으로 토글.
     /// </summary>
-    [RequireComponent(typeof(LineRenderer))]
     public class GridVisualizer : MonoBehaviour
     {
         public BattleField field;
-        public float liftY = 0.02f;          // 바닥 살짝 위
-        public Color   lineColor = new Color(0.4f, 0.9f, 1f, 0.8f);
-        public float   lineWidth = 0.04f;
+        public float liftY = 0.02f;
+        public Color lineColor = new Color(0.4f, 0.9f, 1f, 0.8f);
+        public float lineWidth = 0.04f;
+        public Material lineMaterial; // 비워두면 기본 Sprites/Default 사용
 
-        private LineRenderer _lr;
-
-        private void Reset() { _lr = GetComponent<LineRenderer>(); }
-        private void Awake() { _lr = GetComponent<LineRenderer>(); }
+        private readonly List<LineRenderer> _cells = new List<LineRenderer>();
 
         private void OnEnable()
         {
-            BuildLines();
+            BuildIfNeeded();
+            foreach (var lr in _cells) if (lr != null) lr.enabled = true;
         }
 
-        public void BuildLines()
+        private void OnDisable()
+        {
+            foreach (var lr in _cells) if (lr != null) lr.enabled = false;
+        }
+
+        private void BuildIfNeeded()
         {
             if (field == null) return;
-            if (_lr == null) _lr = GetComponent<LineRenderer>();
 
-            _lr.useWorldSpace = true;
-            _lr.startWidth = lineWidth;
-            _lr.endWidth   = lineWidth;
-            _lr.startColor = lineColor;
-            _lr.endColor   = lineColor;
-            _lr.loop = false;
-
-            // 각 셀을 사각형으로 한 번에 그리려면 LineStrip 트릭이 필요.
-            // 단순히 각 셀 4변을 따로 그리는 게 보기 쉬움 → 셀 N개 × 5점(닫힌 사각형).
             int cellsX = BattleGrid.Width;
             int cellsY = BattleGrid.AllyZoneMaxY + 1;
-            int pointsPerCell = 5;
-            int total = cellsX * cellsY * pointsPerCell;
-            _lr.positionCount = total;
+            int need = cellsX * cellsY;
 
+            // 부족하면 생성
+            while (_cells.Count < need)
+            {
+                var go = new GameObject($"CellLine_{_cells.Count}");
+                go.transform.SetParent(transform, false);
+                var lr = go.AddComponent<LineRenderer>();
+                lr.useWorldSpace = true;
+                lr.loop = true;        // ← 사각형 닫음
+                lr.positionCount = 4;
+                lr.startWidth = lineWidth;
+                lr.endWidth = lineWidth;
+                lr.startColor = lineColor;
+                lr.endColor = lineColor;
+                lr.material = lineMaterial != null ? lineMaterial
+                                                     : new Material(Shader.Find("Sprites/Default"));
+                _cells.Add(lr);
+            }
+
+            // 위치 갱신
             float halfX = field.cellSize.x * 0.5f;
             float halfZ = field.cellSize.y * 0.5f;
             int idx = 0;
 
             for (int y = 0; y < cellsY; y++)
-            for (int x = 0; x < cellsX; x++)
-            {
-                Vector3 c = field.CellToWorld(new Vector2Int(x, y));
-                c.y += liftY;
-
-                // 시계 방향 닫힌 사각형
-                _lr.SetPosition(idx++, c + new Vector3(-halfX, 0, -halfZ));
-                _lr.SetPosition(idx++, c + new Vector3( halfX, 0, -halfZ));
-                _lr.SetPosition(idx++, c + new Vector3( halfX, 0,  halfZ));
-                _lr.SetPosition(idx++, c + new Vector3(-halfX, 0,  halfZ));
-                _lr.SetPosition(idx++, c + new Vector3(-halfX, 0, -halfZ));
-            }
+                for (int x = 0; x < cellsX; x++)
+                {
+                    Vector3 c = field.CellToWorld(new Vector2Int(x, y));
+                    c.y += liftY;
+                    var lr = _cells[idx++];
+                    lr.SetPosition(0, c + new Vector3(-halfX, 0, -halfZ));
+                    lr.SetPosition(1, c + new Vector3(halfX, 0, -halfZ));
+                    lr.SetPosition(2, c + new Vector3(halfX, 0, halfZ));
+                    lr.SetPosition(3, c + new Vector3(-halfX, 0, halfZ));
+                    // loop=true이므로 자동으로 4→0 연결
+                }
         }
     }
 }
