@@ -34,34 +34,90 @@ namespace AutoBattler.Battle
         private bool _warnedNoUnitsRoot;
 
         // ─────────────────────────────────────────────────────────
-        public void StartBattle(List<Hero> heroes, List<EnemySpawn> enemies)
+        /// <summary>
+        /// 전투 시작. heroes의 배치는 placement에서 가져옴.
+        /// placement에 없는 영웅은 자동으로 빈 칸에 배치.
+        /// </summary>
+        public void StartBattle(List<Hero> heroes, Dictionary<Hero, Vector2Int> placement,
+                                List<EnemySpawn> enemies)
         {
             CleanUp();
             Grid = new BattleGrid();
             State = BattleState.Preparing;
 
-            // 아군: y=0..3 영역에 자동 배치 (앞열부터)
-            int placed = 0;
-            for (int y = 0; y <= BattleGrid.AllyZoneMaxY && placed < heroes.Count; y++)
-                for (int x = 0; x < BattleGrid.Width && placed < heroes.Count; x++)
-                {
-                    SpawnHero(heroes[placed], new Vector2Int(x, y));
-                    placed++;
-                }
+            // 아군 배치
+            SpawnHeroesWithPlacement(heroes, placement);
 
             // 적군: 데이터로 받은 위치에 배치
             foreach (var e in enemies) SpawnEnemy(e);
 
             State = BattleState.Running;
 
-            // [디버그] 스폰 결과 요약
             UnityEngine.Debug.Log($"[BattleField] StartBattle 완료. _units={_units.Count}");
+        }
+
+        /// <summary>
+        /// 전투 시작 전 영웅만 그리드에 올려두는 "미리보기" 모드.
+        /// 적도 없고 AI도 안 돎. 배치 화면에서 사용.
+        /// </summary>
+        public void EnterPlacementPreview(List<Hero> heroes, Dictionary<Hero, Vector2Int> placement)
+        {
+            CleanUp();
+            Grid = new BattleGrid();
+            State = BattleState.Preparing;
+
+            SpawnHeroesWithPlacement(heroes, placement);
+
+            // State는 Preparing 유지 — Update의 AI Tick은 안 돔
+        }
+
+        public void ExitPlacementPreview()
+        {
+            CleanUp();
+        }
+
+        /// <summary>현재 미리보기에 떠있는 영웅 BattleUnit을 셀로 찾기. 드래그 픽킹용.</summary>
+        public BattleUnit GetUnitAt(Vector2Int cell)
+        {
+            return Grid?.GetOccupant(cell);
+        }
+
+        /// <summary>현재 살아있는 모든 아군 BattleUnit 순회 (배치 화면용).</summary>
+        public IEnumerable<BattleUnit> AllAllyUnits()
+        {
             foreach (var u in _units)
+                if (u != null && u.Team == Team.Ally && u.IsAlive) yield return u;
+        }
+
+        private void SpawnHeroesWithPlacement(List<Hero> heroes,
+                                              Dictionary<Hero, Vector2Int> placement)
+        {
+            // 우선순위 1: placement에 있는 영웅
+            // 우선순위 2: placement에 없는 영웅 → 빈 칸 앞에서부터
+            var unplaced = new List<Hero>();
+
+            foreach (var hero in heroes)
             {
-                if (u == null) { UnityEngine.Debug.Log("  - (null)"); continue; }
-                UnityEngine.Debug.Log(
-                    $"  - {u.name} team={u.Team} cell={u.Cell} pos={u.transform.position} " +
-                    $"alive={u.IsAlive} hp={u.CurrentHP}/{u.Stats.maxHp} active={u.gameObject.activeSelf}");
+                if (placement != null && placement.TryGetValue(hero, out var cell))
+                {
+                    if (Grid.IsEmpty(cell) && Grid.IsAllyZone(cell))
+                        SpawnHero(hero, cell);
+                    else
+                        unplaced.Add(hero); // 충돌이나 잘못된 셀이면 자동 배치로
+                }
+                else unplaced.Add(hero);
+            }
+
+            // 자동 배치 폴백
+            foreach (var hero in unplaced)
+            {
+                bool placed = false;
+                for (int y = 0; y <= BattleGrid.AllyZoneMaxY && !placed; y++)
+                    for (int x = 0; x < BattleGrid.Width && !placed; x++)
+                    {
+                        var c = new Vector2Int(x, y);
+                        if (Grid.IsEmpty(c)) { SpawnHero(hero, c); placed = true; }
+                    }
             }
         }
 
@@ -241,6 +297,16 @@ namespace AutoBattler.Battle
             float x = (c.x - (BattleGrid.Width - 1) * 0.5f) * cellSize.x;
             float z = (c.y - (BattleGrid.Height - 1) * 0.5f) * cellSize.y;
             return new Vector3(x, groundY, z);
+        }
+
+        /// <summary>월드 좌표를 가장 가까운 셀로 스냅. 범위 밖이면 클램프.</summary>
+        public Vector2Int WorldToCell(Vector3 world)
+        {
+            int x = Mathf.RoundToInt(world.x / cellSize.x + (BattleGrid.Width - 1) * 0.5f);
+            int y = Mathf.RoundToInt(world.z / cellSize.y + (BattleGrid.Height - 1) * 0.5f);
+            x = Mathf.Clamp(x, 0, BattleGrid.Width - 1);
+            y = Mathf.Clamp(y, 0, BattleGrid.Height - 1);
+            return new Vector2Int(x, y);
         }
     }
 

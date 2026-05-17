@@ -17,7 +17,7 @@ namespace AutoBattler.UI
     ///   1) "장착할 스킬"을 인벤토리에서 탭 → 선택 상태
     ///   2) 영웅 카드의 슬롯 A 또는 B 탭 → 장착 (기존 스킬은 인벤토리로 복귀)
     ///   3) 합성 가능한 스킬 옆 [합성] 버튼 → 3개 소비 + 상위 1개 추가
-    ///   4) [다음 전투] 버튼 → RunManager.ProceedToNextRound()
+    ///   4) [확인] 버튼 → RunManager.ConfirmLoadout() → 배치 화면
     ///
     /// 프리팹 의존:
     ///   heroCardPrefab: HeroLoadoutCard 컴포넌트가 붙은 프리팹
@@ -31,15 +31,15 @@ namespace AutoBattler.UI
         [Header("UI 루트")]
         public Transform heroCardsRoot;     // VerticalLayoutGroup 권장
         public Transform inventoryRoot;     // VerticalLayoutGroup 권장
-        public Button   proceedButton;      // "다음 전투"
+        public Button proceedButton;      // "다음 전투"
 
         [Header("프리팹")]
-        public HeroLoadoutCard   heroCardPrefab;
+        public HeroLoadoutCard heroCardPrefab;
         public InventorySkillItem inventoryItemPrefab;
 
         // 런타임 인스턴스
-        private readonly List<HeroLoadoutCard>    _heroCards = new List<HeroLoadoutCard>();
-        private readonly List<InventorySkillItem> _invItems  = new List<InventorySkillItem>();
+        private readonly List<HeroLoadoutCard> _heroCards = new List<HeroLoadoutCard>();
+        private readonly List<InventorySkillItem> _invItems = new List<InventorySkillItem>();
 
         // 현재 인벤토리에서 선택된 스킬
         public SkillData SelectedSkill { get; private set; }
@@ -135,7 +135,7 @@ namespace AutoBattler.UI
         // ─────────────────────────────────────────────────────────
         private void OnProceedClicked()
         {
-            runManager.ProceedToNextRound();
+            runManager.ConfirmLoadout();   // → OnPlacementReady → 배치 화면
         }
     }
 }

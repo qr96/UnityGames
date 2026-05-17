@@ -50,13 +50,17 @@ namespace AutoBattler.Rounds
         public List<EquipmentData> InventoryEquipment { get; } = new List<EquipmentData>();
         public SkillInventory SkillInv { get; } = new SkillInventory();
 
+        /// <summary>영웅별 그리드 셀 배치 (아군 영역: y=0..3)</summary>
+        public Dictionary<Hero, Vector2Int> Placement { get; } = new Dictionary<Hero, Vector2Int>();
+
         // ─────────────────────────────────────────────────────────
         // 이벤트 — UI 가 구독
         // ─────────────────────────────────────────────────────────
-        public event Action<int> OnRoundStarted;        // round
-        public event Action<int, bool> OnRoundEnded;          // round, won
-        public event Action<List<SkillData>> OnRewardOffered;       // 자동 지급된 스킬 목록 표시용
-        public event Action OnLoadoutReady;        // 보상 확인 후 장착 화면 열기
+        public event Action<int> OnRoundStarted;
+        public event Action<int, bool> OnRoundEnded;
+        public event Action<List<SkillData>> OnRewardOffered;
+        public event Action OnLoadoutReady;        // 보상 확인 후 장착 화면
+        public event Action OnPlacementReady;      // 장착 확인 후 배치 화면
         public event Action OnRunCompleted;
         public event Action OnRunFailed;
 
@@ -71,6 +75,7 @@ namespace AutoBattler.Rounds
             InventoryWeapons.Clear();
             InventoryEquipment.Clear();
             SkillInv.Clear();
+            Placement.Clear();
             CurrentRound = 0;
             IsRunOver = false;
 
@@ -78,20 +83,70 @@ namespace AutoBattler.Rounds
             int n = Mathf.Min(2, startingPick.Length);
             for (int i = 0; i < n; i++) Roster.Add(new Hero(startingPick[i]));
 
+            // 초기 자동 배치 (앞줄부터)
+            AutoPlaceMissingHeroes();
+
             if (battleField != null)
             {
                 battleField.OnBattleEnded -= OnBattleResult;
                 battleField.OnBattleEnded += OnBattleResult;
             }
 
-            StartNextRound();
+            // 첫 라운드 시작 전에도 배치 단계 거침
+            OnPlacementReady?.Invoke();
         }
 
         public bool TryRecruitHero(HeroData data)
         {
             if (Roster.Count >= MaxHeroes) return false;
             Roster.Add(new Hero(data));
+            AutoPlaceMissingHeroes(); // 신규 영웅은 빈 칸 자동 배치
             return true;
+        }
+
+        /// <summary>아직 배치 안 된 영웅이 있으면 앞줄부터 빈 칸에 자동 배치.</summary>
+        private void AutoPlaceMissingHeroes()
+        {
+            foreach (var hero in Roster)
+            {
+                if (Placement.ContainsKey(hero)) continue;
+
+                // 앞줄부터 빈 칸 찾기 (y=0..3, x=0..4)
+                bool placed = false;
+                for (int y = 0; y <= BattleGrid.AllyZoneMaxY && !placed; y++)
+                    for (int x = 0; x < BattleGrid.Width && !placed; x++)
+                    {
+                        var cell = new Vector2Int(x, y);
+                        if (!Placement.ContainsValue(cell))
+                        {
+                            Placement[hero] = cell;
+                            placed = true;
+                        }
+                    }
+            }
+        }
+
+        /// <summary>외부(배치 UI)에서 호출: 영웅을 특정 셀에. 이미 있으면 swap.</summary>
+        public void SetPlacement(Hero hero, Vector2Int cell)
+        {
+            if (hero == null) return;
+            if (cell.y < 0 || cell.y > BattleGrid.AllyZoneMaxY) return;
+            if (cell.x < 0 || cell.x >= BattleGrid.Width) return;
+
+            // 그 셀에 이미 있는 다른 영웅
+            Hero occupant = null;
+            foreach (var kv in Placement)
+                if (kv.Value == cell && kv.Key != hero) { occupant = kv.Key; break; }
+
+            if (occupant != null)
+            {
+                // swap: 점유자를 hero의 기존 자리로
+                if (Placement.TryGetValue(hero, out var oldCell))
+                    Placement[occupant] = oldCell;
+                else
+                    Placement.Remove(occupant); // hero가 아직 배치 안 됐던 케이스
+            }
+            Placement[hero] = cell;
         }
 
         // ─────────────────────────────────────────────────────────
@@ -110,7 +165,7 @@ namespace AutoBattler.Rounds
 
             OnRoundStarted?.Invoke(CurrentRound);
             var enemies = BuildEnemiesForRound(CurrentRound);
-            battleField.StartBattle(Roster, enemies);
+            battleField.StartBattle(Roster, Placement, enemies);
         }
 
         private void OnBattleResult(bool won)
@@ -140,7 +195,13 @@ namespace AutoBattler.Rounds
             OnLoadoutReady?.Invoke();
         }
 
-        /// <summary>장착/합성 화면의 "다음 전투" 버튼이 호출. 다음 라운드 시작.</summary>
+        /// <summary>장착/합성 화면의 "확인" 버튼이 호출. 배치 화면 열라는 신호.</summary>
+        public void ConfirmLoadout()
+        {
+            OnPlacementReady?.Invoke();
+        }
+
+        /// <summary>배치 화면의 "전투 시작" 버튼이 호출. 다음 라운드 시작.</summary>
         public void ProceedToNextRound()
         {
             StartNextRound();
