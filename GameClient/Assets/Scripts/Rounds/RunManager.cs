@@ -20,17 +20,14 @@ namespace AutoBattler.Rounds
     /// </summary>
     public class RunManager : MonoBehaviour
     {
-        public const int MaxHeroes = 5;
+        public const int MaxHeroes = 5;   // 영웅 보유 상한
         public const int TotalRounds = 15;
 
         [Header("씬 참조")]
         public BattleField battleField;
 
-        [Header("기본 풀 (디자이너가 채움)")]
-        public HeroData[] startingHeroPool;
-        public HeroData[] recruitablePool;
-        public WeaponData[] weaponPool;
-        public EquipmentData[] equipmentPool;
+        [Header("보상 — 스킬 풀")]
+        [Tooltip("라운드 클리어 시 자동 지급되는 스킬의 후보 목록")]
         public SkillData[] skillPool;
 
         [Header("인카운터 (적 데이터)")]
@@ -55,8 +52,6 @@ namespace AutoBattler.Rounds
         public int CurrentRound { get; private set; } = 0;
         public bool IsRunOver { get; private set; }
 
-        public List<WeaponData> InventoryWeapons { get; } = new List<WeaponData>();
-        public List<EquipmentData> InventoryEquipment { get; } = new List<EquipmentData>();
         public SkillInventory SkillInv { get; } = new SkillInventory();
 
         /// <summary>영웅별 그리드 셀 배치 (아군 영역: y=0..3)</summary>
@@ -90,17 +85,29 @@ namespace AutoBattler.Rounds
         public void StartNewRun(HeroData[] startingPick)
         {
             Roster.Clear();
-            InventoryWeapons.Clear();
-            InventoryEquipment.Clear();
             SkillInv.Clear();
             Placement.Clear();
             _nextEncounter = null;
             CurrentRound = 0;
             IsRunOver = false;
 
-            // 2명으로 시작
-            int n = Mathf.Min(2, startingPick.Length);
-            for (int i = 0; i < n; i++) Roster.Add(new Hero(startingPick[i]));
+            // 배열에 든 영웅 다 추가. null 슬롯은 건너뜀.
+            int added = 0, skipped = 0;
+            foreach (var hd in startingPick)
+            {
+                if (hd == null) { skipped++; continue; }
+                if (Roster.Count >= MaxHeroes) break;
+                Roster.Add(new Hero(hd));
+                added++;
+            }
+            Debug.Log($"[RunManager] StartNewRun: added={added}, skipped(null)={skipped}, " +
+                      $"input length={startingPick.Length}");
+
+            if (added == 0)
+            {
+                Debug.LogError("[RunManager] 시작 영웅이 0명입니다. BattleHUD의 Starting Heroes 배열을 확인하세요.");
+                return;
+            }
 
             // 초기 자동 배치 (앞줄부터)
             AutoPlaceMissingHeroes();
@@ -114,14 +121,6 @@ namespace AutoBattler.Rounds
             // 첫 라운드 시작 전에도 배치 단계 거침
             EnsureNextEncounterReady();
             OnPlacementReady?.Invoke();
-        }
-
-        public bool TryRecruitHero(HeroData data)
-        {
-            if (Roster.Count >= MaxHeroes) return false;
-            Roster.Add(new Hero(data));
-            AutoPlaceMissingHeroes(); // 신규 영웅은 빈 칸 자동 배치
-            return true;
         }
 
         /// <summary>아직 배치 안 된 영웅이 있으면 앞줄부터 빈 칸에 자동 배치.</summary>

@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4298043780124706424, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
       propertyPath: m_Name
-      value: BaseUnit Variant
+      value: Unit_0000
       objectReference: {fileID: 0}
     - target: {fileID: 4298043780124706424, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
       propertyPath: m_Layer
@@ -129,6 +129,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 6a3f4a85c04c15a4e9d6ae611b5b6508, type: 2}
+    - target: {fileID: 5866666021909216657, guid: ec9413dcf7107ce4f84a4250da698d28, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

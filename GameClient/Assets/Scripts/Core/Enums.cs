@@ -21,20 +21,6 @@ namespace AutoBattler.Core
         AllyLowestHP
     }
 
-    public enum RewardType
-    {
-        Weapon,
-        Equipment,
-        Skill
-    }
-
-    public enum EquipmentSlot
-    {
-        Weapon,
-        Armor,
-        Accessory
-    }
-
     public enum BattleState
     {
         Idle,
