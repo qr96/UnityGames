@@ -16,11 +16,11 @@ MonoBehaviour:
   displayName: "\uACE0\uBE14\uB9B0 \uC14B"
   enemies:
   - enemyData: {fileID: 11400000, guid: 32925fc95aaf3554c8297e1f1e88bf7a, type: 2}
-    cell: {x: 1, y: 8}
+    cell: {x: 1, y: 9}
   - enemyData: {fileID: 11400000, guid: 32925fc95aaf3554c8297e1f1e88bf7a, type: 2}
-    cell: {x: 2, y: 8}
+    cell: {x: 2, y: 9}
   - enemyData: {fileID: 11400000, guid: 32925fc95aaf3554c8297e1f1e88bf7a, type: 2}
-    cell: {x: 3, y: 8}
+    cell: {x: 3, y: 9}
   applyDifficultyScaling: 1
   hpMultiplier: 1
   attackMultiplier: 1

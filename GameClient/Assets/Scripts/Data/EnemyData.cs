@@ -10,10 +10,16 @@ namespace AutoBattler.Data
         public string displayName;
 
         [Header("스탯 (Lv1 기준)")]
-        public Stats baseStats = new Stats {
-            attack = 8, defense = 1, maxHp = 60,
-            critRate = 0.05f, critDamage = 1.5f,
-            attackSpeed = 100, range = 0, moveSpeed = 1f
+        public Stats baseStats = new Stats
+        {
+            attack = 8,
+            defense = 1,
+            maxHp = 60,
+            critRate = 0.05f,
+            critDamage = 1.5f,
+            attackSpeed = 100,
+            attackRange = 0,
+            moveSpeed = 1f
         };
 
         [Header("장비/스킬 (옵션)")]

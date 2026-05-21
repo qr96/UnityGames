@@ -18,21 +18,21 @@ namespace AutoBattler.Core
 
         // 전투 보조
         public float attackSpeed;   // 100 = 1초에 1번
-        public int range;           // 사정거리(칸)
+        public int attackRange;     // 공격 사거리 보너스(칸). 0이 기본. 무기 사거리에 합산됨.
         public float moveSpeed;     // 칸/초 (기본 1.0)
 
         public static Stats Zero => new Stats();
 
         public static Stats operator +(Stats a, Stats b) => new Stats
         {
-            attack       = a.attack + b.attack,
-            defense      = a.defense + b.defense,
-            maxHp        = a.maxHp + b.maxHp,
-            critRate     = Mathf.Clamp01(a.critRate + b.critRate),
-            critDamage   = a.critDamage + b.critDamage,
-            attackSpeed  = a.attackSpeed + b.attackSpeed,
-            range        = a.range + b.range,
-            moveSpeed    = a.moveSpeed + b.moveSpeed,
+            attack = a.attack + b.attack,
+            defense = a.defense + b.defense,
+            maxHp = a.maxHp + b.maxHp,
+            critRate = Mathf.Clamp01(a.critRate + b.critRate),
+            critDamage = a.critDamage + b.critDamage,
+            attackSpeed = a.attackSpeed + b.attackSpeed,
+            attackRange = a.attackRange + b.attackRange,
+            moveSpeed = a.moveSpeed + b.moveSpeed,
         };
 
         public float AttackInterval =>

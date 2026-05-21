@@ -68,7 +68,7 @@ namespace AutoBattler.Battle
         {
             SourceHero = hero;
             DisplayName = hero.data.displayName;
-            Weapon = hero.weapon;
+            Weapon = null;   // 무기는 직업이 결정 (시각/모션 측면). 전투 수치는 Stats로 합산됨.
             Stats = hero.GetFinalStats();
             CurrentHP = Stats.maxHp;
             AttackRange = hero.GetBaseAttackRange();
@@ -89,8 +89,8 @@ namespace AutoBattler.Battle
             CurrentHP = stats.maxHp;
             Weapon = weapon;
             AttackRange = weapon != null
-                ? Mathf.Max(1, weapon.baseAttackRange + stats.range)
-                : Mathf.Max(1, 1 + stats.range);
+                ? Mathf.Max(1, weapon.baseAttackRange + stats.attackRange)
+                : Mathf.Max(1, 1 + stats.attackRange);
 
             _skills.Clear();
             _cooldownRemain.Clear();

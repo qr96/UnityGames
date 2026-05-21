@@ -13,7 +13,7 @@ namespace AutoBattler.EditorTools
     /// </summary>
     public static class DummyEncounterGenerator
     {
-        private const string EnemyDir     = "Assets/_Generated/Enemies";
+        private const string EnemyDir = "Assets/_Generated/Enemies";
         private const string EncounterDir = "Assets/_Generated/Encounters";
 
         [MenuItem("AutoBattler/Generate/Dummy Encounters")]
@@ -24,13 +24,13 @@ namespace AutoBattler.EditorTools
 
             // 적 3종
             var goblin = MakeEnemy("Enemy_Goblin", "Goblin",
-                atk: 6, def: 1, hp: 40, atkSpd: 100, range: 0, moveSpd: 1.2f);
+                atk: 6, def: 1, hp: 40, atkSpd: 100, attackRange: 0, moveSpd: 1.2f);
 
             var orc = MakeEnemy("Enemy_Orc", "Orc",
-                atk: 10, def: 2, hp: 80, atkSpd: 80, range: 0, moveSpd: 0.9f);
+                atk: 10, def: 2, hp: 80, atkSpd: 80, attackRange: 0, moveSpd: 0.9f);
 
             var archer = MakeEnemy("Enemy_Archer", "Archer",
-                atk: 8, def: 1, hp: 50, atkSpd: 100, range: 3, moveSpd: 1f);
+                atk: 8, def: 1, hp: 50, atkSpd: 100, attackRange: 3, moveSpd: 1f);
 
             // 인카운터 5종
             var trio = MakeEncounter("Encounter_GoblinTrio", "고블린 셋",
@@ -44,7 +44,7 @@ namespace AutoBattler.EditorTools
 
             var mixed = MakeEncounter("Encounter_Mixed", "혼성 부대",
                 (goblin, new Vector2Int(0, 7)),
-                (orc,    new Vector2Int(2, 9)),
+                (orc, new Vector2Int(2, 9)),
                 (archer, new Vector2Int(4, 8)));
 
             var ambush = MakeEncounter("Encounter_Ambush", "양면 공격",
@@ -71,10 +71,10 @@ namespace AutoBattler.EditorTools
             for (int r = 1; r <= 15; r++)
             {
                 EncounterData[] pool;
-                if      (r >= 14) pool = new[] { boss };                              // 보스 라운드
+                if (r >= 14) pool = new[] { boss };                              // 보스 라운드
                 else if (r >= 10) pool = new[] { mixed, ambush, orcDuo };
-                else if (r >= 5)  pool = new[] { trio, orcDuo, mixed };
-                else              pool = new[] { trio, orcDuo };
+                else if (r >= 5) pool = new[] { trio, orcDuo, mixed };
+                else pool = new[] { trio, orcDuo };
                 table.rounds.Add(new RoundEntry { round = r, candidates = pool });
             }
             EditorUtility.SetDirty(table);
@@ -86,7 +86,7 @@ namespace AutoBattler.EditorTools
 
         private static EnemyData MakeEnemy(string fileName, string display,
             float atk, float def, float hp,
-            float atkSpd, int range, float moveSpd)
+            float atkSpd, int attackRange, float moveSpd)
         {
             string path = $"{EnemyDir}/{fileName}.asset";
             var e = AssetDatabase.LoadAssetAtPath<EnemyData>(path);
@@ -99,14 +99,14 @@ namespace AutoBattler.EditorTools
             e.displayName = display;
             e.baseStats = new Stats
             {
-                attack      = atk,
-                defense     = def,
-                maxHp       = hp,
-                critRate    = 0.05f,
-                critDamage  = 1.5f,
+                attack = atk,
+                defense = def,
+                maxHp = hp,
+                critRate = 0.05f,
+                critDamage = 1.5f,
                 attackSpeed = atkSpd,
-                range       = range,
-                moveSpeed   = moveSpd
+                attackRange = attackRange,
+                moveSpeed = moveSpd
             };
             EditorUtility.SetDirty(e);
             return e;

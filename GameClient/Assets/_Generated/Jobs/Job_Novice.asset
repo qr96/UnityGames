@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce6fbfd1b91356144a57d7329c32da0b, type: 3}
+  m_Name: Job_Novice
+  m_EditorClassIdentifier: Assembly-CSharp::AutoBattler.Data.JobData
+  id: Job_Novice
+  displayName: "\uCD08\uBCF4\uC790"
+  description: "\uBC29\uB9DD\uC774\uB97C \uB4E4\uACE0 \uD718\uB450\uB974\uB294 \uACAC\uC2B5\uC0DD."
+  statBonus:
+    attack: 0
+    defense: 0
+    maxHp: 0
+    critRate: 0
+    critDamage: 0
+    attackSpeed: 0
+    attackRange: 0
+    moveSpeed: 0
+  attackMotion: 0
+  weaponVisualPrefab: {fileID: 0}
+  hitVfxPrefab: {fileID: 0}

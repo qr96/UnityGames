@@ -16,7 +16,6 @@ MonoBehaviour:
   - round: 1
     candidates:
     - {fileID: 11400000, guid: 9d79c5bdc4de979458620753078c331e, type: 2}
-    - {fileID: 11400000, guid: d03e77f750f0219418bd7d28e85e1175, type: 2}
   - round: 2
     candidates:
     - {fileID: 11400000, guid: 9d79c5bdc4de979458620753078c331e, type: 2}
