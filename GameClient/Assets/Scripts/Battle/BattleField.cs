@@ -287,8 +287,22 @@ namespace AutoBattler.Battle
                 if (anyAlly && anyEnemy) return;
             }
 
-            if (!anyEnemy) { State = BattleState.Won; OnBattleEnded?.Invoke(true); }
-            else if (!anyAlly) { State = BattleState.Lost; OnBattleEnded?.Invoke(false); }
+            if (!anyEnemy) { EndBattle(true); }
+            else if (!anyAlly) { EndBattle(false); }
+        }
+
+        private void EndBattle(bool won)
+        {
+            State = won ? BattleState.Won : BattleState.Lost;
+
+            // 살아있는 유닛 시각 정지 (이동 모션 끄기). 풀 반납은 다음 라운드 시작 시 CleanUp.
+            foreach (var u in _units)
+            {
+                if (u == null || !u.IsAlive) continue;
+                u.StopVisuals();
+            }
+
+            OnBattleEnded?.Invoke(won);
         }
 
         // ─────────────────────────────────────────────────────────

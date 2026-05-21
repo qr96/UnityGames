@@ -119,29 +119,38 @@ namespace AutoBattler.Battle
             int sx = dx == 0 ? 0 : (dx > 0 ? 1 : -1);
             int sy = dy == 0 ? 0 : (dy > 0 ? 1 : -1);
 
-            // 후보를 우선순위 순으로 정렬해서 시도
-            // [장축 직진, 단축 직진, 장축 역방향, 단축 역방향]
-            // 장축은 차이가 큰 쪽
+            // 이미 도착했으면 null
+            if (sx == 0 && sy == 0) return null;
+
             bool yIsLong = Mathf.Abs(dy) > Mathf.Abs(dx);
 
             Vector2Int longStep = yIsLong ? new Vector2Int(0, sy) : new Vector2Int(sx, 0);
             Vector2Int shortStep = yIsLong ? new Vector2Int(sx, 0) : new Vector2Int(0, sy);
 
             // 1순위: 장축 직진
-            if (sy != 0 || sx != 0)
-            {
-                var step = TryStep(self.Cell, longStep);
-                if (step.HasValue) return step;
+            var step = TryStep(self.Cell, longStep);
+            if (step.HasValue) return step;
 
-                // 2순위: 단축 (=장축이 막혔거나 이미 정렬됨)
-                if (shortStep != Vector2Int.zero)
-                {
-                    step = TryStep(self.Cell, shortStep);
-                    if (step.HasValue) return step;
-                }
+            // 2순위: 단축 방향. 이미 정렬된 경우(shortStep=zero)엔 좌우 어느 쪽이든 시도해서 우회.
+            if (shortStep != Vector2Int.zero)
+            {
+                step = TryStep(self.Cell, shortStep);
+                if (step.HasValue) return step;
+            }
+            else
+            {
+                // 같은 축에 정렬되어 직진 막힘 — 좌우(또는 상하) 어느 쪽이든 빈 칸으로 우회
+                Vector2Int sideA = yIsLong ? new Vector2Int(1, 0) : new Vector2Int(0, 1);
+                Vector2Int sideB = yIsLong ? new Vector2Int(-1, 0) : new Vector2Int(0, -1);
+                // 매번 같은 쪽으로 쏠리지 않게 랜덤 우선순위
+                if (Random.value < 0.5f) { var tmp = sideA; sideA = sideB; sideB = tmp; }
+                step = TryStep(self.Cell, sideA);
+                if (step.HasValue) return step;
+                step = TryStep(self.Cell, sideB);
+                if (step.HasValue) return step;
             }
 
-            // 3순위: 어느 방향이든 거리가 줄어들고 빈 칸이면 OK
+            // 3순위: 그래도 갈 데 없으면 거리 줄어드는 어떤 빈 칸이든
             int curDist = Distance(self.Cell, target);
             var fallback = new List<Vector2Int>(4);
             for (int i = 0; i < _dirs4.Length; i++)
@@ -152,7 +161,6 @@ namespace AutoBattler.Battle
             }
             if (fallback.Count > 0) return fallback[Random.Range(0, fallback.Count)];
 
-            // 막힘
             return null;
         }
 

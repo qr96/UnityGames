@@ -155,9 +155,10 @@ namespace AutoBattler.Battle
                 else
                 {
                     SetMoving(true);
-                    // 이동 중에도 타깃 방향 갱신해서 자연스럽게
-                    var t2 = AcquireTarget(allUnits);
-                    if (t2 != null) UpdateFacing(t2.Cell);
+                    // 이동 중엔 진행 방향을 봄 (월드 좌표 차이 = 진행 방향)
+                    Vector3 dir = _moveTargetWorld - _moveStartWorld;
+                    dir.y = 0;
+                    if (dir.sqrMagnitude > 0.0001f) DesiredFacing = dir.normalized;
                     return;
                 }
             }
@@ -252,6 +253,14 @@ namespace AutoBattler.Battle
             if (moving == _wasMoving) return;
             _wasMoving = moving;
             anim?.SetMoving(moving);
+        }
+
+        /// <summary>전투 종료 시 BattleField가 호출. 이동 모션/이동 보간 정지.</summary>
+        public void StopVisuals()
+        {
+            _isMoving = false;
+            _moveElapsed = 0f;
+            SetMoving(false);
         }
 
         // ─────────────────────────────────────────────────────────
