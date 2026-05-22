@@ -17,7 +17,7 @@ MonoBehaviour:
   description: 
   cooldown: 5
   targetType: 1
-  range: 4
+  range: 2
   areaRadius: 1
   damageMultiplier: 2.5
   healAmount: 0
@@ -29,6 +29,8 @@ MonoBehaviour:
     critRate: 0
     critDamage: 0
     attackSpeed: 0
-    range: 0
+    attackRange: 0
     moveSpeed: 0
   upgradedVersion: {fileID: 11400000, guid: cd4836ec958baae4f86e585b3dbd128b, type: 2}
+  projectilePrefab: {fileID: 3795219548592558598, guid: 771c762513d9e1d4e89ad7ac0f19e178, type: 3}
+  projectileSpeed: 8
