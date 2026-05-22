@@ -264,8 +264,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 568977266134049462}
-  - component: {fileID: 533486997419450196}
-  - component: {fileID: 1606801651935374924}
+  - component: {fileID: 3767627623520451794}
   m_Layer: 0
   m_Name: Fireball
   m_TagString: Untagged
@@ -292,7 +291,7 @@ Transform:
   - {fileID: 703480985997227437}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &533486997419450196
+--- !u!114 &3767627623520451794
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -301,23 +300,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 3795219548592558598}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f6b0a22cb3d3f6499a796c6d517d51e, type: 3}
+  m_Script: {fileID: 11500000, guid: 9c8821d98fdd1fe4f9a943cfd6f8fb1a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Poolable
-  poolKey: 
---- !u!114 &1606801651935374924
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3795219548592558598}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e04a6eb8804e8eb43a7d846537aa5ff1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SkillProjectile
-  speed: 0
+  m_EditorClassIdentifier: Assembly-CSharp::AutoBattler.Battle.FX.Projectile
+  arriveDistance: 0.3
+  maxLifetime: 5
 --- !u!1 &5978563507173594423
 GameObject:
   m_ObjectHideFlags: 0

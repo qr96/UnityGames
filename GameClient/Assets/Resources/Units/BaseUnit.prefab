@@ -253,6 +253,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AutoBattler.Battle.FX.UnitFlash
   renderers: []
-  hitColor: {r: 1, g: 1, b: 1, a: 1}
+  hitColor: {r: 1, g: 0.28773582, b: 0.28773582, a: 1}
   healColor: {r: 0.4, g: 1, b: 0.4, a: 1}
   flashDuration: 0.12
