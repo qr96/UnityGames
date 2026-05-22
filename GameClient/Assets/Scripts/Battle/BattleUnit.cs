@@ -124,6 +124,9 @@ namespace AutoBattler.Battle
             anim?.SetMoving(false);
             anim?.Revive();
             _wasMoving = false;
+
+            // 색 깜빡임 잔존 상태 리셋
+            GetFlash()?.ForceReset();
         }
 
         // ─────────────────────────────────────────────────────────
@@ -305,6 +308,11 @@ namespace AutoBattler.Battle
             dmg = Mathf.Max(1f, dmg);
 
             target.CurrentHP -= dmg;
+
+            // 시각 효과
+            FX.FloatingTextManager.Instance?.SpawnDamage(target.transform.position, dmg, crit);
+            target.GetFlash()?.FlashHit();
+
             if (target.CurrentHP <= 0f) target.OnDeath();
             else target.anim?.PlayHit();
         }
@@ -312,7 +320,27 @@ namespace AutoBattler.Battle
         public void Heal(float amount)
         {
             if (!IsAlive) return;
+            float before = CurrentHP;
             CurrentHP = Mathf.Min(Stats.maxHp, CurrentHP + amount);
+            float actual = CurrentHP - before;
+            if (actual > 0f)
+            {
+                FX.FloatingTextManager.Instance?.SpawnHeal(transform.position, actual);
+                GetFlash()?.FlashHeal();
+            }
+        }
+
+        // UnitFlash 자동 탐지 (자식 어딘가에 있다고 가정)
+        private FX.UnitFlash _flash;
+        private bool _flashSearched;
+        private FX.UnitFlash GetFlash()
+        {
+            if (!_flashSearched)
+            {
+                _flash = GetComponentInChildren<FX.UnitFlash>();
+                _flashSearched = true;
+            }
+            return _flash;
         }
 
         [Header("사망 처리")]

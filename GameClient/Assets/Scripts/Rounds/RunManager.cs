@@ -92,16 +92,14 @@ namespace AutoBattler.Rounds
             IsRunOver = false;
 
             // 배열에 든 영웅 다 추가. null 슬롯은 건너뜀.
-            int added = 0, skipped = 0;
+            int added = 0;
             foreach (var hd in startingPick)
             {
-                if (hd == null) { skipped++; continue; }
+                if (hd == null) continue;
                 if (Roster.Count >= MaxHeroes) break;
                 Roster.Add(new Hero(hd));
                 added++;
             }
-            Debug.Log($"[RunManager] StartNewRun: added={added}, skipped(null)={skipped}, " +
-                      $"input length={startingPick.Length}");
 
             if (added == 0)
             {
@@ -186,7 +184,7 @@ namespace AutoBattler.Rounds
             var enemies = BuildEnemiesForRound(CurrentRound);
             battleField.StartBattle(Roster, Placement, enemies);
 
-            // 이번 인카운터 소비 — 다음에 또 EnsureNextEncounterReady 호출 시 새로 추첨
+            // 이번 인카운터 소비
             _nextEncounter = null;
         }
 
@@ -376,7 +374,6 @@ namespace AutoBattler.Rounds
         private void AutoSave()
         {
             // TODO: 직렬화 연결
-            Debug.Log($"[AutoSave] round={CurrentRound}, heroes={Roster.Count}, skillKinds={SkillInv.Counts.Count}");
         }
     }
 }

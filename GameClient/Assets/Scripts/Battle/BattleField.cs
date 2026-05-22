@@ -29,6 +29,7 @@ namespace AutoBattler.Battle
         public BattleState State { get; private set; } = BattleState.Idle;
 
         public event Action<bool> OnBattleEnded; // true=승, false=패
+        public event Action OnBattleStarted;     // StartBattle에서 유닛 스폰 완료 직후 발사
 
         private readonly List<BattleUnit> _units = new List<BattleUnit>();
         private bool _warnedNoUnitsRoot;
@@ -52,8 +53,7 @@ namespace AutoBattler.Battle
             foreach (var e in enemies) SpawnEnemy(e);
 
             State = BattleState.Running;
-
-            UnityEngine.Debug.Log($"[BattleField] StartBattle 완료. _units={_units.Count}");
+            OnBattleStarted?.Invoke();
         }
 
         /// <summary>
@@ -94,6 +94,13 @@ namespace AutoBattler.Battle
         {
             foreach (var u in _units)
                 if (u != null && u.Team == Team.Ally && u.IsAlive) yield return u;
+        }
+
+        /// <summary>현재 모든 살아있는 BattleUnit 순회 (양 팀).</summary>
+        public IEnumerable<BattleUnit> GetAllUnits()
+        {
+            foreach (var u in _units)
+                if (u != null && u.IsAlive) yield return u;
         }
 
         private void SpawnHeroesWithPlacement(List<Hero> heroes,
