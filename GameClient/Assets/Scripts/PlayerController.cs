@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         currentHP = maxHP;
+        animator.SetBool("isWalking", true);
     }
 
     void Update()

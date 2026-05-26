@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    public Animator animator;
+
     public float speed = 8f;
     public float knockbackForce = 5f;
     public float knockbackDecay = 5f;
@@ -13,6 +15,9 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         currentHP = maxHP;
+        transform.rotation = Quaternion.Euler(0, 180, 0);
+        if (animator != null)
+            animator.SetBool("isWalking", true);
     }
 
     void Update()
