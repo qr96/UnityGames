@@ -264,8 +264,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 568977266134049462}
-  - component: {fileID: 3767627623520451794}
-  m_Layer: 0
+  - component: {fileID: -2969446537728163145}
+  - component: {fileID: 5211730421471600677}
+  m_Layer: 11
   m_Name: Fireball
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -291,7 +292,7 @@ Transform:
   - {fileID: 703480985997227437}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3767627623520451794
+--- !u!114 &-2969446537728163145
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -300,11 +301,32 @@ MonoBehaviour:
   m_GameObject: {fileID: 3795219548592558598}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c8821d98fdd1fe4f9a943cfd6f8fb1a, type: 3}
+  m_Script: {fileID: 11500000, guid: 058b911cd17b53b4caa6ae7470579d15, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AutoBattler.Battle.FX.Projectile
-  arriveDistance: 0.3
-  maxLifetime: 5
+  m_EditorClassIdentifier: Assembly-CSharp::Projectile
+  speed: 8
+  lifeTime: 3
+--- !u!135 &5211730421471600677
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3795219548592558598}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.2
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5978563507173594423
 GameObject:
   m_ObjectHideFlags: 0

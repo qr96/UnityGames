@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6722564125083806290}
   - component: {fileID: 6961606906474395643}
-  - component: {fileID: 7043801061378197742}
   m_Layer: 5
   m_Name: UnitHpBar
   m_TagString: Untagged
@@ -90,26 +89,6 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &7043801061378197742
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1650896607558174278}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0809371926e10a843a2b2dc0bfee149a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AutoBattler.Battle.FX.UnitHpBar
-  slider: {fileID: 6961606906474395643}
-  fillImage: {fileID: 725529036669673754}
-  allyColor: {r: 0.4, g: 1, b: 0.4, a: 1}
-  enemyColor: {r: 1, g: 0.4, b: 0.4, a: 1}
-  lowHpColor: {r: 1, g: 0.6, b: 0.1, a: 1}
-  hideWhenFull: 0
-  useLowHpColor: 1
-  yOffset: 1.25
 --- !u!1 &7434198685489186657
 GameObject:
   m_ObjectHideFlags: 0

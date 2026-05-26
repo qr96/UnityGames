@@ -130,10 +130,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4887441272725831373}
   - component: {fileID: 5453995726536013165}
-  - component: {fileID: 3381387804595408110}
-  - component: {fileID: 3611345698195520888}
-  - component: {fileID: 5534942880088417640}
-  - component: {fileID: 3104206276695170226}
+  - component: {fileID: 5619075580952760141}
+  - component: {fileID: 3002028332215130276}
   m_Layer: 0
   m_Name: BaseUnit
   m_TagString: Untagged
@@ -180,47 +178,8 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &3381387804595408110
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4298043780124706424}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f637ccd2a19e134a99abdd0f32038a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AutoBattler.Battle.BattleUnit
-  Cell: {x: 0, y: 0}
-  DesiredFacing: {x: 0, y: 0, z: 1}
-  anim: {fileID: 3611345698195520888}
-  deathHideDelay: 0
---- !u!114 &3611345698195520888
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4298043780124706424}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f7d314d5acc6ea4aabb9413d6ed8916, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AutoBattler.Battle.UnitAnimator
-  animator: {fileID: 5453995726536013165}
-  walkBoolName: isWalking
-  attackTriggerName: attack
-  skillTriggerName: skill
-  hitTriggerName: hit
-  deadBoolName: isDead
-  useWalk: 1
-  useAttack: 1
-  useSkill: 0
-  useHit: 0
-  useDead: 0
---- !u!65 &5534942880088417640
-BoxCollider:
+--- !u!136 &5619075580952760141
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -237,22 +196,35 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  serializedVersion: 2
+  m_Radius: 0.25
+  m_Height: 1
+  m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3104206276695170226
-MonoBehaviour:
+--- !u!54 &3002028332215130276
+Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4298043780124706424}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2667109f2c68f1746893c9866d7f56cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AutoBattler.Battle.FX.UnitFlash
-  renderers: []
-  hitColor: {r: 1, g: 0.28773582, b: 0.28773582, a: 1}
-  healColor: {r: 0.4, g: 1, b: 0.4, a: 1}
-  flashDuration: 0.12
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

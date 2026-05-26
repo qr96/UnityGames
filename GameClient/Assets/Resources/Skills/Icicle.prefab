@@ -9,8 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7186519853823634503}
-  - component: {fileID: 4321301335551591255}
-  - component: {fileID: 2446589045358502183}
   m_Layer: 0
   m_Name: Icicle
   m_TagString: Untagged
@@ -34,32 +32,6 @@ Transform:
   - {fileID: 3782945242588084548}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4321301335551591255
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7429655025657176930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f6b0a22cb3d3f6499a796c6d517d51e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Poolable
-  poolKey: 
---- !u!114 &2446589045358502183
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7429655025657176930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e04a6eb8804e8eb43a7d846537aa5ff1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SkillProjectile
-  speed: 0
 --- !u!1001 &3743900704323542703
 PrefabInstance:
   m_ObjectHideFlags: 0
