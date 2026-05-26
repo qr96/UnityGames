@@ -14,6 +14,8 @@ namespace AutoBattler.EditorTools
     /// - 기본 스킬 3종 (1단계)
     /// - 각각의 합성 결과 (2단계)
     /// 1단계 SkillData.upgradedVersion 이 2단계를 가리키도록 자동 연결.
+    ///
+    /// 타깃팅은 3축 (TeamFilter / RangeFilter / Selector) 기반.
     /// </summary>
     public static class DummySkillGenerator
     {
@@ -26,25 +28,35 @@ namespace AutoBattler.EditorTools
 
             // 2단계 (합성 결과)부터 만들어야 1단계가 참조할 수 있음
             var fireballPlus = MakeSkill("Skill_Fireball+", "Fireball+",
-                cooldown: 4f, range: 4, dmgMul: 4f, area: 1, upgraded: null);
+                cooldown: 4f, range: 4, dmgMul: 4f, splash: 1,
+                team: SkillTeamFilter.Enemy, selector: SkillTargetSelector.Nearest,
+                upgraded: null);
 
             var healPlus = MakeSkill("Skill_Heal+", "Heal+",
                 cooldown: 5f, range: 0, dmgMul: 0f, healAmt: 60f,
-                target: SkillTargetType.AllyLowestHP, upgraded: null);
+                team: SkillTeamFilter.Ally, selector: SkillTargetSelector.LowestHP,
+                upgraded: null);
 
             var slashPlus = MakeSkill("Skill_Slash+", "Slash+",
-                cooldown: 3f, range: 1, dmgMul: 3f, upgraded: null);
+                cooldown: 3f, range: 1, dmgMul: 3f,
+                team: SkillTeamFilter.Enemy, selector: SkillTargetSelector.Nearest,
+                upgraded: null);
 
             // 1단계
             MakeSkill("Skill_Fireball", "Fireball",
-                cooldown: 5f, range: 4, dmgMul: 2.5f, area: 1, upgraded: fireballPlus);
+                cooldown: 5f, range: 4, dmgMul: 2.5f, splash: 1,
+                team: SkillTeamFilter.Enemy, selector: SkillTargetSelector.Nearest,
+                upgraded: fireballPlus);
 
             MakeSkill("Skill_Heal", "Heal",
                 cooldown: 6f, range: 0, dmgMul: 0f, healAmt: 30f,
-                target: SkillTargetType.AllyLowestHP, upgraded: healPlus);
+                team: SkillTeamFilter.Ally, selector: SkillTargetSelector.LowestHP,
+                upgraded: healPlus);
 
             MakeSkill("Skill_Slash", "Slash",
-                cooldown: 4f, range: 1, dmgMul: 1.8f, upgraded: slashPlus);
+                cooldown: 4f, range: 1, dmgMul: 1.8f,
+                team: SkillTeamFilter.Enemy, selector: SkillTargetSelector.Nearest,
+                upgraded: slashPlus);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -54,8 +66,11 @@ namespace AutoBattler.EditorTools
         private static SkillData MakeSkill(
             string fileName, string display,
             float cooldown, int range, float dmgMul,
-            int area = 0, float healAmt = 0f,
-            SkillTargetType target = SkillTargetType.SingleEnemy,
+            float healAmt = 0f,
+            int splash = 0,
+            SkillTeamFilter team = SkillTeamFilter.Enemy,
+            SkillRangeFilter rangeFilter = SkillRangeFilter.WithinSkillRange,
+            SkillTargetSelector selector = SkillTargetSelector.Nearest,
             SkillData upgraded = null)
         {
             string path = $"{OutDir}/{fileName}.asset";
@@ -70,10 +85,12 @@ namespace AutoBattler.EditorTools
             s.displayName = display;
             s.cooldown = cooldown;
             s.range = range;
-            s.areaRadius = area;
             s.damageMultiplier = dmgMul;
             s.healAmount = healAmt;
-            s.targetType = area > 0 ? SkillTargetType.AreaEnemy : target;
+            s.splashRadius = splash;
+            s.teamFilter = team;
+            s.rangeFilter = rangeFilter;
+            s.selector = selector;
             s.upgradedVersion = upgraded;
 
             EditorUtility.SetDirty(s);

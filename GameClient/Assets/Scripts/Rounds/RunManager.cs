@@ -180,9 +180,12 @@ namespace AutoBattler.Rounds
                 return;
             }
 
-            OnRoundStarted?.Invoke(CurrentRound);
+            // 매 전투는 독립적 — 영웅 HP를 만피로 리셋 (사망 영웅도 자동 부활)
+            foreach (var hero in Roster) hero.ResetHPToFull();
+
             var enemies = BuildEnemiesForRound(CurrentRound);
             battleField.StartBattle(Roster, Placement, enemies);
+            OnRoundStarted?.Invoke(CurrentRound);
 
             // 이번 인카운터 소비
             _nextEncounter = null;

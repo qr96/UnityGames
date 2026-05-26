@@ -68,9 +68,10 @@ namespace AutoBattler.Battle
         {
             SourceHero = hero;
             DisplayName = hero.data.displayName;
-            Weapon = null;   // 무기는 직업이 결정 (시각/모션 측면). 전투 수치는 Stats로 합산됨.
+            Weapon = null;
             Stats = hero.GetFinalStats();
-            CurrentHP = Stats.maxHp;
+            // Hero가 HP 소유 — RunManager가 라운드 시작 시 만피로 리셋해 둠
+            CurrentHP = hero.CurrentHP;
             AttackRange = hero.GetBaseAttackRange();
 
             _skills.Clear();
@@ -84,6 +85,7 @@ namespace AutoBattler.Battle
         public void InitAsEnemy(string name, Stats stats, WeaponData weapon,
                                 IList<SkillData> skills, BattleField field)
         {
+            SourceHero = null;   // 풀 재사용 시 이전 라운드 잔존값 방지
             DisplayName = name;
             Stats = stats;
             CurrentHP = stats.maxHp;
@@ -166,19 +168,20 @@ namespace AutoBattler.Battle
                 }
             }
 
-            // 2) 타깃 탐색
+            // 2) 타깃 탐색 — 적이 없어도 스킬(Self/Ally)은 시도할 수 있어야 함
             var target = AcquireTarget(allUnits);
-            if (target == null) { SetMoving(false); return; }
+            if (target != null) UpdateFacing(target.Cell);
 
-            UpdateFacing(target.Cell);
-
-            // 3) 스킬 우선
-            if (TryCastReadySkill(target, allUnits))
+            // 3) 스킬 우선 (적 타깃과 무관 — 스킬 자체의 타깃팅 규칙으로 발동)
+            if (TryCastReadySkill(allUnits))
             {
                 SetMoving(false);
                 anim?.PlaySkill();
                 return;
             }
+
+            // 적이 없으면 기본공격/이동은 할 게 없음
+            if (target == null) { SetMoving(false); return; }
 
             // 4) 사거리 안이면 기본 공격
             //    range==1 → 맨해튼 (대각 불가)
@@ -276,16 +279,29 @@ namespace AutoBattler.Battle
             DealDamage(this, target, power);
         }
 
-        private bool TryCastReadySkill(BattleUnit primaryTarget, List<BattleUnit> all)
+        private bool TryCastReadySkill(List<BattleUnit> all)
         {
             for (int i = 0; i < _skills.Count; i++)
             {
                 if (_cooldownRemain[i] > 0f) continue;
                 var s = _skills[i];
                 if (s == null) continue;
-                if (!BattleGrid.InAttackRange(Cell, primaryTarget.Cell, s.range)) continue;
 
-                SkillExecutor.Execute(this, s, primaryTarget, all, _field);
+                // 3축 타깃팅 기반 발동 조건:
+                //   - Self: 항상 발동 가능 (단, 회복 스킬이고 만피면 ResolveTarget이 null 반환)
+                //   - Enemy/Ally: ResolveTarget이 유효한 후보를 찾으면 발동
+                if (s.teamFilter == SkillTeamFilter.Self)
+                {
+                    // 회복인데 만피면 낭비 방지
+                    if (s.healAmount > 0f && CurrentHP >= Stats.maxHp) continue;
+                }
+                else
+                {
+                    var resolved = SkillExecutor.ResolveTarget(this, s, all);
+                    if (resolved == null) continue;
+                }
+
+                SkillExecutor.Execute(this, s, all, _field);
                 _cooldownRemain[i] = s.cooldown;
                 return true; // 한 틱에 한 스킬만
             }
@@ -308,6 +324,9 @@ namespace AutoBattler.Battle
             dmg = Mathf.Max(1f, dmg);
 
             target.CurrentHP -= dmg;
+            // 영웅이면 Hero 모델에도 반영 → 카드가 이벤트로 즉시 갱신됨
+            if (target.SourceHero != null)
+                target.SourceHero.SetCurrentHP(target.CurrentHP);
 
             // 시각 효과
             FX.FloatingTextManager.Instance?.SpawnDamage(target.transform.position, dmg, crit);
@@ -325,6 +344,7 @@ namespace AutoBattler.Battle
             float actual = CurrentHP - before;
             if (actual > 0f)
             {
+                if (SourceHero != null) SourceHero.SetCurrentHP(CurrentHP);
                 FX.FloatingTextManager.Instance?.SpawnHeal(transform.position, actual);
                 GetFlash()?.FlashHeal();
             }
@@ -349,6 +369,7 @@ namespace AutoBattler.Battle
         private void OnDeath()
         {
             CurrentHP = 0f;
+            if (SourceHero != null) SourceHero.SetCurrentHP(0f);
             _field?.Grid.Remove(this);          // 그리드는 즉시 비움 (다른 유닛 진로 방해 X)
             anim?.SetMoving(false);
             anim?.PlayDeath();

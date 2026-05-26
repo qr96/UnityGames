@@ -33,4 +33,4 @@ MonoBehaviour:
     moveSpeed: 0
   upgradedVersion: {fileID: 11400000, guid: cd4836ec958baae4f86e585b3dbd128b, type: 2}
   projectilePrefab: {fileID: 3795219548592558598, guid: 771c762513d9e1d4e89ad7ac0f19e178, type: 3}
-  projectileSpeed: 8
+  projectileSpeed: 4

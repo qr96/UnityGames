@@ -195,7 +195,7 @@ MonoBehaviour:
   Cell: {x: 0, y: 0}
   DesiredFacing: {x: 0, y: 0, z: 1}
   anim: {fileID: 3611345698195520888}
-  deathHideDelay: 1.5
+  deathHideDelay: 0
 --- !u!114 &3611345698195520888
 MonoBehaviour:
   m_ObjectHideFlags: 0

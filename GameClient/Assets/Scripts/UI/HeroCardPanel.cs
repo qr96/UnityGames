@@ -1,23 +1,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 using AutoBattler.Battle;
-using AutoBattler.Core;
 using AutoBattler.Heroes;
 using AutoBattler.Rounds;
+using AutoBattler.Core;
 
 namespace AutoBattler.UI
 {
     /// <summary>
     /// 하단에 항상 표시되는 영웅 카드 패널.
     /// - Roster의 영웅 수만큼 HeroCard 인스턴스를 생성/갱신
-    /// - 전투 시작/종료 시 카드를 BattleUnit과 연결/해제 (HP 갱신용)
     /// - 슬롯 탭 → RunManager.EquipSkill 호출
     /// - 인벤토리에서 SelectedSkill을 사용 (LoadoutScreen의 선택 상태 공유)
+    ///
+    /// 설계 노트:
+    ///   HP는 Hero가 소유하고 카드가 Hero.OnHPChanged를 직접 구독하므로,
+    ///   패널은 전투 시작/종료 시점에 카드를 BattleUnit과 연결할 필요가 없다.
+    ///   battleField 참조는 "전투 중 슬롯 조작 차단" 용도로만 남아있음.
     /// </summary>
     public class HeroCardPanel : MonoBehaviour
     {
         [Header("매니저")]
         public RunManager runManager;
+        [Tooltip("전투 중 슬롯 조작을 막기 위한 참조. HP 표시에는 사용하지 않음.")]
         public BattleField battleField;
 
         [Header("UI")]
@@ -36,8 +41,6 @@ namespace AutoBattler.UI
         private void OnEnable()
         {
             if (runManager == null) return;
-            runManager.OnRoundStarted += HandleRoundStarted;
-            runManager.OnRoundEnded += HandleRoundEnded;
             runManager.OnPlacementReady += Rebuild;
             runManager.SkillInv.OnChanged += RefreshAllCards;
         }
@@ -45,8 +48,6 @@ namespace AutoBattler.UI
         private void OnDisable()
         {
             if (runManager == null) return;
-            runManager.OnRoundStarted -= HandleRoundStarted;
-            runManager.OnRoundEnded -= HandleRoundEnded;
             runManager.OnPlacementReady -= Rebuild;
             runManager.SkillInv.OnChanged -= RefreshAllCards;
         }
@@ -63,7 +64,7 @@ namespace AutoBattler.UI
             foreach (var hero in runManager.Roster)
             {
                 var card = Instantiate(heroCardPrefab, cardsRoot);
-                card.Bind(this, hero);
+                card.Bind(this, hero);   // 카드가 Hero.OnHPChanged를 구독
                 _cards[hero] = card;
             }
         }
@@ -71,25 +72,6 @@ namespace AutoBattler.UI
         private void RefreshAllCards()
         {
             foreach (var c in _cards.Values) c?.Refresh();
-        }
-
-        // ─────────────────────────────────────────────────────────
-        // 전투 연결
-        // ─────────────────────────────────────────────────────────
-        private void HandleRoundStarted(int round)
-        {
-            // BattleField가 영웅들 스폰한 직후 — 카드를 BattleUnit과 연결
-            foreach (var u in battleField.AllAllyUnits())
-            {
-                if (u.SourceHero != null && _cards.TryGetValue(u.SourceHero, out var card))
-                    card.TrackUnit(u);
-            }
-        }
-
-        private void HandleRoundEnded(int round, bool won)
-        {
-            foreach (var c in _cards.Values) c?.Untrack();
-            RefreshAllCards();
         }
 
         // ─────────────────────────────────────────────────────────

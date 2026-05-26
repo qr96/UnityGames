@@ -17,11 +17,11 @@ MonoBehaviour:
   baseStats:
     attack: 6
     defense: 1
-    maxHp: 40
+    maxHp: 200
     critRate: 0.05
     critDamage: 1.5
     attackSpeed: 100
-    range: 0
+    attackRange: 0
     moveSpeed: 1.2
   weapon: {fileID: 0}
   skills: []

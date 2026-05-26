@@ -51,8 +51,11 @@ namespace AutoBattler.Battle
 
         private void OnDisable()
         {
-            // 배치 종료 시 미리보기 정리
-            if (battleField != null) battleField.ExitPlacementPreview();
+            // 미리보기 정리는 여기서 하지 않음:
+            //   - 전투 시작 → BattleField.StartBattle이 내부에서 CleanUp 후 새 유닛 스폰
+            //   - 새 런/배치 재진입 → OnEnable의 EnterPlacementPreview가 내부에서 CleanUp 호출
+            // 여기서 ExitPlacementPreview를 부르면 StartBattle 직후 OnRoundStarted → ShowHud →
+            // PlacementController.SetActive(false) → 이 OnDisable이 방금 스폰된 유닛을 다 날린다.
             _dragging = null;
         }
 

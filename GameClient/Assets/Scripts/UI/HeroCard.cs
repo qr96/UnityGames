@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using AutoBattler.Battle;
 using AutoBattler.Heroes;
 using AutoBattler.Rounds;
 
@@ -12,12 +11,18 @@ namespace AutoBattler.UI
     ///
     /// 표시:
     ///   - 영웅 이름
-    ///   - 현재 HP / 최대 HP (전투 중엔 실시간)
+    ///   - 현재 HP / 최대 HP (전투 중엔 Hero.OnHPChanged 이벤트로 갱신)
     ///   - 스킬 A/B 슬롯 (이름)
     ///
     /// 상호작용:
     ///   - 슬롯 탭 → HeroCardPanel을 통해 RunManager에 장착 시도
     ///   - 전투 중이면 RunManager가 거부
+    ///
+    /// 설계 노트:
+    ///   카드는 Hero(영구 모델)만 본다. BattleUnit(전투 런타임)은 직접 추적하지 않음.
+    ///   BattleUnit은 데미지 발생 시 Hero.SetCurrentHP로 모델에 반영하고,
+    ///   Hero가 발사하는 OnHPChanged 이벤트를 카드가 받아 갱신한다.
+    ///   → BattleUnit GameObject의 풀링/재스폰 라이프사이클과 카드 UI가 완전히 분리됨.
     /// </summary>
     public class HeroCard : MonoBehaviour
     {
@@ -36,14 +41,16 @@ namespace AutoBattler.UI
         private HeroCardPanel _owner;
         private Hero _hero;
 
-        // 전투 중 추적할 BattleUnit (HP 갱신용)
-        private BattleUnit _trackedUnit;
-
         // ─────────────────────────────────────────────────────────
         public void Bind(HeroCardPanel owner, Hero hero)
         {
+            // 이전 영웅 구독 해제
+            if (_hero != null) _hero.OnHPChanged -= Refresh;
+
             _owner = owner;
             _hero = hero;
+
+            if (_hero != null) _hero.OnHPChanged += Refresh;
 
             if (slotAButton != null)
             {
@@ -59,10 +66,16 @@ namespace AutoBattler.UI
             Refresh();
         }
 
-        /// <summary>외부에서 호출 — 영웅 정보(이름/스킬) 갱신.</summary>
+        private void OnDestroy()
+        {
+            if (_hero != null) _hero.OnHPChanged -= Refresh;
+        }
+
+        /// <summary>영웅 정보(이름/스킬/HP) 갱신. Hero.OnHPChanged에서도 호출됨.</summary>
         public void Refresh()
         {
             if (_hero == null) return;
+
             if (nameText != null)
                 nameText.text = _hero.data != null ? _hero.data.displayName : "?";
             if (slotALabel != null)
@@ -70,36 +83,8 @@ namespace AutoBattler.UI
             if (slotBLabel != null)
                 slotBLabel.text = _hero.skillB != null ? _hero.skillB.displayName : "(빈)";
 
-            // 전투 외부에선 만피로 표시
-            var finalStats = _hero.GetFinalStats();
-            SetHp(finalStats.maxHp, finalStats.maxHp);
-        }
-
-        /// <summary>전투 시작 시 호출 — 이 카드가 어떤 BattleUnit을 추적할지 지정.</summary>
-        public void TrackUnit(BattleUnit unit)
-        {
-            _trackedUnit = unit;
-        }
-
-        /// <summary>전투 종료 시 호출.</summary>
-        public void Untrack()
-        {
-            _trackedUnit = null;
-        }
-
-        // ─────────────────────────────────────────────────────────
-        private void Update()
-        {
-            if (_trackedUnit == null) return;
-
-            if (_trackedUnit.IsAlive)
-            {
-                SetHp(_trackedUnit.CurrentHP, _trackedUnit.Stats.maxHp);
-            }
-            else
-            {
-                SetHp(0f, _trackedUnit.Stats.maxHp);
-            }
+            float maxHp = _hero.GetFinalStats().maxHp;
+            SetHp(_hero.CurrentHP, maxHp);
         }
 
         private void SetHp(float cur, float max)
