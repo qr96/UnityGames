@@ -13,10 +13,10 @@ GameObject:
   - component: {fileID: 6499456922110936135}
   - component: {fileID: 3641847832112952942}
   - component: {fileID: 1751432458107972536}
-  - component: {fileID: -1135727211332900665}
+  - component: {fileID: 2615966905788634358}
   m_Layer: 9
   m_Name: Coin
-  m_TagString: Untagged
+  m_TagString: Coin
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -107,7 +107,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -135,12 +135,12 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
+  m_UseGravity: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
---- !u!114 &-1135727211332900665
+--- !u!114 &2615966905788634358
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -149,13 +149,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 6569833850832445322}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78f2275b974da5e499787f11d5777281, type: 3}
+  m_Script: {fileID: 11500000, guid: e78f214b63392e5478b936d62a3f2969, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DroppedItem
-  model: {fileID: 6569833850832445322}
-  rigid: {fileID: 1751432458107972536}
-  rotateSpeed: 0
-  jumpPower: 1
-  flyDuration: 0.5
-  targetOffset: {x: 0, y: 0, z: 0}
-  landedSpeedThreshold: 0.1
+  m_EditorClassIdentifier: Assembly-CSharp::Coin
+  moveSpeedZ: 3
+  rotateSpeed: 180
+  magnetRange: 1
+  magnetMinSpeed: 8
+  magnetMaxSpeed: 12
+  pickupDistance: 0.3
+  value: 1
+  despawnZ: -15

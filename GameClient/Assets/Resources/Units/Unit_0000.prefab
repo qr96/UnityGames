@@ -66,13 +66,43 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4887441272725831373, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7742991681758407331}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4298043780124706424, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7599323055461847512}
   m_SourcePrefab: {fileID: 100100000, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
 --- !u!4 &454382800032087466 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4887441272725831373, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
   m_PrefabInstance: {fileID: 5016419884613124967}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &9095124198874629407 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4298043780124706424, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
+  m_PrefabInstance: {fileID: 5016419884613124967}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7599323055461847512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9095124198874629407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 149c8efb71325c34697187c4bdc3ad22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  animator: {fileID: 4437326828540948697}
+  keyboardSpeed: 8
+  dragSensitivity: 0.02
+  minX: -2
+  maxX: 2
+  minZ: -5
+  maxZ: 4
+  projectilePrefab: {fileID: 3795219548592558598, guid: 771c762513d9e1d4e89ad7ac0f19e178, type: 3}
+  fireInterval: 1
+  maxHP: 3
 --- !u!1001 &7853741825939393864
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -125,6 +155,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Original
       objectReference: {fileID: 0}
+    - target: {fileID: 4306973692438328298, guid: ec9413dcf7107ce4f84a4250da698d28, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 6d10cccf937a6f4459e147b1a6b28383, type: 2}
     - target: {fileID: 5866666021909216657, guid: ec9413dcf7107ce4f84a4250da698d28, type: 3}
       propertyPath: m_Controller
       value: 
@@ -138,6 +172,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ec9413dcf7107ce4f84a4250da698d28, type: 3}
+--- !u!95 &4437326828540948697 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: ec9413dcf7107ce4f84a4250da698d28, type: 3}
+  m_PrefabInstance: {fileID: 7853741825939393864}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7742991681758407331 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ec9413dcf7107ce4f84a4250da698d28, type: 3}
