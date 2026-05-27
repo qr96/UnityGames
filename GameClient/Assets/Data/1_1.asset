@@ -15,13 +15,13 @@ MonoBehaviour:
   spawns:
   - spawnTime: 0
     enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
-    xPosition: -1
+    xPosition: -0.5
     count: 1
     spacing: 0
     spawnDelay: 0
   - spawnTime: 0
     enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
-    xPosition: 0
+    xPosition: 0.5
     count: 1
     spacing: 0
     spawnDelay: 0
@@ -43,5 +43,13 @@ MonoBehaviour:
     count: 1
     spacing: 0
     spawnDelay: 0
+  randomSpawns:
+  - enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
+    startTime: 0
+    duration: 60
+    totalCount: 40
+    minX: -2
+    maxX: 2
+    intervalJitter: 0.3
   maxDuration: 30
   restAfter: 2

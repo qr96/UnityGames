@@ -582,7 +582,7 @@ MonoBehaviour:
   diedChannel: {fileID: 11400000, guid: ee487da7102d05048823758f636c749d, type: 2}
   coinPrefab: {fileID: 6569833850832445322, guid: 3786406fd75d11a4195b1debbfa227ab, type: 3}
   spreadRadius: 0.5
-  dropHeight: 0.5
+  dropHeight: 0
 --- !u!1001 &1578679327
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -844,7 +844,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: Lv. 99
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f6763573d88abf449aeec08bbb38e45b, type: 2}
   m_sharedMaterial: {fileID: -6341118024281136697, guid: f6763573d88abf449aeec08bbb38e45b, type: 2}
