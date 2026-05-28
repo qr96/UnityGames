@@ -99,9 +99,17 @@ MonoBehaviour:
   minX: -2
   maxX: 2
   minZ: -5
-  maxZ: 4
+  maxZ: 6
   projectilePrefab: {fileID: 3795219548592558598, guid: 771c762513d9e1d4e89ad7ac0f19e178, type: 3}
   fireInterval: 1
+  projectileCount: 1
+  spreadAngle: 15
+  damageMultiplier: 1
+  bonusPierce: 0
+  swordWavePrefab: {fileID: 0}
+  swordWaveCount: 0
+  swordWaveInterval: 1.2
+  swordWaveDamage: 2
   maxHP: 3
 --- !u!1001 &7853741825939393864
 PrefabInstance:

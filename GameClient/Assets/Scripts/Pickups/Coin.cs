@@ -4,6 +4,9 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Coin : MonoBehaviour
 {
+    /// <summary>스킬로 누적되는 전역 자석 보너스. 모든 코인에 즉시 적용됨.</summary>
+    public static float GlobalMagnetBonus = 0f;
+
     [Header("Movement")]
     public float moveSpeedZ = 8f;
     public float rotateSpeed = 180f;
@@ -22,7 +25,7 @@ public class Coin : MonoBehaviour
 
     private Rigidbody rb;
     private Transform player;
-    private Transform visualRoot;   // 회전용 (자식이 있으면 그걸 회전, 없으면 자기 자신)
+    private Transform visualRoot;
     private bool collected = false;
 
     void Awake()
@@ -31,7 +34,6 @@ public class Coin : MonoBehaviour
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-        // 자식 메시가 있으면 그걸 돌리는 게 안전 (rb를 직접 회전시키지 않기 위해)
         visualRoot = transform.childCount > 0 ? transform.GetChild(0) : transform;
     }
 
@@ -53,7 +55,6 @@ public class Coin : MonoBehaviour
 
     void Update()
     {
-        // 시각 효과(회전)는 Update에서. 물리에 영향 없음.
         if (!collected)
             visualRoot.Rotate(0f, rotateSpeed * Time.deltaTime, 0f, Space.World);
     }
@@ -75,9 +76,11 @@ public class Coin : MonoBehaviour
                 return;
             }
 
-            if (dist < magnetRange)
+            float effectiveRange = magnetRange + GlobalMagnetBonus;
+
+            if (dist < effectiveRange)
             {
-                float t = 1f - (dist / magnetRange);
+                float t = 1f - (dist / effectiveRange);
                 float magnetSpeed = Mathf.Lerp(magnetMinSpeed, magnetMaxSpeed, t);
                 pos = Vector3.MoveTowards(pos, player.position, magnetSpeed * Time.fixedDeltaTime);
             }

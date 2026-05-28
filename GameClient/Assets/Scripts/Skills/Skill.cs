@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 스킬 정의. ScriptableObject라서 에셋으로 관리 가능. 런타임 상태는 안 가짐.
+/// 스킬 정의. ScriptableObject라서 에셋으로 관리. 런타임 상태는 SkillInstance가 보유.
 /// </summary>
 public abstract class Skill : ScriptableObject
 {
@@ -17,9 +17,6 @@ public abstract class Skill : ScriptableObject
     public abstract void Apply(int stackLevel);
 }
 
-/// <summary>
-/// 런타임 인스턴스. 플레이마다 새로 만들어짐.
-/// </summary>
 public class SkillInstance
 {
     public readonly Skill definition;

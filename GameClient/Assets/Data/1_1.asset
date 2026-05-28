@@ -12,44 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7f13298bcd53a7469529f2278d09959, type: 3}
   m_Name: 1_1
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
-  spawns:
-  - spawnTime: 0
-    enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
-    xPosition: -0.5
-    count: 1
-    spacing: 0
-    spawnDelay: 0
-  - spawnTime: 0
-    enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
-    xPosition: 0.5
-    count: 1
-    spacing: 0
-    spawnDelay: 0
-  - spawnTime: 2
-    enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
-    xPosition: 0
-    count: 1
-    spacing: 0
-    spawnDelay: 0
-  - spawnTime: 3
-    enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
-    xPosition: 1
-    count: 1
-    spacing: 0
-    spawnDelay: 0
-  - spawnTime: 3
-    enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
-    xPosition: -1
-    count: 1
-    spacing: 0
-    spawnDelay: 0
+  spawns: []
   randomSpawns:
   - enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
     startTime: 0
-    duration: 60
-    totalCount: 40
+    duration: 300
+    totalCount: 500
     minX: -2
     maxX: 2
-    intervalJitter: 0.3
+    intervalJitter: 0.1
   maxDuration: 30
   restAfter: 2

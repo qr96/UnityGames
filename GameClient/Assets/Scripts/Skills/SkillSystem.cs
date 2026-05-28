@@ -15,10 +15,13 @@ public class SkillSystem : MonoBehaviour
     public SkillSelectionUI selectionUI;
 
     private readonly Dictionary<Skill, SkillInstance> instances = new Dictionary<Skill, SkillInstance>();
+    private bool subscribed = false;
 
     void Awake()
     {
         Instance = this;
+
+        Coin.GlobalMagnetBonus = 0f;
 
         foreach (var skill in allSkills)
         {
@@ -32,23 +35,53 @@ public class SkillSystem : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
+    // Start는 모든 GameObject의 Awake가 끝난 뒤 호출되므로 Instance 보장됨
+    void Start()
+    {
+        TrySubscribe();
+    }
+
     void OnEnable()
     {
-        if (ExperienceManager.Instance != null)
-            ExperienceManager.Instance.OnLevelUp += HandleLevelUp;
+        TrySubscribe();
     }
 
     void OnDisable()
     {
-        if (ExperienceManager.Instance != null)
+        if (subscribed && ExperienceManager.Instance != null)
+        {
             ExperienceManager.Instance.OnLevelUp -= HandleLevelUp;
+            subscribed = false;
+        }
+    }
+
+    void TrySubscribe()
+    {
+        if (subscribed) return;
+        if (ExperienceManager.Instance == null) return;
+
+        ExperienceManager.Instance.OnLevelUp += HandleLevelUp;
+        subscribed = true;
+        Debug.Log("[Skill] OnLevelUp 구독 완료");
     }
 
     void HandleLevelUp(int newLevel)
     {
+        Debug.Log($"[Skill] 레벨업 감지: Lv.{newLevel}");
         var choices = RollChoices();
-        if (choices.Count == 0) return;
-        if (selectionUI != null) selectionUI.Show(choices, OnSkillChosen);
+        if (choices.Count == 0)
+        {
+            Debug.LogWarning("[Skill] 선택할 스킬이 없음");
+            return;
+        }
+        if (selectionUI != null)
+        {
+            selectionUI.Show(choices, OnSkillChosen);
+        }
+        else
+        {
+            Debug.LogError("[Skill] selectionUI가 null! Inspector 연결 확인");
+        }
     }
 
     List<SkillInstance> RollChoices()

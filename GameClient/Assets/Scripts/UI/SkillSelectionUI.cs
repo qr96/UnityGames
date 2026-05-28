@@ -1,29 +1,25 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
-/// 씬 구성 가이드:
-/// - Canvas 아래 패널 하나 (root에 할당)
-/// - 자식으로 카드 3개: 각 카드는 Button + Image icon + TMP_Text nameText + TMP_Text descText
+/// 레벨업 시 스킬 카드들을 표시. 카드는 프리팹에서 동적 생성.
 /// </summary>
 public class SkillSelectionUI : MonoBehaviour
 {
-    [Serializable]
-    public class CardUI
-    {
-        public Button button;
-        public Image iconImage;
-        public TMP_Text nameText;
-        public TMP_Text descText;
-    }
-
+    [Header("UI Root")]
+    [Tooltip("켜고 끌 패널 (자기 자신을 넣으면 안 됨)")]
     public GameObject root;
-    public List<CardUI> cardSlots = new List<CardUI>();
+
+    [Header("Card Spawn")]
+    [Tooltip("카드 프리팹 (SkillCard.cs 부착된)")]
+    public SkillCard cardPrefab;
+
+    [Tooltip("생성된 카드들이 들어갈 부모. 보통 Horizontal Layout Group 가진 컨테이너")]
+    public Transform cardContainer;
 
     private Action<SkillInstance> currentCallback;
+    private readonly List<SkillCard> spawnedCards = new List<SkillCard>();
 
     void Awake()
     {
@@ -34,40 +30,33 @@ public class SkillSelectionUI : MonoBehaviour
     {
         currentCallback = onChosen;
 
-        if (root != null) root.SetActive(true);
+        ClearCards();
 
-        for (int i = 0; i < cardSlots.Count; i++)
+        foreach (var inst in choices)
         {
-            var slot = cardSlots[i];
-            if (i < choices.Count)
-            {
-                var inst = choices[i];
-                var def = inst.definition;
-
-                slot.button.gameObject.SetActive(true);
-                if (slot.iconImage != null) slot.iconImage.sprite = def.icon;
-                if (slot.nameText != null) slot.nameText.text = def.skillName +
-                    (inst.stack > 0 ? $" (Lv.{inst.stack + 1})" : "");
-                if (slot.descText != null) slot.descText.text = def.description;
-
-                slot.button.onClick.RemoveAllListeners();
-                SkillInstance captured = inst;
-                slot.button.onClick.AddListener(() => Choose(captured));
-            }
-            else
-            {
-                slot.button.gameObject.SetActive(false);
-            }
+            SkillCard card = Instantiate(cardPrefab, cardContainer);
+            card.Setup(inst, OnCardClicked);
+            spawnedCards.Add(card);
         }
 
+        if (root != null) root.SetActive(true);
         Time.timeScale = 0f;
     }
 
-    void Choose(SkillInstance inst)
+    void OnCardClicked(SkillInstance inst)
     {
         Time.timeScale = 1f;
         if (root != null) root.SetActive(false);
+        ClearCards();
+
         currentCallback?.Invoke(inst);
         currentCallback = null;
+    }
+
+    void ClearCards()
+    {
+        foreach (var card in spawnedCards)
+            if (card != null) Destroy(card.gameObject);
+        spawnedCards.Clear();
     }
 }
