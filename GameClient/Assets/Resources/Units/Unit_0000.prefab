@@ -91,8 +91,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0435aa14f25652b49b95304691494537, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwordWaveActiveSkill
-  displayName: New Active
-  description: 
+  displayName: "\uAC80\uAE30 \uAC15\uD654"
+  description: "\uAC70\uB9AC 10% \uC99D\uAC00, \uB370\uBBF8\uC9C0 10% \uC99D\uAC00"
   icon: {fileID: 0}
   tags:
     creation: 0
@@ -104,7 +104,8 @@ MonoBehaviour:
   maxLevel: 5
   baseCooldown: 1
   baseDamage: 1
-  projectilePrefab: {fileID: 3795219548592558598, guid: 771c762513d9e1d4e89ad7ac0f19e178, type: 3}
+  playerAnimTrigger: attack
+  projectilePrefab: {fileID: 1392559610590369509, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
   spawnDistance: 1
   spreadCount: 1
   spreadAngle: 15

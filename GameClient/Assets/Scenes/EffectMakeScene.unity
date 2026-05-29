@@ -30000,19 +30000,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &2461012871765835938
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3403728212829394290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f6b0a22cb3d3f6499a796c6d517d51e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Poolable
-  poolKey: 
 --- !u!199 &2748829438046967776
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -30166,8 +30153,6 @@ GameObject:
   - component: {fileID: 1187610733281725605}
   - component: {fileID: 3554619188366424909}
   - component: {fileID: 6219789552134515502}
-  - component: {fileID: 2461012871765835938}
-  - component: {fileID: 4646372344970422891}
   m_Layer: 0
   m_Name: Fireball
   m_TagString: Untagged
@@ -39621,6 +39606,63 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!1001 &4054021034071220228
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1392559610590369509, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_Name
+      value: SlashWave
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6562335147761075370, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
 --- !u!1 &4399261669079164065
 GameObject:
   m_ObjectHideFlags: 0
@@ -39719,19 +39761,6 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
---- !u!114 &4646372344970422891
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3403728212829394290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e04a6eb8804e8eb43a7d846537aa5ff1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SkillProjectile
-  speed: 12
 --- !u!1001 &5076107506955116868
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -44713,3 +44742,4 @@ SceneRoots:
   - {fileID: 700940650}
   - {fileID: 1900700024}
   - {fileID: 775857618}
+  - {fileID: 4054021034071220228}

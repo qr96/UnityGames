@@ -6,6 +6,7 @@
 public enum CreationType
 {
     Projectile,  // 투사체 (앞으로 날아감)
+    Melee,       // 근접 (즉시 범위 판정)
     Drop,        // 낙하 (위에서 떨어짐)
     Summon,      // 소환 (정해진 위치에 생성)
 }

@@ -9838,7 +9838,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8262766449595846372}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.3420201, z: 0.9396927, w: 0}
+  m_LocalRotation: {x: 0.61237246, y: -0.3535534, z: 0.3535534, w: 0.61237246}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -9848,7 +9848,7 @@ Transform:
   - {fileID: 84122263393250888}
   - {fileID: 503500237804568257}
   m_Father: {fileID: 8306778148007116594}
-  m_LocalEulerAnglesHint: {x: 40, y: 0, z: 180}
+  m_LocalEulerAnglesHint: {x: 40, y: 60, z: 180}
 --- !u!198 &8568610583162239994
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -14733,6 +14733,7 @@ GameObject:
   - component: {fileID: 8306778148007116594}
   - component: {fileID: 6112655535052497127}
   - component: {fileID: 7420961727351748573}
+  - component: {fileID: 3477699995197963388}
   m_Layer: 0
   m_Name: FX_Orange_Slash_1
   m_TagString: Untagged
@@ -14750,7 +14751,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5816952573816200542}
@@ -19571,6 +19572,19 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &3477699995197963388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8307060409358143758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1b4bedb1114ca4439ae28ecab44bed5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VisualEffect
+  lifeTime: 0.3
 --- !u!1 &8703285099506347597
 GameObject:
   m_ObjectHideFlags: 0

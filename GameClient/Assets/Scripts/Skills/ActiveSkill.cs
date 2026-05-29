@@ -21,6 +21,10 @@ public abstract class ActiveSkill : MonoBehaviour
     [Header("Stats")]
     public int baseDamage = 1;
 
+    [Header("Animation")]
+    [Tooltip("발동 시 플레이어 Animator에 보낼 트리거 이름. 비우면 안 보냄.")]
+    public string playerAnimTrigger = "";
+
     private float timer = 0f;
 
     public bool CanLevelUp => level < maxLevel;
@@ -29,7 +33,6 @@ public abstract class ActiveSkill : MonoBehaviour
     {
         timer += deltaTime;
 
-        // 모디파이어 적용한 최종 쿨다운
         float cdMul = ModifierRegistry.Instance != null
             ? ModifierRegistry.Instance.GetMultiplier(tags, ModifierType.CooldownMultiplier)
             : 1f;
@@ -39,7 +42,15 @@ public abstract class ActiveSkill : MonoBehaviour
         {
             timer = 0f;
             Execute(playerPosition);
+            TriggerPlayerAnimation();
         }
+    }
+
+    void TriggerPlayerAnimation()
+    {
+        if (string.IsNullOrEmpty(playerAnimTrigger)) return;
+        if (PlayerController.Instance == null || PlayerController.Instance.animator == null) return;
+        PlayerController.Instance.animator.SetTrigger(playerAnimTrigger);
     }
 
     public void LevelUp()
@@ -58,9 +69,8 @@ public abstract class ActiveSkill : MonoBehaviour
         return new ActiveSkillLevelUpChoice(this, displayName, description, icon);
     }
 
-    // ─── 헬퍼: 자식 클래스가 발사 시 사용 ───
+    // ─── 헬퍼 ───
 
-    /// <summary>모디파이어 + 레벨 보너스가 적용된 최종 데미지.</summary>
     protected int CalculateFinalDamage(float levelBonus)
     {
         float dmgMul = ModifierRegistry.Instance != null
