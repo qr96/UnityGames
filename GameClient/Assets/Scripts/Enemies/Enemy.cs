@@ -1,12 +1,16 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// 적의 HP, 넉백, 죽음. 이동 결정은 EnemyMover에 위임.
+/// 같은 GameObject에 EnemyMover를 상속한 컴포넌트가 부착되어 있어야 함.
+/// </summary>
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(EnemyMover))]
 public class Enemy : MonoBehaviour
 {
     [Header("Stats")]
     public int maxHP = 2;
-    public float speed = 8f;
 
     [Header("Knockback")]
     public float knockbackForce = 5f;
@@ -16,21 +20,22 @@ public class Enemy : MonoBehaviour
     public int coinDropAmount = 2;
     public int xpReward = 1;
 
+    [Header("Lifetime")]
+    [Tooltip("이 Z 좌표 아래로 가면 자동 제거")]
+    public float despawnZ = -15f;
+
     [Header("Event Channel")]
     public EnemyDiedChannel diedChannel;
 
     [Header("Visual")]
-    [Tooltip("비워두면 자식에서 자동으로 찾음")]
     public Animator animator;
 
     public event Action<Enemy> OnDied;
 
-    // 이동 방향. 나중에 좌우/곡선 이동 추가 시 이 벡터만 바꾸면 됨.
-    private Vector3 moveDirection = Vector3.back;
-
     private Rigidbody rb;
+    private EnemyMover mover;
+    private Vector3 knockbackVelocity = Vector3.zero;
     private int currentHP;
-    private float knockbackVelocity = 0f;
     private bool isDead = false;
 
     public bool IsDead => isDead;
@@ -41,10 +46,9 @@ public class Enemy : MonoBehaviour
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-        if (animator == null) animator = GetComponentInChildren<Animator>();
+        mover = GetComponent<EnemyMover>();
 
-        // 이동 방향과 forward 일치
-        FaceMoveDirection();
+        if (animator == null) animator = GetComponentInChildren<Animator>();
     }
 
     void Start()
@@ -57,28 +61,26 @@ public class Enemy : MonoBehaviour
     {
         if (isDead) return;
 
-        // forward 방향으로 이동 + 넉백은 forward 반대 방향
-        Vector3 delta = transform.forward * speed * Time.fixedDeltaTime
-                      - transform.forward * knockbackVelocity * Time.fixedDeltaTime;
-        Vector3 target = rb.position + delta;
+        // 의도된 이동 (AI/Mover가 결정)
+        Vector3 velocity = mover.GetVelocity();
+
+        // 넉백은 별도. 총 이동 = velocity + knockback
+        Vector3 totalVelocity = velocity + knockbackVelocity;
+        Vector3 target = rb.position + totalVelocity * Time.fixedDeltaTime;
         rb.MovePosition(target);
 
-        knockbackVelocity = Mathf.MoveTowards(knockbackVelocity, 0f, knockbackDecay * Time.fixedDeltaTime);
+        // 회전: velocity 방향을 봄 (넉백은 무시 — 넉백 중에도 가던 방향 응시)
+        if (velocity.sqrMagnitude > 0.0001f)
+        {
+            transform.rotation = Quaternion.LookRotation(velocity);
+        }
 
-        if (target.z < -15f) Destroy(gameObject);
-    }
+        // 넉백 감쇠
+        knockbackVelocity = Vector3.MoveTowards(
+            knockbackVelocity, Vector3.zero, knockbackDecay * Time.fixedDeltaTime);
 
-    /// <summary>이동 방향 변경. 호출 시 자동으로 그 방향을 바라봄.</summary>
-    public void SetMoveDirection(Vector3 direction)
-    {
-        moveDirection = direction.normalized;
-        FaceMoveDirection();
-    }
-
-    void FaceMoveDirection()
-    {
-        if (moveDirection.sqrMagnitude > 0.0001f)
-            transform.rotation = Quaternion.LookRotation(moveDirection);
+        // 화면 밖 제거
+        if (target.z < despawnZ) Destroy(gameObject);
     }
 
     public void TakeHit(int damage)
@@ -86,8 +88,13 @@ public class Enemy : MonoBehaviour
         if (isDead) return;
 
         currentHP -= damage;
-        // 넉백은 forward 반대 방향 = 뒤로 밀려남
-        knockbackVelocity = knockbackForce;
+
+        // 넉백: 현재 이동 방향의 반대로
+        Vector3 velocity = mover.GetVelocity();
+        if (velocity.sqrMagnitude > 0.0001f)
+            knockbackVelocity = -velocity.normalized * knockbackForce;
+        else
+            knockbackVelocity = Vector3.forward * knockbackForce; // 정지 적이면 +Z로 (플레이어 반대)
 
         if (currentHP <= 0) Die();
     }

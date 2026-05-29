@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 스킬 카드 하나의 표시와 클릭을 담당. 프리팹으로 만들어두면 부모 UI가 동적 생성.
+/// 레벨업 선택 카드. 패시브든 액티브든 ISelectableChoice면 다 표시 가능.
 /// </summary>
 public class SkillCard : MonoBehaviour
 {
@@ -14,40 +14,28 @@ public class SkillCard : MonoBehaviour
     public TMP_Text nameText;
     public TMP_Text descText;
 
-    private SkillInstance instance;
-    private Action<SkillInstance> onClicked;
+    private ISelectableChoice choice;
+    private Action<ISelectableChoice> onClicked;
 
     void Awake()
     {
         if (button != null) button.onClick.AddListener(HandleClick);
     }
 
-    public void Setup(SkillInstance inst, Action<SkillInstance> onClick)
+    public void Setup(ISelectableChoice c, Action<ISelectableChoice> onClick)
     {
-        instance = inst;
+        choice = c;
         onClicked = onClick;
-
-        var def = inst.definition;
 
         if (iconImage != null)
         {
-            iconImage.sprite = def.icon;
-            // 아이콘이 없으면 슬롯 자체를 숨김 (디자인 선택)
-            iconImage.enabled = def.icon != null;
+            iconImage.sprite = c.Icon;
+            iconImage.enabled = c.Icon != null;
         }
 
-        if (nameText != null)
-        {
-            nameText.text = inst.stack > 0
-                ? $"{def.skillName} (Lv.{inst.stack + 1})"
-                : def.skillName;
-        }
-
-        if (descText != null) descText.text = def.description;
+        if (nameText != null) nameText.text = c.DisplayName;
+        if (descText != null) descText.text = c.Description;
     }
 
-    void HandleClick()
-    {
-        onClicked?.Invoke(instance);
-    }
+    void HandleClick() => onClicked?.Invoke(choice);
 }

@@ -1,5 +1,116 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3039625482822238668
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8027223473559346241}
+  - component: {fileID: 602012055853420104}
+  m_Layer: 7
+  m_Name: ActiveSkills
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8027223473559346241
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3039625482822238668}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5541821014071702519}
+  m_Father: {fileID: 454382800032087466}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &602012055853420104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3039625482822238668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db2a7f77900742a439754d89ef3add8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActiveSkillSystem
+  activeSkills:
+  - {fileID: 1541502557719668810}
+--- !u!1 &4557828548076073969
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5541821014071702519}
+  - component: {fileID: 1541502557719668810}
+  m_Layer: 7
+  m_Name: SwordWave
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5541821014071702519
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4557828548076073969}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8027223473559346241}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1541502557719668810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4557828548076073969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0435aa14f25652b49b95304691494537, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SwordWaveActiveSkill
+  displayName: New Active
+  description: 
+  icon: {fileID: 0}
+  tags:
+    creation: 0
+    movement: 0
+    collision: 0
+    skillClass: 0
+    element: 0
+  level: 1
+  maxLevel: 5
+  baseCooldown: 1
+  baseDamage: 1
+  projectilePrefab: {fileID: 3795219548592558598, guid: 771c762513d9e1d4e89ad7ac0f19e178, type: 3}
+  spawnDistance: 1
+  spreadCount: 1
+  spreadAngle: 15
+  frontExtraCount: 0
+  damagePerLevel: 0.1
+  distancePerLevel: 0.1
 --- !u!1001 &5016419884613124967
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -66,6 +177,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4887441272725831373, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7742991681758407331}
+    - targetCorrespondingSourceObject: {fileID: 4887441272725831373, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8027223473559346241}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4298043780124706424, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
       insertIndex: -1
@@ -100,16 +214,6 @@ MonoBehaviour:
   maxX: 2
   minZ: -5
   maxZ: 6
-  projectilePrefab: {fileID: 3795219548592558598, guid: 771c762513d9e1d4e89ad7ac0f19e178, type: 3}
-  fireInterval: 1
-  projectileCount: 1
-  spreadAngle: 15
-  damageMultiplier: 1
-  bonusPierce: 0
-  swordWavePrefab: {fileID: 0}
-  swordWaveCount: 0
-  swordWaveInterval: 1.2
-  swordWaveDamage: 2
   maxHP: 3
 --- !u!1001 &7853741825939393864
 PrefabInstance:

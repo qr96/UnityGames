@@ -236,54 +236,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &254497800
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 254497801}
-  - component: {fileID: 254497802}
-  m_Layer: 0
-  m_Name: EnemySpawner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &254497801
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 254497800}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1969378292}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &254497802
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 254497800}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1624633281d5b1e40840d7fede4f5460, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
-  enemyPrefab: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
-  spawnInterval: 1
-  spawnZ: 30
-  spawnRangeX: 2
 --- !u!1 &440883843
 GameObject:
   m_ObjectHideFlags: 0
@@ -1386,7 +1338,7 @@ GameObject:
   - component: {fileID: 1929093541}
   - component: {fileID: 1929093542}
   m_Layer: 0
-  m_Name: SkillSystem
+  m_Name: LevelUpSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1416,17 +1368,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1929093540}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2aed293085c40ee49bdd0343b714d7ca, type: 3}
+  m_Script: {fileID: 11500000, guid: 49b1cd1236fef6c4989fe6c826d9f6ce, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SkillSystem
-  allSkills:
-  - {fileID: 11400000, guid: f50f91d0073caf9409c675101cff81e4, type: 2}
-  - {fileID: 11400000, guid: bead7f8cebb045747b0e9a658c72c285, type: 2}
-  - {fileID: 11400000, guid: 71c1fc19e5813454fb1aed7f42279c55, type: 2}
-  - {fileID: 11400000, guid: 22d07cc569d83034ea9c3c4e7781e5ed, type: 2}
-  - {fileID: 11400000, guid: f444509b49d09df4daa548a17bbafff9, type: 2}
-  - {fileID: 11400000, guid: e83d90dd18a58934bad85c32cb0d674a, type: 2}
-  - {fileID: 11400000, guid: 5af2568542b5be64f8ee6d1632854ff1, type: 2}
+  m_EditorClassIdentifier: Assembly-CSharp::LevelUpSystem
+  allPassives:
+  - {fileID: 11400000, guid: 871f6231a94107e4b9b3fb991d6d9aca, type: 2}
+  - {fileID: 11400000, guid: 31fe072cf8cdd524c8fca58f841bc843, type: 2}
+  - {fileID: 11400000, guid: 0c2eaa05a2dfcba48964ddefdc7fa4f4, type: 2}
+  - {fileID: 11400000, guid: 25c847276dd41ea40b8b3310d3b60565, type: 2}
   choicesPerLevelUp: 3
   selectionUI: {fileID: 440883845}
 --- !u!1 &1969378291
@@ -1458,7 +1407,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 254497801}
   - {fileID: 1507319929}
   - {fileID: 1625104470}
   - {fileID: 1337644038}

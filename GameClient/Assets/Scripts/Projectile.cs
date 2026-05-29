@@ -8,48 +8,57 @@ public class Projectile : MonoBehaviour
     public float speed = 20f;
     public float lifeTime = 3f;
 
-    [Header("Combat")]
-    public int damage = 1;
-
-    [Tooltip("적을 몇 명까지 관통할지. 1 = 한 명 맞고 사라짐, 2 = 두 명, ...")]
+    [Header("Behavior")]
+    [Tooltip("적을 몇 명까지 관통할지. 1 = 한 명 맞고 사라짐.")]
     public int pierceCount = 1;
+
+    // 데미지는 발사 주체(ActiveSkill)가 Setup으로 주입.
+    // 프리팹에서 직접 설정하지 않도록 Inspector에서 숨김.
+    [HideInInspector] public int damage = 1;
 
     private Rigidbody rb;
     private int remainingPierce;
     private bool initialized = false;
+    private float spawnTime;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+        spawnTime = Time.time;
     }
 
     void Start()
     {
-        // Setup 안 불렸으면 기본값으로 동작
         if (!initialized)
         {
             remainingPierce = pierceCount;
-            Destroy(gameObject, lifeTime);
+            initialized = true;
         }
     }
 
-    /// <summary>발사 직후 호출. 스킬 효과 반영된 최종 값으로 초기화.</summary>
-    public void Setup(int finalDamage, int finalPierce, float finalLifeTime)
+    /// <summary>발사 직후 호출. ActiveSkill이 자기 데미지/관통/지속시간/크기를 주입.</summary>
+    public void Setup(int damage, int pierce, float lifeTime, float sizeMultiplier)
     {
-        damage = finalDamage;
-        pierceCount = finalPierce;
-        remainingPierce = finalPierce;
-        lifeTime = finalLifeTime;
-        initialized = true;
+        this.damage = damage;
+        this.pierceCount = pierce;
+        this.remainingPierce = pierce;
+        this.lifeTime = lifeTime;
+        this.initialized = true;
 
-        // 명시적으로 수명 예약 (Start의 fallback과 중복 방지)
-        Destroy(gameObject, finalLifeTime);
+        if (sizeMultiplier > 0f && Mathf.Abs(sizeMultiplier - 1f) > 0.001f)
+            transform.localScale *= sizeMultiplier;
     }
 
     void FixedUpdate()
     {
+        if (initialized && Time.time - spawnTime >= lifeTime)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Vector3 target = rb.position + transform.forward * speed * Time.fixedDeltaTime;
         rb.MovePosition(target);
     }
