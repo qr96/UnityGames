@@ -31,6 +31,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5541821014071702519}
+  - {fileID: 3595042925470191635}
   m_Father: {fileID: 454382800032087466}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &602012055853420104
@@ -92,6 +93,71 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwordWaveActiveSkill
   displayName: "\uAC80\uAE30 \uAC15\uD654"
+  description: "\uAC70\uB9AC 10% \uC99D\uAC00, \uB370\uBBF8\uC9C0 10% \uC99D\uAC00"
+  icon: {fileID: 0}
+  tags:
+    creation: 0
+    movement: 0
+    collision: 0
+    skillClass: 0
+    element: 0
+  level: 1
+  maxLevel: 5
+  baseCooldown: 1
+  baseDamage: 1
+  playerAnimTrigger: attack
+  projectilePrefab: {fileID: 1392559610590369509, guid: 17858f3b1fa173e4b8a49a7c27a9ecd1, type: 3}
+  spawnDistance: 1
+  spreadCount: 1
+  spreadAngle: 15
+  frontExtraCount: 0
+  damagePerLevel: 0.1
+  distancePerLevel: 0.1
+--- !u!1 &5444924017483978014
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3595042925470191635}
+  - component: {fileID: 376925903186325824}
+  m_Layer: 7
+  m_Name: Fireball
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3595042925470191635
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5444924017483978014}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8027223473559346241}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &376925903186325824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5444924017483978014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0435aa14f25652b49b95304691494537, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SwordWaveActiveSkill
+  displayName: "\uD654\uC5FC\uAD6C"
   description: "\uAC70\uB9AC 10% \uC99D\uAC00, \uB370\uBBF8\uC9C0 10% \uC99D\uAC00"
   icon: {fileID: 0}
   tags:
