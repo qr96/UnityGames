@@ -6,7 +6,7 @@ public enum ModifierType
     DamageMultiplier,        // 데미지 곱
     CooldownMultiplier,      // 쿨다운 곱 (0.9 = 10% 빨라짐)
     SizeMultiplier,          // 크기 곱
-    LifeTimeMultiplier,      // 지속시간 곱
+    DistanceMultiplier,      // 사거리 곱
     PierceBonus,             // 관통 +N (덧셈)
 }
 

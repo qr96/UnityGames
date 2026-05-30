@@ -77,10 +77,19 @@ public class LevelUpSystem : MonoBehaviour
 
         if (ActiveSkillSystem.Instance != null)
         {
-            foreach (var active in ActiveSkillSystem.Instance.activeSkills)
+            // 보유 중인 액티브 → 레벨업 선택지
+            foreach (var active in ActiveSkillSystem.Instance.GetOwnedSkills())
             {
                 if (active == null) continue;
                 var choice = active.AsChoice();
+                if (choice.CanBeOffered) pool.Add(choice);
+            }
+
+            // 미보유 액티브 → 신규 획득 선택지
+            foreach (var active in ActiveSkillSystem.Instance.GetUnownedSkills())
+            {
+                if (active == null) continue;
+                var choice = new ActiveSkillUnlockChoice(active);
                 if (choice.CanBeOffered) pool.Add(choice);
             }
         }

@@ -66,7 +66,13 @@ public abstract class ActiveSkill : MonoBehaviour
 
     public ActiveSkillLevelUpChoice AsChoice()
     {
-        return new ActiveSkillLevelUpChoice(this, displayName, description, icon);
+        return new ActiveSkillLevelUpChoice(this, displayName, GetNextLevelDescription(), icon);
+    }
+
+    /// <summary>레벨업 카드에 표시할 "다음 레벨 효과" 설명. 자식이 레벨별 설명을 가지면 override.</summary>
+    public virtual string GetNextLevelDescription()
+    {
+        return description;
     }
 
     // ─── 헬퍼 ───
@@ -86,10 +92,10 @@ public abstract class ActiveSkill : MonoBehaviour
             : 1f;
     }
 
-    protected float GetLifeTimeMultiplier()
+    protected float GetDistanceMultiplier()
     {
         return ModifierRegistry.Instance != null
-            ? ModifierRegistry.Instance.GetMultiplier(tags, ModifierType.LifeTimeMultiplier)
+            ? ModifierRegistry.Instance.GetMultiplier(tags, ModifierType.DistanceMultiplier)
             : 1f;
     }
 

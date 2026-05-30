@@ -17,9 +17,9 @@ MonoBehaviour:
   - enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
     startTime: 0
     duration: 300
-    totalCount: 500
-    minX: -2
-    maxX: 2
-    intervalJitter: 0.1
+    totalCount: 200
+    minX: -2.2
+    maxX: 2.2
+    intervalJitter: 0.05
   maxDuration: 30
   restAfter: 2
