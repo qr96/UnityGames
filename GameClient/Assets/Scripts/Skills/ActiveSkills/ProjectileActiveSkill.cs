@@ -43,6 +43,9 @@ public abstract class ProjectileActiveSkill : ActiveSkill
     public GameObject projectilePrefab;
     public float spawnDistance = 1f;
 
+    [Tooltip("발사 높이 오프셋. 플레이어 발밑(Y0) 기준으로 이만큼 위에서 발사.")]
+    public float spawnHeight = 1f;
+
     [Tooltip("기본 관통 수 (Lv1 시작값). 레벨별 pierceBonus가 누적됨.")]
     public int basePierce = 1;
 
@@ -94,6 +97,9 @@ public abstract class ProjectileActiveSkill : ActiveSkill
     protected void SpawnOne(Vector3 spawnPos, Quaternion rotation)
     {
         if (projectilePrefab == null) return;
+
+        // 발사 높이 보정 (플레이어 발밑 기준이라 위로 올림)
+        spawnPos.y += spawnHeight;
 
         GameObject p = Instantiate(projectilePrefab, spawnPos, rotation);
         Projectile proj = p.GetComponent<Projectile>();

@@ -163,7 +163,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealthBarUI
   slider: {fileID: 7614508218004958601}
   hideDelay: 1.5
-  heightOffset: 0.5
+  heightOffset: 1.5
 --- !u!114 &7614508218004958601 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6961606906474395643, guid: 788990ab94efcc7418a7cde16e32f056, type: 3}

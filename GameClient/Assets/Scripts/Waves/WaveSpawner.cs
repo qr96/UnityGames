@@ -12,6 +12,9 @@ public class WaveSpawner : MonoBehaviour
     public float spawnZ = 30f;
     public float startDelay = 1.5f;
 
+    [Tooltip("적 스폰 Y 위치. 프리팹 피벗이 발밑이면 0.")]
+    public float spawnY = 0f;
+
     [Header("Boss")]
     public GameObject bossPrefab;
     public float bossSpawnDelay = 2f;
@@ -153,7 +156,7 @@ public class WaveSpawner : MonoBehaviour
 
     void SpawnAt(GameObject prefab, float xPosition)
     {
-        Vector3 pos = new Vector3(xPosition, 1f, spawnZ);
+        Vector3 pos = new Vector3(xPosition, spawnY, spawnZ);
         GameObject enemyGo = Instantiate(prefab, pos, Quaternion.identity);
 
         Enemy enemy = enemyGo.GetComponent<Enemy>();

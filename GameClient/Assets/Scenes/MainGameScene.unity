@@ -2221,7 +2221,7 @@ MonoBehaviour:
   diedChannel: {fileID: 11400000, guid: ee487da7102d05048823758f636c749d, type: 2}
   coinPrefab: {fileID: 6569833850832445322, guid: 3786406fd75d11a4195b1debbfa227ab, type: 3}
   spreadRadius: 0.5
-  dropHeight: 0
+  dropHeight: 0.75
 --- !u!1001 &1578679327
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2560,8 +2560,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4743f6f4217772b4fb5fb4dc5cac424c, type: 2}
   spawnZ: 30
   startDelay: 1.5
+  spawnY: 0
   bossPrefab: {fileID: 5455637313283568746, guid: 53bebaf2def7d174bbc9ab83f1ba53f5, type: 3}
   bossSpawnDelay: 2
+  bossSpawnX: 0
+  bossSpawnY: 0
+  bossSpawnZ: 20
 --- !u!1 &1747662765
 GameObject:
   m_ObjectHideFlags: 0
@@ -3223,11 +3227,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 454382800032087466, guid: ae55515cfa570714b9731d2b2a78df4e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 454382800032087466, guid: ae55515cfa570714b9731d2b2a78df4e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 454382800032087466, guid: ae55515cfa570714b9731d2b2a78df4e, type: 3}
       propertyPath: m_LocalRotation.w
