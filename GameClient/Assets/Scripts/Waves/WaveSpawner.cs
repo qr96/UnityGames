@@ -16,6 +16,15 @@ public class WaveSpawner : MonoBehaviour
     public GameObject bossPrefab;
     public float bossSpawnDelay = 2f;
 
+    [Tooltip("보스 스폰 X 위치")]
+    public float bossSpawnX = 0f;
+
+    [Tooltip("보스 스폰 Y 위치. 프리팹 피벗이 발밑이면 0.")]
+    public float bossSpawnY = 0f;
+
+    [Tooltip("보스 스폰 Z 위치 (화면 위쪽). 여기서 등장해 Boss.battleZ로 내려옴.")]
+    public float bossSpawnZ = 20f;
+
     public int CurrentWaveIndex { get; private set; } = -1;
     public bool AllWavesCleared { get; private set; }
 
@@ -167,8 +176,10 @@ public class WaveSpawner : MonoBehaviour
 
     void SpawnBoss()
     {
-        Vector3 pos = new Vector3(0f, 1f, spawnZ - 10f);
-        Instantiate(bossPrefab, pos, Quaternion.identity);
+        Vector3 pos = new Vector3(bossSpawnX, bossSpawnY, bossSpawnZ);
+        // -Z(플레이어 쪽)를 보게 회전
+        Quaternion rot = Quaternion.LookRotation(Vector3.back);
+        Instantiate(bossPrefab, pos, rot);
         Debug.Log("[Boss] 등장!");
     }
 }
