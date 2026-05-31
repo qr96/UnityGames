@@ -27,6 +27,9 @@ public class Enemy : MonoBehaviour, IDamageable
     [Header("Event Channel")]
     public EnemyDiedChannel diedChannel;
 
+    [Tooltip("데미지 발생 시 발행할 채널 (데미지 팝업용). 없으면 발행 안 함.")]
+    public DamageDealtChannel damageChannel;
+
     [Header("Visual")]
     public Animator animator;
 
@@ -89,6 +92,22 @@ public class Enemy : MonoBehaviour, IDamageable
         if (isDead) return;
 
         currentHP -= damage;
+
+        // 체력바용 비율
+        float ratio = maxHP > 0 ? Mathf.Clamp01((float)currentHP / maxHP) : 0f;
+
+        // 데미지 시각화 통지 (팝업 + 체력바 둘 다 이 채널로)
+        if (damageChannel != null)
+        {
+            damageChannel.Raise(new DamageInfo
+            {
+                position = rb.position,
+                amount = damage,
+                isCritical = false,
+                source = this,
+                hpRatio = ratio,
+            });
+        }
 
         // 넉백: 현재 이동 방향의 반대로
         Vector3 velocity = mover.GetVelocity();

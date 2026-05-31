@@ -209,7 +209,7 @@ MonoBehaviour:
     widthMultiplier: 1
     speedMultiplier: 1.4
     projectileCount: 4
-  spreadArc: 30
+  spreadArc: 10
 --- !u!1 &3039625482822238668
 GameObject:
   m_ObjectHideFlags: 0

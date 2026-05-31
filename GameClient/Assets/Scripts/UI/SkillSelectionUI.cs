@@ -33,17 +33,22 @@ public class SkillSelectionUI : MonoBehaviour
         }
 
         if (root != null) root.SetActive(true);
-        Time.timeScale = 0f;
+
+        if (GameManager.Instance != null) GameManager.Instance.NotifyLevelUpStarted();
+        else Time.timeScale = 0f;
     }
 
     void OnCardClicked(ISelectableChoice c)
     {
-        Time.timeScale = 1f;
         if (root != null) root.SetActive(false);
         ClearCards();
 
+        // 선택 효과 먼저 적용한 뒤 상태 복귀
         currentCallback?.Invoke(c);
         currentCallback = null;
+
+        if (GameManager.Instance != null) GameManager.Instance.NotifyLevelUpFinished();
+        else Time.timeScale = 1f;
     }
 
     void ClearCards()

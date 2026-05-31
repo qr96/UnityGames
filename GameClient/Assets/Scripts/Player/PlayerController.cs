@@ -127,11 +127,10 @@ public class PlayerController : MonoBehaviour
     {
         CurrentHP -= amount;
         OnHPChanged?.Invoke();
-        Debug.Log($"HP: {CurrentHP}/{maxHP}");
         if (CurrentHP <= 0)
         {
-            Debug.Log("Game Over");
-            Time.timeScale = 0f;
+            if (GameManager.Instance != null) GameManager.Instance.NotifyPlayerDied();
+            else Time.timeScale = 0f; // GameManager 없을 때 fallback
         }
     }
 }

@@ -46,6 +46,9 @@ public class WaveSpawner : MonoBehaviour
         AllWavesCleared = true;
         OnAllWavesCleared?.Invoke();
 
+        if (GameManager.Instance != null)
+            GameManager.Instance.NotifyAllWavesCleared();
+
         if (bossPrefab != null)
         {
             yield return new WaitForSeconds(bossSpawnDelay);
@@ -60,15 +63,12 @@ public class WaveSpawner : MonoBehaviour
 
         float waveStartTime = Time.time;
 
-        // 정해진 스폰 스케줄링
         foreach (var entry in wave.spawns)
             StartCoroutine(ScheduleDesignedSpawn(entry, waveStartTime));
 
-        // 랜덤 스폰 스케줄링
         foreach (var rule in wave.randomSpawns)
             StartCoroutine(ScheduleRandomSpawn(rule, waveStartTime));
 
-        // 마지막 스폰까지의 시간 계산 (정해진 + 랜덤 모두)
         float lastSpawnTime = 0f;
         foreach (var entry in wave.spawns)
         {
@@ -83,7 +83,6 @@ public class WaveSpawner : MonoBehaviour
 
         yield return new WaitForSeconds(lastSpawnTime + 0.5f);
 
-        // 모든 적이 죽거나 maxDuration 초과까지 대기
         while (aliveEnemies > 0)
         {
             if (Time.time - waveStartTime > wave.maxDuration) break;
@@ -119,7 +118,6 @@ public class WaveSpawner : MonoBehaviour
 
     IEnumerator ScheduleRandomSpawn(WaveData.RandomSpawnRule rule, float waveStartTime)
     {
-        // 시작 시간까지 대기
         float wait = (waveStartTime + rule.startTime) - Time.time;
         if (wait > 0f) yield return new WaitForSeconds(wait);
 
@@ -129,7 +127,6 @@ public class WaveSpawner : MonoBehaviour
 
         if (prefab == null || rule.totalCount <= 0) yield break;
 
-        // duration 동안 totalCount만큼을 균등 분포 + 흔들림으로 스폰
         float baseInterval = rule.duration / rule.totalCount;
 
         for (int i = 0; i < rule.totalCount; i++)
@@ -139,7 +136,6 @@ public class WaveSpawner : MonoBehaviour
 
             if (i < rule.totalCount - 1)
             {
-                // intervalJitter만큼 무작위 흔들림 (0이면 균등, 1이면 0~2배 사이)
                 float jitter = 1f + Random.Range(-rule.intervalJitter, rule.intervalJitter);
                 yield return new WaitForSeconds(baseInterval * jitter);
             }
