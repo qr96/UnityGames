@@ -8,6 +8,7 @@ public enum ModifierType
     SizeMultiplier,          // 크기 곱
     DistanceMultiplier,      // 사거리 곱
     PierceBonus,             // 관통 +N (덧셈)
+    ProjectileCountBonus,    // 발사 수 +N (덧셈). 각 액티브가 자기 패턴에 합산.
 }
 
 /// <summary>

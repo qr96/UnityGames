@@ -11,6 +11,12 @@ public class Coin : MonoBehaviour
     public float moveSpeedZ = 8f;
     public float rotateSpeed = 180f;
 
+    [Header("Spawn kick")]
+    [Tooltip("등장 시 뒤(+Z)로 튕기는 초기 속도. moveSpeedZ보다 커야 실제로 뒤로 간다.")]
+    public float launchSpeed = 12f;
+    [Tooltip("튕긴 속도가 잦아드는 빠르기. 클수록 빨리 -Z 흐름으로 돌아온다.")]
+    public float launchDamping = 4f;
+
     [Header("Magnet")]
     public float magnetRange = 3f;
     public float magnetMinSpeed = 8f;
@@ -28,6 +34,8 @@ public class Coin : MonoBehaviour
     private Transform visualRoot;
     private bool collected = false;
 
+    private float launchVelZ; // 등장 시 +Z로 튕겼다가 0으로 감쇠
+
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -42,6 +50,8 @@ public class Coin : MonoBehaviour
         collected = false;
         if (player == null && PlayerController.PlayerTransform != null)
             player = PlayerController.PlayerTransform;
+
+        launchVelZ = launchSpeed; // 뒤로 튕기며 등장
     }
 
     void Start()
@@ -64,7 +74,16 @@ public class Coin : MonoBehaviour
         if (collected) return;
 
         Vector3 pos = rb.position;
+
+        // 항상 -Z 컨베이어. 등장 직후엔 +Z 튕김이 더 세서 잠깐 뒤로 갔다가,
+        // 그 속도가 사라지면서 자연스럽게 -Z 흐름으로 합류.
         pos.z -= moveSpeedZ * Time.fixedDeltaTime;
+        if (launchVelZ > 0f)
+        {
+            pos.z += launchVelZ * Time.fixedDeltaTime;
+            launchVelZ *= Mathf.Exp(-launchDamping * Time.fixedDeltaTime);
+            if (launchVelZ < 0.01f) launchVelZ = 0f;
+        }
 
         if (player != null)
         {

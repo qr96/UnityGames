@@ -185,7 +185,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Coin
   moveSpeedZ: 2
-  rotateSpeed: 180
+  rotateSpeed: 480
+  launchSpeed: 12
+  launchDamping: 4
   magnetRange: 1
   magnetMinSpeed: 8
   magnetMaxSpeed: 12

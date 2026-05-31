@@ -7,7 +7,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(EnemyMover))]
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour, IDamageable
 {
     [Header("Stats")]
     public int maxHP = 2;
@@ -39,6 +39,7 @@ public class Enemy : MonoBehaviour
     private bool isDead = false;
 
     public bool IsDead => isDead;
+    public Vector3 Position => rb != null ? rb.position : transform.position;
 
     void Awake()
     {

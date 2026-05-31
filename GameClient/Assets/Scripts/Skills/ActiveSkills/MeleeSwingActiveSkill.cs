@@ -82,23 +82,23 @@ public class MeleeSwingActiveSkill : ActiveSkill
         Collider[] hits = Physics.OverlapSphere(playerPos, effectiveRange);
 
         // 부채꼴 안의 적만 필터링 + 거리순 정렬
-        var candidates = new List<(Enemy enemy, float dist)>();
+        var candidates = new List<(IDamageable target, float dist)>();
 
         foreach (var col in hits)
         {
             if (!col.CompareTag("Enemy")) continue;
 
-            Enemy enemy = col.GetComponent<Enemy>();
-            if (enemy == null || enemy.IsDead) continue;
+            IDamageable target = col.GetComponent<IDamageable>();
+            if (target == null || target.IsDead) continue;
 
-            Vector3 toEnemy = enemy.transform.position - playerPos;
-            toEnemy.y = 0f; // 2D 평면에서 각도 검사
+            Vector3 toTarget = col.transform.position - playerPos;
+            toTarget.y = 0f; // 2D 평면에서 각도 검사
 
             // 부채꼴 각도 검사 (정면 = +Z 기준)
-            float angleToEnemy = Vector3.Angle(Vector3.forward, toEnemy);
-            if (angleToEnemy > angle * 0.5f) continue;
+            float angleToTarget = Vector3.Angle(Vector3.forward, toTarget);
+            if (angleToTarget > angle * 0.5f) continue;
 
-            candidates.Add((enemy, toEnemy.sqrMagnitude));
+            candidates.Add((target, toTarget.sqrMagnitude));
         }
 
         // 가까운 순으로 정렬
@@ -108,7 +108,7 @@ public class MeleeSwingActiveSkill : ActiveSkill
         int actualHits = Mathf.Min(maxHits, candidates.Count);
         for (int i = 0; i < actualHits; i++)
         {
-            candidates[i].enemy.TakeHit(damage);
+            candidates[i].target.TakeHit(damage);
         }
     }
 }

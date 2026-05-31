@@ -73,6 +73,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4298043780124706424, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2231119215245092904}
+    - targetCorrespondingSourceObject: {fileID: 4298043780124706424, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3088456263442838005}
   m_SourcePrefab: {fileID: 100100000, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
 --- !u!4 &4202109149531583880 stripped
 Transform:
@@ -118,6 +121,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StraightMover
   direction: {x: 0, y: 0, z: -1}
   speed: 3
+--- !u!114 &3088456263442838005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4766763317621509437}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f6eb68108d0b8040ac55cb52cf5998a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.06
+  renderers: []
+  flashMaterial: {fileID: 0}
 --- !u!1001 &9049953644515285441
 PrefabInstance:
   m_ObjectHideFlags: 0

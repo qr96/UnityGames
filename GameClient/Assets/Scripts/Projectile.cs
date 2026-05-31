@@ -40,6 +40,9 @@ public class Projectile : MonoBehaviour
     [Tooltip("적을 몇 명까지 관통할지. 1 = 한 명 맞고 사라짐.")]
     public int pierceCount = 1;
 
+    [Tooltip("이 태그를 가진 대상을 때림. 플레이어 투사체는 'Enemy', 적 투사체는 'Player'.")]
+    public string targetTag = "Enemy";
+
     [HideInInspector] public int damage = 1;
 
     private Rigidbody rb;
@@ -104,12 +107,12 @@ public class Projectile : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Enemy")) return;
+        if (!other.CompareTag(targetTag)) return;
 
-        Enemy enemy = other.GetComponent<Enemy>();
-        if (enemy == null || enemy.IsDead) return;
+        IDamageable target = other.GetComponent<IDamageable>();
+        if (target == null || target.IsDead) return;
 
-        enemy.TakeHit(damage);
+        target.TakeHit(damage);
 
         remainingPierce--;
         if (remainingPierce <= 0) Destroy(gameObject);

@@ -1,5 +1,110 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &127480730616517990
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6306814894333728579}
+  - component: {fileID: 7367296165182356624}
+  m_Layer: 7
+  m_Name: FireBall
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &6306814894333728579
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 127480730616517990}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8027223473559346241}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7367296165182356624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 127480730616517990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28f4b624512f9144786e5401b736027c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BurstWaveActiveSkill
+  displayName: "\uD654\uC5FC\uAD6C"
+  description: "\uD654\uC5FC\uAD6C\uB97C \uBC1C\uC0AC\uD55C\uB2E4."
+  icon: {fileID: 0}
+  tags:
+    creation: 0
+    movement: 0
+    collision: 0
+    skillClass: 1
+    element: 1
+  level: 1
+  maxLevel: 6
+  baseCooldown: 1
+  baseDamage: 1
+  playerAnimTrigger: 
+  projectilePrefab: {fileID: 3795219548592558598, guid: 771c762513d9e1d4e89ad7ac0f19e178, type: 3}
+  spawnDistance: 1
+  basePierce: 1
+  levelStats:
+  - manualDescription: 
+    pierceBonus: 0
+    damageMultiplier: 1
+    rangeMultiplier: 1
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 1
+  - manualDescription: 
+    pierceBonus: 0
+    damageMultiplier: 1
+    rangeMultiplier: 1.2
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 2
+  - manualDescription: 
+    pierceBonus: 0
+    damageMultiplier: 1.2
+    rangeMultiplier: 1
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 3
+  - manualDescription: 
+    pierceBonus: 0
+    damageMultiplier: 1.2
+    rangeMultiplier: 1.2
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 4
+  - manualDescription: 
+    pierceBonus: 0
+    damageMultiplier: 1.2
+    rangeMultiplier: 1
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 5
+  - manualDescription: 
+    pierceBonus: 0
+    damageMultiplier: 1.2
+    rangeMultiplier: 1
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 5
+  burstInterval: 0.12
 --- !u!1 &1705583864252827460
 GameObject:
   m_ObjectHideFlags: 0
@@ -61,50 +166,50 @@ MonoBehaviour:
   projectilePrefab: {fileID: 2426780470968161270, guid: 777d7c9fbc58ed0429b973569d930a9f, type: 3}
   spawnDistance: 1
   basePierce: 1
-  spreadArc: 45
   levelStats:
   - manualDescription: 
-    directionCount: 2
     pierceBonus: 0
     damageMultiplier: 1
     rangeMultiplier: 1
     widthMultiplier: 1
     speedMultiplier: 1
+    projectileCount: 2
   - manualDescription: 
-    directionCount: 2
     pierceBonus: 2
     damageMultiplier: 1
     rangeMultiplier: 1
     widthMultiplier: 1
     speedMultiplier: 1
+    projectileCount: 2
   - manualDescription: 
-    directionCount: 4
     pierceBonus: 0
     damageMultiplier: 1.2
     rangeMultiplier: 1
     widthMultiplier: 1
     speedMultiplier: 1
+    projectileCount: 2
   - manualDescription: 
-    directionCount: 4
     pierceBonus: 2
     damageMultiplier: 1.2
     rangeMultiplier: 1.2
     widthMultiplier: 1
     speedMultiplier: 1
+    projectileCount: 2
   - manualDescription: 
-    directionCount: 4
     pierceBonus: 0
     damageMultiplier: 1.2
     rangeMultiplier: 1.2
     widthMultiplier: 1
     speedMultiplier: 1
+    projectileCount: 4
   - manualDescription: 
-    directionCount: 4
     pierceBonus: 1
     damageMultiplier: 1.2
     rangeMultiplier: 1
     widthMultiplier: 1
     speedMultiplier: 1.4
+    projectileCount: 4
+  spreadArc: 30
 --- !u!1 &3039625482822238668
 GameObject:
   m_ObjectHideFlags: 0
@@ -135,8 +240,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5541821014071702519}
   - {fileID: 131747715509690717}
+  - {fileID: 3705919586926035180}
+  - {fileID: 2987866570564080745}
+  - {fileID: 6306814894333728579}
   m_Father: {fileID: 454382800032087466}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &602012055853420104
@@ -151,8 +258,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db2a7f77900742a439754d89ef3add8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActiveSkillSystem
-  allActiveSkills: []
---- !u!1 &4557828548076073969
+  allActiveSkills:
+  - {fileID: 6543908165835402718}
+--- !u!1 &8168885055980282849
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -160,8 +268,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5541821014071702519}
-  - component: {fileID: 1541502557719668810}
+  - component: {fileID: 2987866570564080745}
+  - component: {fileID: 6543908165835402718}
   m_Layer: 7
   m_Name: SwordWave
   m_TagString: Untagged
@@ -169,13 +277,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5541821014071702519
+--- !u!4 &2987866570564080745
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4557828548076073969}
+  m_GameObject: {fileID: 8168885055980282849}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -184,20 +292,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8027223473559346241}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1541502557719668810
+--- !u!114 &6543908165835402718
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4557828548076073969}
+  m_GameObject: {fileID: 8168885055980282849}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0435aa14f25652b49b95304691494537, type: 3}
+  m_Script: {fileID: 11500000, guid: 28f4b624512f9144786e5401b736027c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SwordWaveActiveSkill
+  m_EditorClassIdentifier: Assembly-CSharp::BurstWaveActiveSkill
   displayName: "\uC6D4\uC601\uCC38"
-  description: "\uB2EC\uC758 \uD798\uC744 \uBC1B\uC544 \uAC80\uAE30\uB97C \uB0A0\uB9B0\uB2E4."
+  description: "\uB2EC\uC758 \uD798\uC744 \uBC1B\uC544 \uAC80\uAE30\uB97C \uC5EC\uB7EC\uBC88
+    \uB0A0\uB9B0\uB2E4."
   icon: {fileID: 0}
   tags:
     creation: 0
@@ -213,50 +322,155 @@ MonoBehaviour:
   projectilePrefab: {fileID: 2426780470968161270, guid: 657074831af75ac438a58228f6ef4c05, type: 3}
   spawnDistance: 1
   basePierce: 1
-  spreadArc: 0
   levelStats:
   - manualDescription: 
-    directionCount: 1
     pierceBonus: 0
     damageMultiplier: 1
     rangeMultiplier: 1
     widthMultiplier: 1
     speedMultiplier: 1
+    projectileCount: 1
   - manualDescription: 
-    directionCount: 1
     pierceBonus: 1
     damageMultiplier: 1
     rangeMultiplier: 1
     widthMultiplier: 1
     speedMultiplier: 1
+    projectileCount: 2
   - manualDescription: 
-    directionCount: 1
     pierceBonus: 0
     damageMultiplier: 1.2
     rangeMultiplier: 1
     widthMultiplier: 1
     speedMultiplier: 1
+    projectileCount: 3
   - manualDescription: 
-    directionCount: 1
     pierceBonus: 2
     damageMultiplier: 1.2
     rangeMultiplier: 1.2
     widthMultiplier: 1
     speedMultiplier: 1
+    projectileCount: 4
   - manualDescription: 
-    directionCount: 1
     pierceBonus: 1
     damageMultiplier: 1.2
     rangeMultiplier: 1.2
     widthMultiplier: 1.2
     speedMultiplier: 1.2
+    projectileCount: 5
   - manualDescription: 
-    directionCount: 1
     pierceBonus: 0
     damageMultiplier: 1.2
     rangeMultiplier: 1.2
     widthMultiplier: 1
     speedMultiplier: 1.2
+    projectileCount: 5
+  burstInterval: 0.12
+--- !u!1 &9145467537628949201
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3705919586926035180}
+  - component: {fileID: 7457314091085870715}
+  m_Layer: 7
+  m_Name: MultiIcicle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &3705919586926035180
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9145467537628949201}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8027223473559346241}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7457314091085870715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9145467537628949201}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0435aa14f25652b49b95304691494537, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SwordWaveActiveSkill
+  displayName: "\uACE0\uB4DC\uB984 \uB09C\uC0AC"
+  description: "\uACE0\uB4DC\uB984\uC744 \uC5EC\uB7EC \uBC29\uD5A5\uC73C\uB85C \uB0A0\uB9B0\uB2E4"
+  icon: {fileID: 0}
+  tags:
+    creation: 0
+    movement: 0
+    collision: 0
+    skillClass: 1
+    element: 2
+  level: 1
+  maxLevel: 6
+  baseCooldown: 1.5
+  baseDamage: 2
+  playerAnimTrigger: 
+  projectilePrefab: {fileID: 7429655025657176930, guid: f13330a1157ba354f97ab0124497b5f1, type: 3}
+  spawnDistance: 1
+  basePierce: 1
+  levelStats:
+  - manualDescription: 
+    pierceBonus: 0
+    damageMultiplier: 1
+    rangeMultiplier: 1
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 2
+  - manualDescription: 
+    pierceBonus: 2
+    damageMultiplier: 1
+    rangeMultiplier: 1
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 2
+  - manualDescription: 
+    pierceBonus: 0
+    damageMultiplier: 1.2
+    rangeMultiplier: 1
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 2
+  - manualDescription: 
+    pierceBonus: 2
+    damageMultiplier: 1.2
+    rangeMultiplier: 1.2
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 4
+  - manualDescription: 
+    pierceBonus: 0
+    damageMultiplier: 1.2
+    rangeMultiplier: 1.2
+    widthMultiplier: 1
+    speedMultiplier: 1
+    projectileCount: 4
+  - manualDescription: 
+    pierceBonus: 1
+    damageMultiplier: 1.2
+    rangeMultiplier: 1
+    widthMultiplier: 1
+    speedMultiplier: 1.4
+    projectileCount: 4
+  spreadArc: 45
 --- !u!1001 &5016419884613124967
 PrefabInstance:
   m_ObjectHideFlags: 0

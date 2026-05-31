@@ -117,8 +117,8 @@ public class PlayerController : MonoBehaviour
         {
             TakeDamage(1);
 
-            Enemy enemy = other.GetComponent<Enemy>();
-            if (enemy != null) enemy.TakeHit(999);
+            IDamageable target = other.GetComponent<IDamageable>();
+            if (target != null) target.TakeHit(999);
             else Destroy(other.gameObject);
         }
     }
