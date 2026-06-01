@@ -60,6 +60,7 @@ MonoBehaviour:
   playerAnimTrigger: 
   projectilePrefab: {fileID: 3795219548592558598, guid: 771c762513d9e1d4e89ad7ac0f19e178, type: 3}
   spawnDistance: 1
+  spawnHeight: 1
   basePierce: 1
   levelStats:
   - manualDescription: 
@@ -105,111 +106,6 @@ MonoBehaviour:
     speedMultiplier: 1
     projectileCount: 5
   burstInterval: 0.12
---- !u!1 &1705583864252827460
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 131747715509690717}
-  - component: {fileID: 5604591744422284900}
-  m_Layer: 7
-  m_Name: MultiSwordWave
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &131747715509690717
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1705583864252827460}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 8027223473559346241}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5604591744422284900
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1705583864252827460}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0435aa14f25652b49b95304691494537, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SwordWaveActiveSkill
-  displayName: "\uC120\uD48D"
-  description: "\uAC80\uAE30\uB97C \uC5EC\uB7EC \uBC29\uD5A5\uC73C\uB85C \uB0A0\uB9B0\uB2E4"
-  icon: {fileID: 0}
-  tags:
-    creation: 0
-    movement: 0
-    collision: 0
-    skillClass: 0
-    element: 0
-  level: 1
-  maxLevel: 6
-  baseCooldown: 1
-  baseDamage: 1
-  playerAnimTrigger: 
-  projectilePrefab: {fileID: 2426780470968161270, guid: 777d7c9fbc58ed0429b973569d930a9f, type: 3}
-  spawnDistance: 1
-  basePierce: 1
-  levelStats:
-  - manualDescription: 
-    pierceBonus: 0
-    damageMultiplier: 1
-    rangeMultiplier: 1
-    widthMultiplier: 1
-    speedMultiplier: 1
-    projectileCount: 2
-  - manualDescription: 
-    pierceBonus: 2
-    damageMultiplier: 1
-    rangeMultiplier: 1
-    widthMultiplier: 1
-    speedMultiplier: 1
-    projectileCount: 2
-  - manualDescription: 
-    pierceBonus: 0
-    damageMultiplier: 1.2
-    rangeMultiplier: 1
-    widthMultiplier: 1
-    speedMultiplier: 1
-    projectileCount: 2
-  - manualDescription: 
-    pierceBonus: 2
-    damageMultiplier: 1.2
-    rangeMultiplier: 1.2
-    widthMultiplier: 1
-    speedMultiplier: 1
-    projectileCount: 2
-  - manualDescription: 
-    pierceBonus: 0
-    damageMultiplier: 1.2
-    rangeMultiplier: 1.2
-    widthMultiplier: 1
-    speedMultiplier: 1
-    projectileCount: 4
-  - manualDescription: 
-    pierceBonus: 1
-    damageMultiplier: 1.2
-    rangeMultiplier: 1
-    widthMultiplier: 1
-    speedMultiplier: 1.4
-    projectileCount: 4
-  spreadArc: 10
 --- !u!1 &3039625482822238668
 GameObject:
   m_ObjectHideFlags: 0
@@ -240,7 +136,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 131747715509690717}
   - {fileID: 3705919586926035180}
   - {fileID: 2987866570564080745}
   - {fileID: 6306814894333728579}
@@ -321,6 +216,7 @@ MonoBehaviour:
   playerAnimTrigger: attack
   projectilePrefab: {fileID: 2426780470968161270, guid: 657074831af75ac438a58228f6ef4c05, type: 3}
   spawnDistance: 1
+  spawnHeight: 1
   basePierce: 1
   levelStats:
   - manualDescription: 
@@ -426,6 +322,7 @@ MonoBehaviour:
   playerAnimTrigger: 
   projectilePrefab: {fileID: 7429655025657176930, guid: f13330a1157ba354f97ab0124497b5f1, type: 3}
   spawnDistance: 1
+  spawnHeight: 1
   basePierce: 1
   levelStats:
   - manualDescription: 
@@ -470,7 +367,7 @@ MonoBehaviour:
     widthMultiplier: 1
     speedMultiplier: 1.4
     projectileCount: 4
-  spreadArc: 45
+  spreadArc: 30
 --- !u!1001 &5016419884613124967
 PrefabInstance:
   m_ObjectHideFlags: 0

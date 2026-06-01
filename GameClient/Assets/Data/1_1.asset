@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
   spawns: []
   randomSpawns:
-  - enemyPrefabOverride: {fileID: 4766763317621509437, guid: 9662093d07c38f94fbc9834eb12ba3ac, type: 3}
+  - enemyPrefabOverride: {fileID: 7786809239936643276, guid: 1da5342fbcee55f4a8258c6e5613a102, type: 3}
     startTime: 0
     duration: 30
     totalCount: 30

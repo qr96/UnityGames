@@ -50,10 +50,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4682261273573558527, guid: 76d055acb969316408d9884b1f469b88, type: 3}
       propertyPath: m_Name
-      value: BaseBoss Variant
+      value: BaseBoss
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 9026371130858376022, guid: 76d055acb969316408d9884b1f469b88, type: 3}
+    - {fileID: 3487545544019724002, guid: 76d055acb969316408d9884b1f469b88, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:

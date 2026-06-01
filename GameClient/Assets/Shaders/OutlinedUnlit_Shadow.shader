@@ -8,6 +8,11 @@ Shader "Custom/URP/OutlinedUnlit_Shadow"
         [Header(Outline)]
         _OutlineColor   ("Outline Color", Color)        = (0,0,0,1)
         _OutlineWidth   ("Outline Width", Range(0, 0.1)) = 0.02
+
+        [Header(Hit Flash)]
+        // MaterialPropertyBlock 으로 런타임에 덮어쓸 값들. 기본값은 0(꺼짐)
+        _FlashColor     ("Flash Color",   Color)        = (1,1,1,1)
+        _FlashAmount    ("Flash Amount",  Range(0, 1))   = 0
     }
 
     SubShader
@@ -50,6 +55,8 @@ Shader "Custom/URP/OutlinedUnlit_Shadow"
                 float4 _BaseColor;
                 float4 _OutlineColor;
                 float  _OutlineWidth;
+                float4 _FlashColor;
+                float  _FlashAmount;
             CBUFFER_END
 
             Varyings Vert(Attributes IN)
@@ -63,6 +70,12 @@ Shader "Custom/URP/OutlinedUnlit_Shadow"
             half4 Frag(Varyings IN) : SV_Target
             {
                 half4 col = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor;
+
+                // 피격 플래시: 원래 색(col.rgb)에 _FlashColor 를 _FlashAmount 만큼 섞음.
+                // _FlashAmount = 0.5, _FlashColor = white 면 "원래 색 + 흰색 반반".
+                // 알파는 그대로 유지(Opaque 라 사실상 무의미하지만 안전하게).
+                col.rgb = lerp(col.rgb, _FlashColor.rgb, _FlashAmount);
+
                 return col;
             }
             ENDHLSL
@@ -97,6 +110,8 @@ Shader "Custom/URP/OutlinedUnlit_Shadow"
                 float4 _BaseColor;
                 float4 _OutlineColor;
                 float  _OutlineWidth;
+                float4 _FlashColor;
+                float  _FlashAmount;
             CBUFFER_END
 
             Varyings OutlineVert(Attributes IN)

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6938970510202446500}
   - component: {fileID: 9026371130858376022}
   - component: {fileID: 4651608136024149059}
-  - component: {fileID: 861660764727278837}
+  - component: {fileID: 4060911342723684096}
   m_Layer: 8
   m_Name: BaseEnemy
   m_TagString: Enemy
@@ -109,6 +109,9 @@ MonoBehaviour:
   diedChannel: {fileID: 11400000, guid: ee487da7102d05048823758f636c749d, type: 2}
   damageChannel: {fileID: 11400000, guid: d5d1bbb4705435043bcb4cc61a9b0ca8, type: 2}
   animator: {fileID: 0}
+  hitFlash: {fileID: 4060911342723684096}
+  deathEffectPath: Effects/CFX2_WWExplosion_C
+  deathEffectHeight: 1
 --- !u!114 &4651608136024149059
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,7 +126,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StraightMover
   direction: {x: 0, y: 0, z: -1}
   speed: 3
---- !u!114 &861660764727278837
+--- !u!114 &4060911342723684096
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -132,13 +135,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 4682261273573558527}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f6eb68108d0b8040ac55cb52cf5998a, type: 3}
+  m_Script: {fileID: 11500000, guid: 6008e2a303b2f5544971bcb28a1eeab2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+  targetRenderer: {fileID: 0}
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   flashDuration: 0.06
-  renderers: []
-  flashMaterial: {fileID: 0}
+  colorProperty: _BaseColor
 --- !u!1 &6269755926698431875
 GameObject:
   m_ObjectHideFlags: 0

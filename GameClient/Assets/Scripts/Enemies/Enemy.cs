@@ -33,6 +33,15 @@ public class Enemy : MonoBehaviour, IDamageable
     [Header("Visual")]
     public Animator animator;
 
+    [Tooltip("피격 번쩍임. 비우면 자동 검색.")]
+    public HitFlash hitFlash;
+
+    [Tooltip("사망 이펙트 프리팹의 Resources 경로 (예: Effects/EnemyDeath). 비우면 없음.")]
+    public string deathEffectPath = "";
+
+    [Tooltip("사망 이펙트 높이 오프셋 (적 발밑 기준 위로). 적 몸통 중앙쯤으로.")]
+    public float deathEffectHeight = 1f;
+
     public event Action<Enemy> OnDied;
 
     private Rigidbody rb;
@@ -53,6 +62,7 @@ public class Enemy : MonoBehaviour, IDamageable
         mover = GetComponent<EnemyMover>();
 
         if (animator == null) animator = GetComponentInChildren<Animator>();
+        if (hitFlash == null) hitFlash = GetComponentInChildren<HitFlash>();
     }
 
     void Start()
@@ -109,6 +119,9 @@ public class Enemy : MonoBehaviour, IDamageable
             });
         }
 
+        // 피격 번쩍임
+        if (hitFlash != null) hitFlash.Flash();
+
         // 넉백: 현재 이동 방향의 반대로
         Vector3 velocity = mover.GetVelocity();
         if (velocity.sqrMagnitude > 0.0001f)
@@ -132,6 +145,13 @@ public class Enemy : MonoBehaviour, IDamageable
                 coinDropAmount = coinDropAmount,
                 xpReward = xpReward,
             });
+        }
+
+        // 사망 이펙트 (풀에서 꺼냄)
+        if (!string.IsNullOrEmpty(deathEffectPath) && PoolManager.Instance != null)
+        {
+            if (PoolManager.Instance.TryCreate(deathEffectPath, out GameObject fx))
+                fx.transform.position = rb.position + Vector3.up * deathEffectHeight;
         }
 
         OnDied?.Invoke(this);

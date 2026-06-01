@@ -19,3 +19,9 @@ MonoBehaviour:
   - resourcePath: UI/EnemyHealthBar
     defaultCapacity: 10
     maxSize: 30
+  - resourcePath: Effects/CFX2_WWExplosion_C
+    defaultCapacity: 5
+    maxSize: 10
+  - resourcePath: Effects/FX_DarkSkill_Hit02
+    defaultCapacity: 5
+    maxSize: 10
