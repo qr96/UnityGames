@@ -215,7 +215,7 @@ MonoBehaviour:
   baseDamage: 1
   playerAnimTrigger: attack
   projectilePrefab: {fileID: 2426780470968161270, guid: 657074831af75ac438a58228f6ef4c05, type: 3}
-  spawnDistance: 1
+  spawnDistance: 0.5
   spawnHeight: 1
   basePierce: 1
   levelStats:

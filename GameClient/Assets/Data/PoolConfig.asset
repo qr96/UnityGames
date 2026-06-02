@@ -25,3 +25,6 @@ MonoBehaviour:
   - resourcePath: Effects/FX_DarkSkill_Hit02
     defaultCapacity: 5
     maxSize: 10
+  - resourcePath: Effects/CFXR Hit D 3D (Yellow)
+    defaultCapacity: 5
+    maxSize: 10
