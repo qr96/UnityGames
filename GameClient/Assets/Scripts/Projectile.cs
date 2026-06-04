@@ -28,7 +28,7 @@ public struct ProjectileSpawnParams
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
-public class Projectile : MonoBehaviour
+public class Projectile : MonoBehaviour, IPoolable
 {
     [Header("Movement")]
     public float speed = 20f;
@@ -51,6 +51,8 @@ public class Projectile : MonoBehaviour
     private Vector3 startPos;
     private float currentSpeed;
     private float effectiveMaxDistance;
+    private Vector3 _baseScale;     // 프리팹 원본 스케일 (재사용 시 누적 방지의 기준)
+    private bool _baseScaleCaptured;
 
     void Awake()
     {
@@ -59,6 +61,12 @@ public class Projectile : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         currentSpeed = speed;
         effectiveMaxDistance = maxDistance;
+
+        if (!_baseScaleCaptured)
+        {
+            _baseScale = transform.localScale;   // 최초 1회만 캡처
+            _baseScaleCaptured = true;
+        }
     }
 
     void Start()
@@ -81,13 +89,22 @@ public class Projectile : MonoBehaviour
         currentSpeed = speed * p.speedScale;
         initialized = true;
 
-        Vector3 scale = transform.localScale;
+        // 스케일은 항상 원본(_baseScale) 기준으로 재계산 → 재사용해도 누적되지 않음
+        Vector3 scale = _baseScale;
         if (p.uniformSize > 0f) scale *= p.uniformSize;
         if (p.widthScale > 0f) scale.x *= p.widthScale;
         transform.localScale = scale;
 
-        // Setup이 Start보다 먼저 호출될 수 있으므로 startPos를 여기서도 잡음
-        startPos = rb.position;
+        // 중요: kinematic + Interpolate rb는 transform을 옮겨도 rb.position이
+        // 다음 물리 스텝 전까지 갱신되지 않음. startPos를 transform 기준으로 잡아야
+        // 재사용 시 '옛 위치'를 startPos로 잡아 즉시 소멸하는 버그를 막는다.
+        startPos = transform.position;
+        rb.position = transform.position;   // 물리 위치 즉시 동기화
+
+        // 위치 확정 후 파티클 최종 정리.
+        // 활성화 순간(위치 지정 전) Prewarm/PlayOnAwake로 옛 위치에 방출된 입자 제거.
+        if (TryGetComponent(out Poolable poolable))
+            poolable.ClearParticles();
     }
 
     void FixedUpdate()
@@ -97,7 +114,7 @@ public class Projectile : MonoBehaviour
         // 거리 기반 소멸
         if (Vector3.Distance(startPos, rb.position) >= effectiveMaxDistance)
         {
-            Destroy(gameObject);
+            ReturnToPool();
             return;
         }
 
@@ -115,6 +132,30 @@ public class Projectile : MonoBehaviour
         target.TakeHit(damage);
 
         remainingPierce--;
-        if (remainingPierce <= 0) Destroy(gameObject);
+        if (remainingPierce <= 0) ReturnToPool();
+    }
+
+    // ─── 풀링 ───
+
+    /// <summary>풀에서 꺼내질 때. Setup()이 직후에 호출돼 실제 파라미터를 채운다.</summary>
+    public void OnSpawn()
+    {
+        // 누적 방지: 스케일을 원본으로 되돌림 (Setup이 다시 배수 적용)
+        if (_baseScaleCaptured) transform.localScale = _baseScale;
+        // Setup이 호출되기 전까지는 움직이지 않도록
+        initialized = false;
+    }
+
+    /// <summary>풀로 반납되기 직전. 투사체는 코루틴/지속효과가 없어 특별 처리 없음.</summary>
+    public void OnDespawn()
+    {
+        initialized = false;
+    }
+
+    /// <summary>풀이 있으면 반납, 없으면 파괴(씬 직접 배치 fallback).</summary>
+    private void ReturnToPool()
+    {
+        if (TryGetComponent(out Poolable poolable)) poolable.ReleaseSelf();
+        else Destroy(gameObject);
     }
 }

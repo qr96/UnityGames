@@ -1016,8 +1016,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldUIManager
   damageChannel: {fileID: 11400000, guid: d5d1bbb4705435043bcb4cc61a9b0ca8, type: 2}
-  popupPath: UI/DamagePopup
-  healthBarPath: UI/EnemyHealthBar
+  popupPrefab: {fileID: 7860899015714314959, guid: 961d965603df3464ba46b3f1fdd62062, type: 3}
+  healthBarPrefab: {fileID: 2295036797833616436, guid: e1c3f92b34f1ad44e852230465111982, type: 3}
   popupHeightOffset: 1.5
   uiParent: {fileID: 604080932}
 --- !u!1 &669701029

@@ -101,7 +101,14 @@ public abstract class ProjectileActiveSkill : ActiveSkill
         // 발사 높이 보정 (플레이어 발밑 기준이라 위로 올림)
         spawnPos.y += spawnHeight;
 
-        GameObject p = Instantiate(projectilePrefab, spawnPos, rotation);
+        // 풀에서 꺼냄 (없으면 fallback으로 직접 생성)
+        GameObject p = PoolManager.Instance != null
+            ? PoolManager.Instance.Get(projectilePrefab)
+            : Instantiate(projectilePrefab);
+        if (p == null) return;
+
+        p.transform.SetPositionAndRotation(spawnPos, rotation);
+
         Projectile proj = p.GetComponent<Projectile>();
         if (proj == null) return;
 

@@ -35,6 +35,7 @@ public class Coin : MonoBehaviour
     private bool collected = false;
 
     private float launchVelZ; // 등장 시 +Z로 튕겼다가 0으로 감쇠
+    private bool _needsPositionSync = false;   // 스폰 후 첫 물리스텝에서 rb.position 동기화
 
     void Awake()
     {
@@ -52,6 +53,7 @@ public class Coin : MonoBehaviour
             player = PlayerController.PlayerTransform;
 
         launchVelZ = launchSpeed; // 뒤로 튕기며 등장
+        _needsPositionSync = true;
     }
 
     void Start()
@@ -63,6 +65,17 @@ public class Coin : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 스폰 위치를 즉시 지정. rb.position 직접 대입으로 보간 잔상 방지.
+    /// CoinDropper가 Get 직후 호출.
+    /// </summary>
+    public void Spawn(Vector3 position)
+    {
+        transform.position = position;
+        if (rb != null) rb.position = position;
+        _needsPositionSync = false;
+    }
+
     void Update()
     {
         if (!collected)
@@ -72,6 +85,13 @@ public class Coin : MonoBehaviour
     void FixedUpdate()
     {
         if (collected) return;
+
+        // 스폰 직후 1회: rb.position을 실제 스폰 위치와 동기화 (옛 위치에서 출발 방지)
+        if (_needsPositionSync)
+        {
+            rb.position = transform.position;
+            _needsPositionSync = false;
+        }
 
         Vector3 pos = rb.position;
 
@@ -107,7 +127,7 @@ public class Coin : MonoBehaviour
 
         rb.MovePosition(pos);
 
-        if (pos.z < despawnZ) Destroy(gameObject);
+        if (pos.z < despawnZ) ReturnToPool();
     }
 
     void OnTriggerEnter(Collider other)
@@ -124,6 +144,17 @@ public class Coin : MonoBehaviour
         if (CoinManager.Instance != null)
             CoinManager.Instance.AddCoin(value);
 
-        Destroy(gameObject);
+        ReturnToPool();
+    }
+
+    /// <summary>
+    /// 풀이 있으면 반납, 없으면 파괴.
+    /// 상태 리셋(collected=false, launchVelZ 등)은 OnEnable에서 처리하므로
+    /// 풀에서 다시 꺼낼 때(SetActive(true)) 자동으로 초기화됨.
+    /// </summary>
+    private void ReturnToPool()
+    {
+        if (TryGetComponent(out Poolable poolable)) poolable.ReleaseSelf();
+        else Destroy(gameObject);
     }
 }

@@ -157,16 +157,23 @@ public class WaveSpawner : MonoBehaviour
     void SpawnAt(GameObject prefab, float xPosition)
     {
         Vector3 pos = new Vector3(xPosition, spawnY, spawnZ);
-        GameObject enemyGo = Instantiate(prefab, pos, Quaternion.identity);
+
+        // 풀에서 꺼냄 (없으면 fallback). Get 시 Enemy.OnSpawn이 상태를 리셋함.
+        GameObject enemyGo = PoolManager.Instance != null
+            ? PoolManager.Instance.Get(prefab)
+            : Instantiate(prefab);
+        if (enemyGo == null) return;
 
         Enemy enemy = enemyGo.GetComponent<Enemy>();
         if (enemy != null)
         {
+            enemy.Spawn(pos, Quaternion.identity);   // transform + rb.position 즉시 동기화
             aliveEnemies++;
             enemy.OnDied += HandleEnemyDied;
         }
         else
         {
+            enemyGo.transform.SetPositionAndRotation(pos, Quaternion.identity);
             Debug.LogWarning($"[WaveSpawner] {prefab.name}에 Enemy 컴포넌트가 없음", prefab);
         }
     }
@@ -179,6 +186,8 @@ public class WaveSpawner : MonoBehaviour
 
     void SpawnBoss()
     {
+        // 보스는 스테이지당 1회만 등장하고 등장연출/static 참조 등 고유 상태가 있어
+        // 풀링 이득이 거의 없음 → 의도적으로 Instantiate 유지.
         Vector3 pos = new Vector3(bossSpawnX, bossSpawnY, bossSpawnZ);
         // -Z(플레이어 쪽)를 보게 회전
         Quaternion rot = Quaternion.LookRotation(Vector3.back);

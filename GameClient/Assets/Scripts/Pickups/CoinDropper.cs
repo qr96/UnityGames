@@ -33,7 +33,19 @@ public class CoinDropper : MonoBehaviour
                 dropHeight,
                 Random.Range(-spreadRadius, spreadRadius)
             );
-            Instantiate(coinPrefab, info.position + offset, Quaternion.identity);
+
+            // 풀에서 꺼냄 (없으면 fallback으로 직접 생성)
+            GameObject coin = PoolManager.Instance != null
+                ? PoolManager.Instance.Get(coinPrefab)
+                : Instantiate(coinPrefab);
+            if (coin == null) continue;
+
+            // Get 시 Coin.OnEnable이 상태 리셋. 위치는 rb까지 즉시 동기화(보간 잔상 방지).
+            Vector3 spawnPos = info.position + offset;
+            if (coin.TryGetComponent(out Coin coinComp))
+                coinComp.Spawn(spawnPos);
+            else
+                coin.transform.position = spawnPos;
         }
     }
 }

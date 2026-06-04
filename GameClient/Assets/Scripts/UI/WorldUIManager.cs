@@ -13,9 +13,12 @@ public class WorldUIManager : MonoBehaviour
     [Header("Channel")]
     public DamageDealtChannel damageChannel;
 
-    [Header("Pool Paths (Resources 경로)")]
-    public string popupPath = "UI/DamagePopup";
-    public string healthBarPath = "UI/EnemyHealthBar";
+    [Header("Prefabs (직접 연결)")]
+    [Tooltip("데미지 팝업 프리팹. Poolable이 미리 부착돼 있어야 함([RequireComponent]로 보장).")]
+    public GameObject popupPrefab;
+
+    [Tooltip("적 체력바 프리팹. Poolable이 미리 부착돼 있어야 함.")]
+    public GameObject healthBarPrefab;
 
     [Header("Offsets")]
     [Tooltip("데미지 팝업이 뜰 높이 (적 중심에서 위로). 적 머리 위에 뜨도록 조정.")]
@@ -57,8 +60,10 @@ public class WorldUIManager : MonoBehaviour
 
     void SpawnPopup(DamageInfo info)
     {
-        if (PoolManager.Instance == null) return;
-        if (!PoolManager.Instance.TryCreate(popupPath, out GameObject obj)) return;
+        if (PoolManager.Instance == null || popupPrefab == null) return;
+
+        GameObject obj = PoolManager.Instance.Get(popupPrefab);
+        if (obj == null) return;
 
         PlaceUnderCanvas(obj);
 
@@ -82,8 +87,10 @@ public class WorldUIManager : MonoBehaviour
             return;
         }
 
-        if (PoolManager.Instance == null) return;
-        if (!PoolManager.Instance.TryCreate(healthBarPath, out GameObject obj)) return;
+        if (PoolManager.Instance == null || healthBarPrefab == null) return;
+
+        GameObject obj = PoolManager.Instance.Get(healthBarPrefab);
+        if (obj == null) return;
 
         PlaceUnderCanvas(obj);
 

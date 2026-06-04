@@ -37,6 +37,20 @@ public class HitFlash : MonoBehaviour
         _flashRoutine = StartCoroutine(FlashRoutine());
     }
 
+    /// <summary>
+    /// 진행 중인 번쩍임을 즉시 끄고 _FlashAmount를 0으로 되돌린다.
+    /// 풀 재사용 시 흰색으로 굳은 상태를 막기 위해 OnSpawn에서 호출.
+    /// </summary>
+    public void ResetFlash()
+    {
+        if (_flashRoutine != null)
+        {
+            StopCoroutine(_flashRoutine);
+            _flashRoutine = null;
+        }
+        SetFlashAmount(0f);
+    }
+
     private IEnumerator FlashRoutine()
     {
         float t = 0f;
