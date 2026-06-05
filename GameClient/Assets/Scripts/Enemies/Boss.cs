@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -117,17 +118,36 @@ public class Boss : MonoBehaviour, IDamageable
         if (currentHP <= 0) Die();
     }
 
+    /// <summary>보스는 충돌 즉사 면역. 플레이어 몸통박치기로는 데미지를 받지 않는다.</summary>
+    public void Kill() { }
+
     void Die()
     {
         if (isDead) return;
         isDead = true;
 
-        OnDefeated?.Invoke();
+        OnDefeated?.Invoke();   // HP바 숨김 등 즉시 반응할 UI용
+
+        // 순서 중요: NotifyBossDefeated를 먼저 부르면 StageClear → timeScale=0이 되어
+        // 사망 연출이 시작도 못 하고 얼어붙고, 스케일 시간 기반 지연 파괴도 영영 안 일어남.
+        // → 연출을 먼저(아직 BossFight라 timeScale=1), 통지를 나중에.
+        StartCoroutine(DeathSequence());
+    }
+
+    [Header("Death")]
+    [Tooltip("사망 연출 시간(초). 이 시간이 지난 뒤 스테이지 클리어로 전환.")]
+    public float deathSequenceDuration = 1f;
+
+    IEnumerator DeathSequence()
+    {
+        // 사망 애니메이션 트리거 (애니메이터에 추가하면 주석 해제)
+        // if (animator != null) animator.SetTrigger("die");
+
+        yield return new WaitForSeconds(deathSequenceDuration);   // BossFight 중이라 timeScale=1, 정상 진행
 
         if (GameManager.Instance != null)
-            GameManager.Instance.NotifyBossDefeated();
+            GameManager.Instance.NotifyBossDefeated();   // 이제 StageClear(timeScale=0)로 전환해도 안전
 
-        // 즉시 파괴하지 않고 약간의 사망 연출 여지 (애니메이션 등)
-        Destroy(gameObject, 1f);
+        Destroy(gameObject);
     }
 }

@@ -184,6 +184,16 @@ public class Enemy : MonoBehaviour, IDamageable, IPoolable
         if (currentHP <= 0) Die();
     }
 
+    /// <summary>
+    /// 즉시 처치 (플레이어 충돌 등). 일반 사망과 동일하게 처리되어 보상도 지급.
+    /// (기존 TakeHit(999) 방식과 동일한 결과, 매직넘버 없이.)
+    /// </summary>
+    public void Kill()
+    {
+        if (isDead) return;
+        Die();
+    }
+
     void Die()
     {
         if (isDead) return;

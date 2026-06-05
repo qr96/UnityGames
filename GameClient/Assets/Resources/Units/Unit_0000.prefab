@@ -441,6 +441,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4298043780124706424, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7599323055461847512}
+    - targetCorrespondingSourceObject: {fileID: 4298043780124706424, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 342803848216693901}
   m_SourcePrefab: {fileID: 100100000, guid: 8ccaaf392e440fd4bbc9df2c039e886c, type: 3}
 --- !u!4 &454382800032087466 stripped
 Transform:
@@ -472,6 +475,26 @@ MonoBehaviour:
   minZ: -5
   maxZ: 6
   maxHP: 3
+  invincibleDuration: 1
+  blinkInterval: 0.1
+  blinkFlashAmount: 0.4
+  hitFlash: {fileID: 0}
+--- !u!114 &342803848216693901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9095124198874629407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6008e2a303b2f5544971bcb28a1eeab2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
+  _renderers: []
+  _flashColor: {r: 1, g: 1, b: 1, a: 1}
+  _flashAmount: 0.5
+  _flashDuration: 0.15
 --- !u!1001 &7853741825939393864
 PrefabInstance:
   m_ObjectHideFlags: 0

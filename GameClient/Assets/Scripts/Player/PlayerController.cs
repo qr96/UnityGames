@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -18,8 +19,24 @@ public class PlayerController : MonoBehaviour
     [Header("Stats")]
     public int maxHP = 3;
 
+    [Header("Invincibility (피격 무적)")]
+    [Tooltip("피격 후 무적 시간(초). 적 무리에 계속 닿아 있으면 이 주기로 다시 맞음.")]
+    public float invincibleDuration = 1f;
+
+    [Tooltip("무적 중 깜빡임 간격(초)")]
+    public float blinkInterval = 0.1f;
+
+    [Tooltip("무적 점멸의 플래시 강도(0~1). 캐릭터가 사라지지 않고 흰빛으로 맥동.")]
+    [Range(0f, 1f)] public float blinkFlashAmount = 0.4f;
+
+    [Tooltip("점멸용 HitFlash. 비우면 자동 검색/부착.")]
+    public HitFlash hitFlash;
+
     public int CurrentHP { get; private set; }
     public int MaxHP => maxHP;
+
+    /// <summary>현재 무적 상태 여부.</summary>
+    public bool IsInvincible => Time.time < invincibleUntil;
 
     /// <summary>HP가 변경됐을 때 발행. UI 갱신용.</summary>
     public event Action OnHPChanged;
@@ -28,6 +45,8 @@ public class PlayerController : MonoBehaviour
     private Vector3 lastMousePos;
     private bool isDragging = false;
     private Vector3 pendingDelta = Vector3.zero;
+    private float invincibleUntil = -999f;
+    private Coroutine _blinkRoutine;
 
     void Awake()
     {
@@ -37,6 +56,10 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+        // 무적 점멸용 HitFlash. 같은 셰이더(_FlashAmount)를 쓰므로 적과 동일 경로로 동작.
+        if (hitFlash == null) hitFlash = GetComponentInChildren<HitFlash>();
+        if (hitFlash == null) hitFlash = gameObject.AddComponent<HitFlash>();
     }
 
     void OnDestroy()
@@ -110,17 +133,40 @@ public class PlayerController : MonoBehaviour
     }
 
     // ─── 충돌 ───
+    // 적 즉사 처리 없음: 적은 살아서 통과하며, 플레이어가 뒤로 쫓아가 잡을 수도 있다.
+    // Enter만으론 '계속 닿아 있는 적'에게 무적 해제 후 다시 맞지 않으므로
+    // (Enter는 처음 겹칠 때 1회만 발화) Stay를 함께 사용한다.
 
-    void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other) => HandleEnemyContact(other);
+    void OnTriggerStay(Collider other) => HandleEnemyContact(other);
+
+    void HandleEnemyContact(Collider other)
     {
-        if (other.CompareTag("Enemy"))
-        {
-            TakeDamage(1);
+        if (!other.CompareTag("Enemy")) return;
+        if (IsInvincible) return;   // 무적 중엔 그냥 통과
 
-            IDamageable target = other.GetComponent<IDamageable>();
-            if (target != null) target.TakeHit(999);
-            else Destroy(other.gameObject);
+        TakeDamage(1);
+        invincibleUntil = Time.time + invincibleDuration;
+
+        if (_blinkRoutine != null) StopCoroutine(_blinkRoutine);
+        _blinkRoutine = StartCoroutine(BlinkWhileInvincible());
+    }
+
+    /// <summary>무적 동안 흰빛 점멸. 사라지지 않아 위치가 항상 보임. 끝나면 원상 복구.</summary>
+    IEnumerator BlinkWhileInvincible()
+    {
+        var wait = new WaitForSeconds(blinkInterval);
+        bool flashOn = true;
+
+        while (IsInvincible)
+        {
+            hitFlash.SetFlash(flashOn ? blinkFlashAmount : 0f);
+            flashOn = !flashOn;
+            yield return wait;
         }
+
+        hitFlash.SetFlash(0f);
+        _blinkRoutine = null;
     }
 
     void TakeDamage(int amount)

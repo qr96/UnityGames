@@ -51,6 +51,20 @@ public class HitFlash : MonoBehaviour
         SetFlashAmount(0f);
     }
 
+    /// <summary>
+    /// 플래시 강도를 외부에서 직접 설정 (무적 점멸 등 지속 제어용).
+    /// 진행 중인 자동 감쇠(Flash)는 중단된다.
+    /// </summary>
+    public void SetFlash(float amount)
+    {
+        if (_flashRoutine != null)
+        {
+            StopCoroutine(_flashRoutine);
+            _flashRoutine = null;
+        }
+        SetFlashAmount(Mathf.Clamp01(amount));
+    }
+
     private IEnumerator FlashRoutine()
     {
         float t = 0f;
