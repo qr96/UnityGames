@@ -89,10 +89,11 @@ public class Boss : MonoBehaviour, IDamageable
         }
     }
 
-    /// <summary>자리를 잡고 전투 시작. 공격 패턴 활성화는 여기서(4단계).</summary>
+    /// <summary>자리를 잡고 전투 시작. 공격 패턴 활성화.</summary>
     void OnEnteredBattle()
     {
-        // 4단계에서 BossAttack 컴포넌트 활성화 예정
+        if (TryGetComponent(out BossAttack attack))
+            attack.Activate();
     }
 
     public void TakeHit(int damage)

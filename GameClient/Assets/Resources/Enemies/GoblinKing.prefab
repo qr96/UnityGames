@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2630582019676125489, guid: c2ac0bd54988f124a8d50e8575d07eeb, type: 3}
       propertyPath: m_Height
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2630582019676125489, guid: c2ac0bd54988f124a8d50e8575d07eeb, type: 3}
       propertyPath: m_Radius
-      value: 0.75
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2630582019676125489, guid: c2ac0bd54988f124a8d50e8575d07eeb, type: 3}
       propertyPath: m_Center.y
-      value: 2
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 3042346461093166799, guid: c2ac0bd54988f124a8d50e8575d07eeb, type: 3}
       propertyPath: m_Name
@@ -75,13 +75,46 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6303149413770918129, guid: c2ac0bd54988f124a8d50e8575d07eeb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7924724703514673199}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3042346461093166799, guid: c2ac0bd54988f124a8d50e8575d07eeb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8974982939637282186}
   m_SourcePrefab: {fileID: 100100000, guid: c2ac0bd54988f124a8d50e8575d07eeb, type: 3}
 --- !u!4 &3960788573715378772 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6303149413770918129, guid: c2ac0bd54988f124a8d50e8575d07eeb, type: 3}
   m_PrefabInstance: {fileID: 7029772431388428965}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5455637313283568746 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3042346461093166799, guid: c2ac0bd54988f124a8d50e8575d07eeb, type: 3}
+  m_PrefabInstance: {fileID: 7029772431388428965}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8974982939637282186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5455637313283568746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3350d73ae0733c64eb4602d65736a0e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossAttack
+  projectilePrefab: {fileID: 208124788834334449, guid: 8fdc51fd8457e0847a72423562c507f9, type: 3}
+  throwInterval: 2.5
+  projectileCount: 3
+  spreadAngle: 36
+  projectileDamage: 1
+  projectileMaxDistance: 30
+  throwHeight: 1.2
+  minionPrefab: {fileID: 7786809239936643276, guid: 1da5342fbcee55f4a8258c6e5613a102, type: 3}
+  summonInterval: 8
+  summonCount: 2
+  summonSpread: 2
+  summonMinX: -4
+  summonMaxX: 4
 --- !u!1001 &7669909836527314884
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -92,15 +125,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 4ea520933e86eb149bda0cd5ef18d22e, type: 3}
       propertyPath: m_LocalScale.x
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4ea520933e86eb149bda0cd5ef18d22e, type: 3}
       propertyPath: m_LocalScale.y
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4ea520933e86eb149bda0cd5ef18d22e, type: 3}
       propertyPath: m_LocalScale.z
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4ea520933e86eb149bda0cd5ef18d22e, type: 3}
       propertyPath: m_LocalPosition.x

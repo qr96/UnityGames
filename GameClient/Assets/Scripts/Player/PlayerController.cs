@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamageable
 {
     public static Transform PlayerTransform { get; private set; }
     public static PlayerController Instance { get; private set; }
@@ -29,6 +29,13 @@ public class PlayerController : MonoBehaviour
     [Tooltip("무적 점멸의 플래시 강도(0~1). 캐릭터가 사라지지 않고 흰빛으로 맥동.")]
     [Range(0f, 1f)] public float blinkFlashAmount = 0.4f;
 
+    [Header("Knockback (피격 넉백)")]
+    [Tooltip("피격 시 +Z(뒤)로 밀리는 초기 속도")]
+    public float knockbackForce = 6f;
+
+    [Tooltip("넉백 감쇠 속도. 클수록 빨리 멈춤(런게임은 짧게).")]
+    public float knockbackDecay = 25f;
+
     [Tooltip("점멸용 HitFlash. 비우면 자동 검색/부착.")]
     public HitFlash hitFlash;
 
@@ -47,6 +54,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 pendingDelta = Vector3.zero;
     private float invincibleUntil = -999f;
     private Coroutine _blinkRoutine;
+    private Vector3 knockbackVelocity = Vector3.zero;
 
     void Awake()
     {
@@ -83,14 +91,21 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (pendingDelta.sqrMagnitude > 0f)
+        // 입력 이동 + 넉백을 합쳐 한 번에 적용
+        Vector3 move = pendingDelta + knockbackVelocity * Time.fixedDeltaTime;
+
+        if (move.sqrMagnitude > 0f)
         {
-            Vector3 target = rb.position + pendingDelta;
-            target.x = Mathf.Clamp(target.x, minX, maxX);
+            Vector3 target = rb.position + move;
+            target.x = Mathf.Clamp(target.x, minX, maxX);   // 넉백도 레인 밖으로 못 나감
             target.z = Mathf.Clamp(target.z, minZ, maxZ);
             rb.MovePosition(target);
-            pendingDelta = Vector3.zero;
         }
+        pendingDelta = Vector3.zero;
+
+        // 넉백 감쇠
+        knockbackVelocity = Vector3.MoveTowards(
+            knockbackVelocity, Vector3.zero, knockbackDecay * Time.fixedDeltaTime);
     }
 
     void ReadKeyboard()
@@ -146,10 +161,42 @@ public class PlayerController : MonoBehaviour
         if (IsInvincible) return;   // 무적 중엔 그냥 통과
 
         TakeDamage(1);
+        BeginInvincibility();
+    }
+
+    /// <summary>피격 무적 시작 + 점멸 + 넉백. 몸통박치기/보스 투사체 공통.</summary>
+    void BeginInvincibility()
+    {
         invincibleUntil = Time.time + invincibleDuration;
+
+        // -Z(뒤, 적이 오는 방향의 반대)로 넉백. 타격 순간을 '밀림'으로 전달.
+        // (적은 +Z에서 -Z로 내려오므로, 맞으면 플레이어는 -Z로 밀려남)
+        knockbackVelocity = Vector3.back * knockbackForce;
 
         if (_blinkRoutine != null) StopCoroutine(_blinkRoutine);
         _blinkRoutine = StartCoroutine(BlinkWhileInvincible());
+    }
+
+    // ─── IDamageable (보스 투사체 등 외부 공격이 이 인터페이스로 때림) ───
+
+    public bool IsDead => CurrentHP <= 0;
+    public Vector3 Position => rb != null ? rb.position : transform.position;
+
+    /// <summary>외부 공격 피격. 몸통박치기와 동일하게 무적이 적용된다(일관성).</summary>
+    public void TakeHit(int damage)
+    {
+        if (IsDead) return;
+        if (IsInvincible) return;
+
+        TakeDamage(damage);
+        BeginInvincibility();
+    }
+
+    /// <summary>즉사(낙사/즉사 장판 등 예비). 무적을 무시하고 즉시 사망 처리.</summary>
+    public void Kill()
+    {
+        if (IsDead) return;
+        TakeDamage(CurrentHP);
     }
 
     /// <summary>무적 동안 흰빛 점멸. 사라지지 않아 위치가 항상 보임. 끝나면 원상 복구.</summary>
