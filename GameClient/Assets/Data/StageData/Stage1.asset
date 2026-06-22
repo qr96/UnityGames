@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 505642b08fc9e9c4b983cf58172be2a6, type: 3}
+  m_Name: Stage1
+  m_EditorClassIdentifier: Assembly-CSharp::StageData
+  stageName: Stage
+  waves:
+  - {fileID: 11400000, guid: 4743f6f4217772b4fb5fb4dc5cac424c, type: 2}
+  bossPrefab: {fileID: 5455637313283568746, guid: 53bebaf2def7d174bbc9ab83f1ba53f5, type: 3}
+  bossSpawnDelay: 2
+  bossSpawnPosition: {x: 0, y: 0, z: 20}
+  groundTilePrefab: {fileID: 6777671371254396520, guid: e89a343b2057e0445aa10f1e6b43e132, type: 3}
+  scrollSpeed: 2
+  tileCount: 3
+  tileLength: 20
+  bgm: {fileID: 0}

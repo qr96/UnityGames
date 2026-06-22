@@ -6,27 +6,25 @@ public class WaveSpawner : MonoBehaviour
 {
     public static WaveSpawner Instance { get; private set; }
 
-    [Header("Setup")]
+    [Header("Stage")]
+    [Tooltip("실행할 스테이지 데이터. (나중에 로비/GameSession이 지정하면 그걸 우선 사용)")]
+    public StageData stage;
+
+    [Header("Spawn Mechanics (스테이지 공통)")]
+    [Tooltip("스테이지에 지정 안 된 적의 기본 프리팹")]
     public GameObject defaultEnemyPrefab;
-    public List<WaveData> waves = new List<WaveData>();
+
+    [Tooltip("적 스폰 Z 위치 (화면 위쪽)")]
     public float spawnZ = 30f;
+
+    [Tooltip("게임 시작 후 첫 웨이브까지 대기")]
     public float startDelay = 1.5f;
 
     [Tooltip("적 스폰 Y 위치. 프리팹 피벗이 발밑이면 0.")]
     public float spawnY = 0f;
 
-    [Header("Boss")]
-    public GameObject bossPrefab;
-    public float bossSpawnDelay = 2f;
-
-    [Tooltip("보스 스폰 X 위치")]
-    public float bossSpawnX = 0f;
-
-    [Tooltip("보스 스폰 Y 위치. 프리팹 피벗이 발밑이면 0.")]
+    [Tooltip("보스 스폰 Y 위치. 프리팹 피벗이 발밑이면 0. (X/Z는 StageData에서)")]
     public float bossSpawnY = 0f;
-
-    [Tooltip("보스 스폰 Z 위치 (화면 위쪽). 여기서 등장해 Boss.battleZ로 내려옴.")]
-    public float bossSpawnZ = 20f;
 
     public int CurrentWaveIndex { get; private set; } = -1;
     public bool AllWavesCleared { get; private set; }
@@ -42,6 +40,16 @@ public class WaveSpawner : MonoBehaviour
 
     void Start()
     {
+        // 나중에 로비가 생기면: GameSession.SelectedStage가 있으면 그걸 우선 사용.
+        // if (GameSession.Instance != null && GameSession.Instance.SelectedStage != null)
+        //     stage = GameSession.Instance.SelectedStage;
+
+        if (stage == null)
+        {
+            Debug.LogError("[WaveSpawner] StageData가 지정되지 않았습니다. 스테이지를 실행할 수 없습니다.");
+            return;
+        }
+
         StartCoroutine(RunWaves());
     }
 
@@ -49,6 +57,7 @@ public class WaveSpawner : MonoBehaviour
     {
         yield return new WaitForSeconds(startDelay);
 
+        var waves = stage.waves;
         for (int i = 0; i < waves.Count; i++)
         {
             CurrentWaveIndex = i;
@@ -61,9 +70,9 @@ public class WaveSpawner : MonoBehaviour
         if (GameManager.Instance != null)
             GameManager.Instance.NotifyAllWavesCleared();
 
-        if (bossPrefab != null)
+        if (stage.bossPrefab != null)
         {
-            yield return new WaitForSeconds(bossSpawnDelay);
+            yield return new WaitForSeconds(stage.bossSpawnDelay);
             SpawnBoss();
         }
     }
@@ -188,10 +197,11 @@ public class WaveSpawner : MonoBehaviour
     {
         // 보스는 스테이지당 1회만 등장하고 등장연출/static 참조 등 고유 상태가 있어
         // 풀링 이득이 거의 없음 → 의도적으로 Instantiate 유지.
-        Vector3 pos = new Vector3(bossSpawnX, bossSpawnY, bossSpawnZ);
+        Vector3 sp = stage.bossSpawnPosition;
+        Vector3 pos = new Vector3(sp.x, bossSpawnY, sp.z);   // Y는 스포너의 발밑 보정값 사용
         // -Z(플레이어 쪽)를 보게 회전
         Quaternion rot = Quaternion.LookRotation(Vector3.back);
-        Instantiate(bossPrefab, pos, rot);
+        Instantiate(stage.bossPrefab, pos, rot);
         Debug.Log("[Boss] 등장!");
     }
 }
