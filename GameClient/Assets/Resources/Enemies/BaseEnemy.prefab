@@ -9,11 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4448262108482801345}
-  - component: {fileID: 5639520783948009217}
-  - component: {fileID: 6938970510202446500}
-  - component: {fileID: 9026371130858376022}
-  - component: {fileID: 4651608136024149059}
-  - component: {fileID: 4060911342723684096}
+  - component: {fileID: 825332680420839346}
+  - component: {fileID: 1084589974254996535}
+  - component: {fileID: 3697172506724538352}
   m_Layer: 8
   m_Name: BaseEnemy
   m_TagString: Enemy
@@ -38,8 +36,23 @@ Transform:
   - {fileID: 6507343886261290592}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &5639520783948009217
-CapsuleCollider:
+--- !u!114 &825332680420839346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682261273573558527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a573044be32d06346a7dba69ced84b3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Enemy
+  maxHp: 30
+  hpLabel: {fileID: 0}
+  body: {fileID: 0}
+--- !u!65 &1084589974254996535
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -53,15 +66,13 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.25
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &6938970510202446500
+  serializedVersion: 3
+  m_Size: {x: 0.5, y: 0.5, z: 0.5}
+  m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!54 &3697172506724538352
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -84,64 +95,10 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &9026371130858376022
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4682261273573558527}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c66eab522dc10e04cbba0ac4869a206c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  maxHP: 2
-  knockbackForce: 5
-  knockbackDecay: 5
-  coinDropAmount: 2
-  xpReward: 1
-  despawnZ: -15
-  diedChannel: {fileID: 11400000, guid: ee487da7102d05048823758f636c749d, type: 2}
-  damageChannel: {fileID: 11400000, guid: d5d1bbb4705435043bcb4cc61a9b0ca8, type: 2}
-  animator: {fileID: 0}
-  hitFlash: {fileID: 4060911342723684096}
-  deathEffectPath: Effects/CFX2_WWExplosion_C
-  deathEffectHeight: 1
---- !u!114 &4651608136024149059
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4682261273573558527}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec46724e146138d46acf9aae6901623a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StraightMover
-  direction: {x: 0, y: 0, z: -1}
-  speed: 3
---- !u!114 &4060911342723684096
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4682261273573558527}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6008e2a303b2f5544971bcb28a1eeab2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HitFlash
-  targetRenderer: {fileID: 0}
-  flashColor: {r: 1, g: 1, b: 1, a: 1}
-  flashDuration: 0.06
-  colorProperty: _BaseColor
 --- !u!1 &6269755926698431875
 GameObject:
   m_ObjectHideFlags: 0

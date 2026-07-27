@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - Coin
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX
@@ -14,12 +15,12 @@ TagManager:
   - Water
   - UI
   - 
-  - Player
+  - Wall
   - Enemy
-  - Item
-  - NPC
-  - PlayerSkill
-  - EnemySkill
+  - 
+  - 
+  - 
+  - 
   - 
   - 
   - 

@@ -152,10 +152,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Goblin
       objectReference: {fileID: 0}
-    - target: {fileID: 5639520783948009217, guid: 76d055acb969316408d9884b1f469b88, type: 3}
-      propertyPath: m_Center.y
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6373064868006107298, guid: 76d055acb969316408d9884b1f469b88, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -168,7 +164,11 @@ PrefabInstance:
       propertyPath: animator
       value: 
       objectReference: {fileID: 8475985765443140016}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
     m_RemovedGameObjects:
     - {fileID: 6269755926698431875, guid: 76d055acb969316408d9884b1f469b88, type: 3}
     m_AddedGameObjects:

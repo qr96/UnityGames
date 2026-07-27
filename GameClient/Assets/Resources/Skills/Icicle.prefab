@@ -4915,10 +4915,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7186519853823634503}
-  - component: {fileID: 6179942930304474627}
-  - component: {fileID: 1185522934950910467}
-  - component: {fileID: 6550426290455259350}
-  m_Layer: 11
+  - component: {fileID: 6358853046527494630}
+  m_Layer: 0
   m_Name: Icicle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4941,55 +4939,7 @@ Transform:
   - {fileID: 3782945242588084548}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &6179942930304474627
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7429655025657176930}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.2
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &1185522934950910467
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7429655025657176930}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!114 &6550426290455259350
+--- !u!114 &6358853046527494630
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4998,13 +4948,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 7429655025657176930}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 058b911cd17b53b4caa6ae7470579d15, type: 3}
+  m_Script: {fileID: 11500000, guid: 45eb16aeb1a128a4a8db048b101dcf9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
-  speed: 10
-  maxDistance: 6
-  pierceCount: 1
-  damage: 1
+  speed: 18
+  radius: 0.15
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 0
+  launchLineZ: 0
+  wallBounceCount: 0
+  enemyHitCount: 0
+  owner: {fileID: 0}
 --- !u!1001 &3743900704323542703
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5031,11 +4986,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e8249da4bb5e34a44b617da8e2de6728, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e8249da4bb5e34a44b617da8e2de6728, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.3
+      value: -0.171
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e8249da4bb5e34a44b617da8e2de6728, type: 3}
       propertyPath: m_LocalRotation.w
