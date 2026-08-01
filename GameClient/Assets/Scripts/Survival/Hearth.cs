@@ -19,7 +19,6 @@ public class Hearth : MonoBehaviour
     [Header("연료")]
     [SerializeField] private float fuel = 100f;
     [SerializeField] private bool isLit = true;
-    [SerializeField] private int relightFirewoodCost = 1;
 
     [Header("비주얼 (선택) — 반경에 맞춰 XZ 스케일(눈 물러남)")]
     [SerializeField] private Transform meltedGroundVisual;
@@ -33,6 +32,11 @@ public class Hearth : MonoBehaviour
     public bool IsLit => isLit;
     public float Fuel => fuel;
     public float FuelCapacity => currentCapacity;
+    public float FuelRatio => currentCapacity > 0f ? fuel / currentCapacity : 0f;
+    public float BurnPerSec => currentBurn;
+
+    // 현재 연료로 남은 지속 시간(초). 소모율이 0이면 무한.
+    public float RemainingSeconds => currentBurn > 0f ? fuel / currentBurn : Mathf.Infinity;
     public int UpgradeLevel => upgradeLevel;
     public bool CanUpgrade =>
         config != null && config.upgrades != null && upgradeLevel < config.upgrades.Length;
@@ -61,34 +65,43 @@ public class Hearth : MonoBehaviour
 
     // ---- 상호작용 진입점 ----
 
-    // 재급유: 인벤토리의 장작을 용량까지 투입. 넣은 양 반환.
-    public int TryRefuel(Inventory inv)
+    // 지정한 연료 아이템을 1개 투입. 성공 여부 반환.
+    public bool AddFuelUnit(Inventory inv, ItemDef def)
     {
-        if (inv == null) return 0;
-        int space = Mathf.FloorToInt(currentCapacity - fuel);
-        if (space <= 0) return 0;
-        int put = Mathf.Min(space, inv.Get(ResourceKind.Firewood));
-        if (put <= 0) return 0;
-        inv.TrySpend(ResourceKind.Firewood, put);
-        fuel = Mathf.Min(currentCapacity, fuel + put);
-        return put;
+        if (inv == null || def == null || !def.IsFuel) return false;
+        if (currentCapacity - fuel < def.fuelValue) return false; // 용량 여유 부족
+        if (!inv.Has(def.kind, 1)) return false;
+
+        inv.TrySpend(def.kind, 1);
+        fuel = Mathf.Min(currentCapacity, fuel + def.fuelValue);
+        return true;
     }
 
-    // 불씨 복구: 장작 소모 후 점화. (불씨 미니게임은 성공 시 Relight() 호출로 대체 예정)
-    public bool TryRelight(Inventory inv)
+    // 불씨 복구: 지정 연료 1개를 소모하고 점화.
+    // (불씨 미니게임은 성공 시 Relight() 호출로 대체 예정)
+    public bool RelightWith(Inventory inv, ItemDef def)
     {
         if (isLit) return false;
-        if (inv == null || !inv.Has(ResourceKind.Firewood, relightFirewoodCost)) return false;
-        inv.TrySpend(ResourceKind.Firewood, relightFirewoodCost);
-        fuel = Mathf.Min(currentCapacity, fuel + relightFirewoodCost);
+        if (inv == null || def == null || !def.IsFuel) return false;
+        if (!inv.Has(def.kind, 1)) return false;
+
+        inv.TrySpend(def.kind, 1);
+        fuel = Mathf.Min(currentCapacity, fuel + def.fuelValue);
         Relight();
         return true;
+    }
+
+    // 남은 용량에 이 연료를 몇 개까지 넣을 수 있는지
+    public int RoomForUnits(ItemDef def)
+    {
+        if (def == null || !def.IsFuel) return 0;
+        float space = currentCapacity - fuel;
+        return space <= 0f ? 0 : Mathf.FloorToInt(space / def.fuelValue);
     }
 
     public void Relight()
     {
         isLit = true;
-        if (fuel <= 0f) fuel = Mathf.Min(currentCapacity, relightFirewoodCost);
     }
 
     // 강화: 다음 단계 골드+자원 소모 → 용량/반경 증가.

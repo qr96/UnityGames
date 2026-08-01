@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: CraftingRecipe
   m_EditorClassIdentifier: Assembly-CSharp::CraftingRecipe
   outputName: "\uB3C4\uB07C"
+  outputKind: 4
+  outputAmount: 1
   costs:
   - kind: 0
     amount: 3
+  - kind: 1
+    amount: 2

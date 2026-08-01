@@ -1,0 +1,42 @@
+using UnityEngine;
+
+public enum ItemCategory { Resource, Tool, Food }
+
+// 도구 종류. 같은 종류 안에서 위력이 높은 것이 자동으로 쓰인다(도구 사다리).
+public enum ToolType { None = 0, Axe = 1 }
+
+// 아이템 1종의 정의. 칸별 스택 상한 / 단위 무게 / 분류 / 음식 회복량.
+[CreateAssetMenu(fileName = "ItemDef", menuName = "혹한/Item Def")]
+public class ItemDef : ScriptableObject
+{
+    public ResourceKind kind;
+    public string displayName = "이름";
+    public ItemCategory category = ItemCategory.Resource;
+
+    [Header("칸")]
+    [Tooltip("한 칸에 쌓이는 최대 수량. 도구는 1")]
+    public int stackLimit = 99;
+
+    [Header("무게")]
+    [Tooltip("1개당 무게")]
+    public float weightPerUnit = 1f;
+
+    [Header("도구 (category=Tool일 때)")]
+    public ToolType toolType = ToolType.None;
+    [Tooltip("1회 사용에 들어가는 타격량. 사다리 상위 도구일수록 크게")]
+    public int hitPower = 1;
+    [Tooltip("판정 방식(반경형·직선형 등). 없으면 공격해도 아무것도 맞지 않음")]
+    public AttackPattern attackPattern;
+
+    [Header("연료")]
+    [Tooltip("화로에 넣었을 때 1개당 연료량. 0이면 연료로 쓸 수 없음")]
+    public float fuelValue = 0f;
+
+    [Header("음식 (category=Food일 때)")]
+    [Tooltip("1개 사용 시 허기 회복량")]
+    public float hungerRestore = 25f;
+
+    public bool IsFuel => fuelValue > 0f;
+    public bool IsTool => category == ItemCategory.Tool;
+    public bool IsFood => category == ItemCategory.Food;
+}

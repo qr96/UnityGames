@@ -1,29 +1,32 @@
 using UnityEngine;
 
-// 임시 개발용 오버레이(throwaway). 정식 UI는 StatHUD로 따로.
-// 현재 상호작용 타겟 / 도끼 상태 / 인벤토리를 화면에 표시.
-// G키: 디버그로 도끼 지급(벌목 테스트용).
+// 임시 개발용 오버레이(throwaway). 정식 UI는 별도.
+// 타겟 / 도구 / 자원 / 스탯 표시. G키 = 디버그 도끼 지급(테스트용).
 public class DebugHud : MonoBehaviour
 {
     [SerializeField] private PlayerInteractor interactor;
-    [SerializeField] private PlayerTools tools;
+    [SerializeField] private AttackExecutor attack;
     [SerializeField] private Inventory inventory;
-    [SerializeField] private PlayerStats stats; // 선택
+    [SerializeField] private PlayerStats stats;
 
     private GUIStyle style;
+
+    private void Update()
+    {
+        // 디버그 도끼 지급 (정식 경로는 제작대)
+        if (Input.GetKeyDown(KeyCode.G) && inventory != null)
+        {
+            if (inventory.Add(ResourceKind.Axe, 1) <= 0)
+                Debug.Log("[디버그] 도끼를 넣을 칸 없음 / ItemDef 미등록");
+        }
+    }
 
     private void Start()
     {
         if (interactor == null) interactor = FindObjectOfType<PlayerInteractor>();
-        if (tools == null)      tools      = FindObjectOfType<PlayerTools>();
-        if (inventory == null)  inventory  = FindObjectOfType<Inventory>();
-        if (stats == null)      stats      = FindObjectOfType<PlayerStats>();
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.G) && tools != null)
-            tools.GiveAxe();
+        if (attack == null) attack = FindObjectOfType<AttackExecutor>();
+        if (inventory == null) inventory = FindObjectOfType<Inventory>();
+        if (stats == null) stats = FindObjectOfType<PlayerStats>();
     }
 
     private void OnGUI()
@@ -41,21 +44,25 @@ public class DebugHud : MonoBehaviour
             : "없음";
         sb.AppendLine($"타겟: {prompt}   (E: 상호작용)");
 
-        if (tools != null)
-            sb.AppendLine($"도끼: {(tools.HasAxe ? "있음" : "없음")}   (G: 디버그 지급)");
+        if (attack != null)
+        {
+            ItemDef tool = attack.EquippedTool;
+            sb.AppendLine(tool != null
+                ? $"장비(퀵슬롯): {tool.displayName} (위력 {tool.hitPower})   (G: 도끼 지급)"
+                : "장비(퀵슬롯): 없음   (G: 도끼 지급)");
+        }
 
         if (inventory != null)
         {
-            sb.AppendLine($"나뭇가지: {inventory.Get(ResourceKind.Stick)}");
-            sb.AppendLine($"장작: {inventory.Get(ResourceKind.Firewood)}");
-            sb.AppendLine($"식량: {inventory.Get(ResourceKind.Food)}");
-            sb.AppendLine($"골드: {inventory.Gold}");
+            sb.AppendLine($"나뭇가지 {inventory.Get(ResourceKind.Stick)}   돌 {inventory.Get(ResourceKind.Stone)}");
+            sb.AppendLine($"장작 {inventory.Get(ResourceKind.Firewood)}   식량 {inventory.Get(ResourceKind.Food)}");
+            sb.AppendLine($"골드 {inventory.Gold}");
         }
 
         if (stats != null)
-            sb.AppendLine($"온기: {stats.Warmth:0}   허기: {stats.Hunger:0}   {(stats.IsDown ? "[쓰러짐]" : "")}");
+            sb.AppendLine($"온기 {stats.Warmth:0}   허기 {stats.Hunger:0}   {(stats.IsDown ? "[쓰러짐]" : "")}");
 
-        GUI.Box(new Rect(10, 10, 260, 200), GUIContent.none);
-        GUI.Label(new Rect(20, 16, 240, 190), sb.ToString(), style);
+        GUI.Box(new Rect(10, 10, 300, 190), GUIContent.none);
+        GUI.Label(new Rect(20, 16, 280, 180), sb.ToString(), style);
     }
 }

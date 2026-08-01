@@ -15,6 +15,18 @@ public class PlayerInteractor : MonoBehaviour
 
     private void Update()
     {
+        // 모달 UI가 열려 있으면 타겟을 놓고 상호작용도 받지 않음
+        if (UIInputLock.IsBlocked)
+        {
+            if (Current != null)
+            {
+                SetHighlight(Current, false);
+                Current = null;
+                OnTargetChanged?.Invoke(null);
+            }
+            return;
+        }
+
         UpdateTarget();
 
         if (Current != null && Input.GetKeyDown(interactKey) && Current.CanInteract(gameObject))

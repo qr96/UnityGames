@@ -17,6 +17,14 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float hunger = 100f;
     [SerializeField] private float hungerDrainPerSec = 2f;
 
+    [Header("기력 (달리기)")]
+    [SerializeField] private float maxStamina = 100f;
+    [SerializeField] private float stamina = 100f;
+    [Tooltip("달리는 동안 초당 소모")]
+    [SerializeField] private float staminaDrainPerSec = 20f;
+    [Tooltip("달리지 않을 때 초당 회복")]
+    [SerializeField] private float staminaRegenPerSec = 25f;
+
     [Header("쓰러짐/회복")]
     [Tooltip("이 온기까지 차면 조작 복귀")]
     [SerializeField] private float recoverWarmthThreshold = 40f;
@@ -26,6 +34,10 @@ public class PlayerStats : MonoBehaviour
     public float Warmth => warmth;
     public float Hunger => hunger;
     public float WarmthNormalized => maxWarmth > 0f ? warmth / maxWarmth : 0f;
+    public float Stamina => stamina;
+    public float StaminaNormalized => maxStamina > 0f ? stamina / maxStamina : 0f;
+    public bool IsSprinting { get; private set; }
+    public bool CanSprint => !IsDown && stamina > 0f;
     public float HungerNormalized => maxHunger > 0f ? hunger / maxHunger : 0f;
     public bool IsDown { get; private set; }
 
@@ -41,9 +53,26 @@ public class PlayerStats : MonoBehaviour
         controller = GetComponent<CharacterController>();
     }
 
+    // 이동 쪽에서 매 프레임 알려줌
+    public void SetSprinting(bool value)
+    {
+        IsSprinting = value && CanSprint;
+    }
+
     private void Update()
     {
         float dt = Time.deltaTime;
+
+        // 기력: 달리면 소모, 아니면 즉시 회복
+        if (IsSprinting && !IsDown)
+        {
+            stamina = Mathf.Max(0f, stamina - staminaDrainPerSec * dt);
+            if (stamina <= 0f) IsSprinting = false;
+        }
+        else
+        {
+            stamina = Mathf.Min(maxStamina, stamina + staminaRegenPerSec * dt);
+        }
 
         // 허기: 항상 감소 (쓰러진 동안에도 자원 소모 지속)
         hunger = Mathf.Max(0f, hunger - hungerDrainPerSec * dt);
