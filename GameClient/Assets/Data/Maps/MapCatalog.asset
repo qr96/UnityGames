@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57b9776781b39d244beed6e9e599c2ce, type: 3}
+  m_Name: MapCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::MapCatalog
+  entries:
+  - id: tree
+    prefab: {fileID: 7732165403120921067, guid: e6b25786b001e15438d9f30fbf2defa7, type: 3}
+  - id: stone
+    prefab: {fileID: 8667438733448051177, guid: 401d1063403a1e444b31029fc12f0c1e, type: 3}
+  - id: hearth
+    prefab: {fileID: 482709525067408468, guid: 3c245f1bd6a0f644080cfdd65e5d6754, type: 3}

@@ -159,13 +159,26 @@ public class Hearth : MonoBehaviour
     // ---- 정적 조회 ----
     public static bool IsPointWarm(Vector3 point)
     {
+        WorldGrid grid = WorldGrid.Instance;
+
         for (int i = 0; i < All.Count; i++)
         {
             Hearth h = All[i];
             if (!h.isLit) continue;
+
             Vector3 d = point - h.transform.position;
             d.y = 0f;
-            if (d.sqrMagnitude <= h.currentRadius * h.currentRadius) return true;
+            if (d.sqrMagnitude > h.currentRadius * h.currentRadius) continue;
+
+            // 층이 다르면 절벽에 막혀 데워지지 않음(격자 설정으로 전환 가능)
+            if (grid != null && !grid.WarmthCrossesLevels)
+            {
+                int hearthLevel = grid.GetLevel(grid.WorldToCell(h.transform.position));
+                int pointLevel = grid.GetLevel(grid.WorldToCell(point));
+                if (hearthLevel != pointLevel) continue;
+            }
+
+            return true;
         }
         return false;
     }

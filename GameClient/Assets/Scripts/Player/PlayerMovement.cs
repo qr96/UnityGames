@@ -19,12 +19,17 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float sprintMultiplier = 1.6f;
     [SerializeField] private PlayerStats stats; // 비우면 자기/씬에서 찾음
 
+    [Header("지면 맞춤 (격자 모드)")]
+    [Tooltip("캡슐 밑면을 지면에 맞춘 뒤 추가로 올릴 값. 모델이 가라앉으면 늘리기")]
+    [SerializeField] private float groundExtraOffset = 0f;
+
     [Header("무게")]
     [Tooltip("비우면 씬에서 찾음. 없으면 감속 없음")]
     [SerializeField] private Inventory inventory;
 
     private CharacterController controller;
     private float verticalVelocity;
+    private WorldGrid grid;
 
     private void Awake()
     {
@@ -38,6 +43,31 @@ public class PlayerMovement : MonoBehaviour
         if (inventory == null) inventory = FindObjectOfType<Inventory>();
         if (stats == null) stats = GetComponent<PlayerStats>();
         if (stats == null) stats = FindObjectOfType<PlayerStats>();
+        grid = WorldGrid.Instance != null ? WorldGrid.Instance : FindObjectOfType<WorldGrid>();
+    }
+
+    // CharacterController 캡슐 밑면 → 오브젝트 원점까지의 거리
+    private float FootToOriginOffset()
+        => controller != null ? (controller.height * 0.5f - controller.center.y) : 0f;
+
+    // 격자 규칙상 갈 수 없는 방향 성분을 제거
+    private Vector3 FilterByGrid(Vector3 delta)
+    {
+        Vector3 from = transform.position;
+
+        if (grid.CanMoveToWorld(from, from + delta)) return delta;
+
+        // 대각선이 막히면 축별로 시도
+        Vector3 xOnly = new Vector3(delta.x, 0f, 0f);
+        Vector3 zOnly = new Vector3(0f, 0f, delta.z);
+
+        bool okX = Mathf.Abs(delta.x) > 0.0001f && grid.CanMoveToWorld(from, from + xOnly);
+        bool okZ = Mathf.Abs(delta.z) > 0.0001f && grid.CanMoveToWorld(from, from + zOnly);
+
+        if (okX && okZ) return delta;   // 둘 다 되면 그대로(모서리 통과 허용)
+        if (okX) return xOnly;
+        if (okZ) return zOnly;
+        return Vector3.zero;
     }
 
     private void Update()
@@ -74,9 +104,28 @@ public class PlayerMovement : MonoBehaviour
         float speed = moveSpeed * (inventory != null ? inventory.SpeedMultiplier : 1f);
         if (wantSprint) speed *= Mathf.Max(1f, sprintMultiplier);
 
-        Vector3 velocity = inputDir * speed;
-        velocity.y = verticalVelocity;
-        controller.Move(velocity * Time.deltaTime);
+        Vector3 horizontal = inputDir * speed * Time.deltaTime;
+
+        if (grid != null)
+        {
+            // 격자 통행 판정: 막히면 축을 나눠 벽을 따라 미끄러짐 (이동 자체는 연속)
+            horizontal = FilterByGrid(horizontal);
+
+            // 층 높이를 따라감(중력 대신) — 절벽 위/아래 높이 반영
+            Vector3 next = transform.position + horizontal;
+            float groundY = grid.SampleHeight(next); // 경사로에서는 칸 안에서 보간된 높이
+
+            // 캡슐 밑면이 지면에 닿도록 오브젝트 원점을 올린다
+            float targetY = groundY + FootToOriginOffset() + groundExtraOffset;
+            float dy = Mathf.Lerp(transform.position.y, targetY, 12f * Time.deltaTime) - transform.position.y;
+            controller.Move(horizontal + Vector3.up * dy);
+        }
+        else
+        {
+            Vector3 velocity = inputDir * speed;
+            velocity.y = verticalVelocity;
+            controller.Move(velocity * Time.deltaTime);
+        }
 
         if (inputDir.sqrMagnitude > 0.0001f)
         {
