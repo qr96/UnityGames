@@ -22,6 +22,9 @@ public class WorldGrid : MonoBehaviour
     [Tooltip("켜면 층이 달라도 온기가 넘어간다. 끄면 절벽 위아래는 서로 데우지 않음")]
     [SerializeField] private bool warmthCrossesLevels = false;
 
+    [Tooltip("켜면 격자를 점유한 배치물(GridOccupant)이 있는 칸을 지나갈 수 없다")]
+    [SerializeField] private bool blockMovementOnOccupied = true;
+
     [Header("표시")]
     [SerializeField] private bool drawGizmo = true;
 
@@ -31,7 +34,6 @@ public class WorldGrid : MonoBehaviour
 
     private GameObject[,] occupants;
     private int[,] levels;
-    private bool[,] blocked;
     private bool[,] ramps;
 
     public float CellSize => cellSize;
@@ -56,7 +58,6 @@ public class WorldGrid : MonoBehaviour
     {
         occupants = new GameObject[width, depth];
         levels = new int[width, depth];
-        blocked = new bool[width, depth];
         ramps = new bool[width, depth];
     }
 
@@ -71,7 +72,6 @@ public class WorldGrid : MonoBehaviour
         Allocate();
 
         ReadRows(data.levels, (x, z, c) => levels[x, z] = (c >= '0' && c <= '9') ? c - '0' : 0);
-        ReadRows(data.blocked, (x, z, c) => blocked[x, z] = (c == '#'));
         ReadRows(data.ramps, (x, z, c) => ramps[x, z] = (c == '/'));
 
         ValidateRamps();
@@ -116,13 +116,6 @@ public class WorldGrid : MonoBehaviour
         OnCellChanged?.Invoke(cell);
     }
 
-    public void SetBlocked(Vector2Int cell, bool value)
-    {
-        if (!InBounds(cell) || blocked[cell.x, cell.y] == value) return;
-        blocked[cell.x, cell.y] = value;
-        OnCellChanged?.Invoke(cell);
-    }
-
     public void SetRamp(Vector2Int cell, bool value)
     {
         if (!InBounds(cell) || ramps[cell.x, cell.y] == value) return;
@@ -157,7 +150,9 @@ public class WorldGrid : MonoBehaviour
     // ---- 층 / 통행 ----
     public int GetLevel(Vector2Int cell) => InBounds(cell) ? levels[cell.x, cell.y] : 0;
     public bool IsRamp(Vector2Int cell) => InBounds(cell) && ramps[cell.x, cell.y];
-    public bool IsBlocked(Vector2Int cell) => !InBounds(cell) || blocked[cell.x, cell.y];
+    // 배치물이 점유해 막힌 칸인지
+    public bool IsBlocked(Vector2Int cell)
+        => !InBounds(cell) || (blockMovementOnOccupied && occupants[cell.x, cell.y] != null);
 
     public float HeightAt(Vector2Int cell) => origin.y + GetLevel(cell) * levelHeight;
 
@@ -242,7 +237,12 @@ public class WorldGrid : MonoBehaviour
     }
 
     // 그 칸에 설 수 있는지
-    public bool CanStand(Vector2Int cell) => InBounds(cell) && !blocked[cell.x, cell.y];
+    public bool CanStand(Vector2Int cell)
+    {
+        if (!InBounds(cell)) return false;
+        if (blockMovementOnOccupied && occupants[cell.x, cell.y] != null) return false;
+        return true;
+    }
 
     // 이웃 칸으로 넘어갈 수 있는지 (동물의 숲식 절벽 규칙)
     public bool CanMoveBetween(Vector2Int from, Vector2Int to)
@@ -270,7 +270,7 @@ public class WorldGrid : MonoBehaviour
             for (int z = 0; z < f.y; z++)
             {
                 Vector2Int c = new Vector2Int(cell.x + x, cell.y + z);
-                if (!InBounds(c) || blocked[c.x, c.y]) return false;
+                if (!InBounds(c)) return false;
                 GameObject o = occupants[c.x, c.y];
                 if (o != null && o != ignore) return false;
             }
@@ -333,12 +333,7 @@ public class WorldGrid : MonoBehaviour
                 Vector2Int c = new Vector2Int(x, z);
                 Vector3 p = CellToWorld(c);
 
-                if (blocked[x, z])
-                {
-                    Gizmos.color = new Color(1f, 0.3f, 0.3f, 0.35f);
-                    Gizmos.DrawCube(p, new Vector3(cellSize * 0.9f, 0.05f, cellSize * 0.9f));
-                }
-                else if (ramps[x, z])
+                if (ramps[x, z])
                 {
                     Gizmos.color = new Color(0.4f, 1f, 0.5f, 0.35f);
                     Gizmos.DrawCube(p, new Vector3(cellSize * 0.7f, 0.05f, cellSize * 0.7f));

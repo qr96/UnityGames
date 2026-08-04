@@ -4,11 +4,10 @@ using System;
 //
 // 지형 표기는 '행 문자열' 방식이다. rows[0]이 z=0(아래), 문자 하나가 x 한 칸.
 //   levels  : 칸의 높이 층. '0'~'9' (없으면 전부 0층)
-//   blocked : 통행 불가 칸. '#' = 막힘, 그 외 = 통행 가능 (절벽 몸통·바위벽 등)
 //   ramps   : 경사로 칸. '/' = 경사로, 그 외 = 아님 (층이 다른 이웃 칸으로 넘어갈 수 있는 지점)
 //
 // 통행 규칙: 이웃 칸끼리 층이 같으면 통행 가능. 층이 1 차이면 둘 중 하나가 경사로일 때만 가능.
-//            2층 이상 차이는 불가. blocked 칸은 무조건 불가.
+//            2층 이상 차이는 불가. 격자를 점유한 배치물이 있는 칸도 막힌다(WorldGrid 설정).
 //
 // 예시:
 // {
@@ -16,7 +15,6 @@ using System;
 //   "width": 8,
 //   "depth": 4,
 //   "levels":  ["00000000", "00011111", "00011111", "00011111"],
-//   "blocked": ["........", "........", "........", "........"],
 //   "ramps":   ["........", ".../....", "........", "........"],
 //   "placements": [
 //     { "id": "hearth", "x": 2, "z": 1, "rotationY": 0 },
@@ -31,7 +29,6 @@ public class MapData
     public int depth = 60;
 
     public string[] levels;
-    public string[] blocked;
     public string[] ramps;
 
     public MapPlacement[] placements;

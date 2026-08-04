@@ -8,14 +8,17 @@ using UnityEngine;
 // 맵 생성기 (에디터 전용). Assets/Editor/ 폴더에 넣을 것.
 // 메뉴: Tools > Map Generator
 //
-// "혹한 정착지 — 맵 파일 규격" 준수:
+// "혹한 정착지 — 맵 파일 규격" 준수 (blocked 삭제판):
+//  - 벽 = 층 차이(절벽) 또는 배치물. 바위 지대는 "층 +2 돌출 지형(crag)"으로 생성
+//  - 배치물이 놓인 칸은 통행 불가(규칙 4) → 배치물까지 고려한 최종 통행 검사 수행,
+//    배치물이 길목을 막으면 자동으로 걷어냄(unpinch)
 //  - 경사로는 낮은 쪽 칸에 표시, 한 단 높은 이웃이 정확히 한 방향(대각선 없음)
 //  - 경사 완급: 같은 층 경사로를 한 줄로 이어 칠하면 완만해짐 (Ramp Length 1=45°, 2=27°, 3=18°)
 //    ※ 규격 체크리스트("모든 / 칸에 +1 이웃")와 완만 경사로 규칙이 상충함 — 여기선
 //      "체인 중 한 칸 이상이 +1 칸에 닿으면 유효"로 해석. 규격 확정 전까지 기본값 1 권장.
 //  - hearth 1개(시작) + hearth_site 1개(멀리, 도달 가능 보장)
 //  - 시작 지점 주변에 stick/stone 배치 (도끼 제작용)
-//  - 고립 구역 없음: 시작점에서 도달 불가능한 열린 칸은 blocked로 봉인
+//  - 고립 구역 없음: 도달 불가능한 열린 칸은 층을 올려 바위 덩어리로 봉인
 //  - 생성 후 규격의 검증 체크리스트를 코드로 자체 검사, 콘솔에 결과 출력
 public class MapGeneratorWindow : EditorWindow
 {
@@ -30,10 +33,10 @@ public class MapGeneratorWindow : EditorWindow
     float level2Threshold = 0.80f;
     int minPlateauSize = 12;          // 이보다 작은 고원은 평탄화
     int rampsPerPlateau = 2;
-    [Range(1, 3)] int rampLength = 1;  // 경사로 체인 길이. 1=45°, 2=27°, 3=18°
+    [Range(1, 3)] int rampLength = 1; // 경사로 체인 길이. 1=45°, 2=27°, 3=18°
 
-    float rockNoiseScale = 0.09f;
-    float rockThreshold = 0.74f;
+    float cragNoiseScale = 0.09f;
+    float cragThreshold = 0.78f;      // 이 값 이상이면 바위 돌출 지형(층 +2)
 
     float treeNoiseScale = 0.07f;
     float treeThreshold = 0.55f;      // 숲 판정
@@ -41,7 +44,7 @@ public class MapGeneratorWindow : EditorWindow
     float berryChance = 0.03f;        // 숲 칸에서 나무 대신 열매
     float stoneChance = 0.02f;
     float stickChance = 0.02f;
-    int minSpacing = 2;               // placement 간 최소 간격(칸)
+    int minSpacing = 2;               // placement 간 최소 간격(칸). 1 이상이어야 길이 안 막힘
 
     int startClearRadius = 5;
     int starterSticks = 3;            // 시작 지점 근처 보장 수량
@@ -51,10 +54,9 @@ public class MapGeneratorWindow : EditorWindow
 
     // ---- 내부 버퍼 ----
     int[,] levels;
-    bool[,] blocked;
     bool[,] ramps;
-    bool[,] occupied;
-    bool[,] reachable;
+    bool[,] occupied;                 // placement 점유 = 통행 불가(규칙 4)
+    bool[,] reachable;                // 배치물 미고려 기준 도달성
     List<MapPlacement> placements;
     System.Random rng;
     float noiseOx, noiseOz;
@@ -63,6 +65,8 @@ public class MapGeneratorWindow : EditorWindow
     static readonly int[] DZ = { 0, 0, 1, -1 };
     static readonly HashSet<string> ValidIds = new HashSet<string>
     { "hearth", "hearth_site", "tree", "stone", "stick", "berry", "crafting_station", "merchant_spot" };
+    static readonly HashSet<string> RemovableIds = new HashSet<string>
+    { "tree", "stone", "stick", "berry" };  // 길막 해소 시 걷어내도 되는 것들
 
     [MenuItem("Tools/Map Generator")]
     static void Open() => GetWindow<MapGeneratorWindow>("Map Generator");
@@ -85,9 +89,9 @@ public class MapGeneratorWindow : EditorWindow
         rampLength = EditorGUILayout.IntSlider("Ramp Length (완만함)", rampLength, 1, 3);
 
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("바위벽 (blocked)", EditorStyles.boldLabel);
-        rockNoiseScale = EditorGUILayout.Slider("Noise Scale", rockNoiseScale, 0.02f, 0.2f);
-        rockThreshold = EditorGUILayout.Slider("Threshold", rockThreshold, 0.5f, 0.95f);
+        EditorGUILayout.LabelField("바위 돌출 지형 (crag, 층 +2)", EditorStyles.boldLabel);
+        cragNoiseScale = EditorGUILayout.Slider("Noise Scale", cragNoiseScale, 0.02f, 0.2f);
+        cragThreshold = EditorGUILayout.Slider("Threshold", cragThreshold, 0.5f, 0.95f);
 
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("산포 (placements)", EditorStyles.boldLabel);
@@ -118,7 +122,6 @@ public class MapGeneratorWindow : EditorWindow
         noiseOz = (float)(rng.NextDouble() * 10000.0);
 
         levels = new int[width, depth];
-        blocked = new bool[width, depth];
         ramps = new bool[width, depth];
         occupied = new bool[width, depth];
         placements = new List<MapPlacement>();
@@ -126,23 +129,27 @@ public class MapGeneratorWindow : EditorWindow
         GenerateLevels();
         RemoveSmallPlateaus();
         CarveRamps();
-        GenerateRocks();
+        GenerateCrags();
 
         Vector2Int start = FindStart();
         ClearAround(start, startClearRadius);
-        SanitizeRamps(); // 클리어로 지형이 바뀌며 무효가 된 경사로 제거
+        SanitizeRamps();
 
-        int[,] dist = ComputeReachability(start);
+        ComputeReachability(start);
         int sealedCells = SealUnreachable();
+        SanitizeRamps();                                 // 봉인으로 무효화된 경사로 정리
+        int[,] dist = ComputeReachability(start);        // 지형 확정 후 재계산
 
         AddPlacement("hearth", start.x, start.y, 0f);
         PlaceStarterResources(start);
         ScatterVegetation(start);
         PlaceHearthSite(start, dist);
 
+        int unpinched = UnpinchPlacements(start);        // 배치물이 막은 길목 해소
+
         bool ok = Validate(start);
         WriteJson();
-        Debug.Log($"[MapGenerator] {(ok ? "완료" : "완료(경고 있음)")}: {outputPath} | placements {placements.Count}개 | 고립 봉인 {sealedCells}칸 | seed {seed}");
+        Debug.Log($"[MapGenerator] {(ok ? "완료" : "완료(경고 있음)")}: {outputPath} | placements {placements.Count}개 | 고립 봉인 {sealedCells}칸 | 길막 해소 {unpinched}개 | seed {seed}");
     }
 
     // ---- 층 ----
@@ -238,7 +245,7 @@ public class MapGeneratorWindow : EditorWindow
         }
         if (upCount != 1) return false;
         int ox = c.x - DX[upDir], oz = c.y - DZ[upDir];
-        return InBounds(ox, oz) && levels[ox, oz] == lv && !blocked[c.x, c.y];
+        return InBounds(ox, oz) && levels[ox, oz] == lv;
     }
 
     // 완만 경사: 머리 칸(+1 칸에 닿는 칸)에서 경사 반대 방향으로 rampLength만큼 이어 칠함
@@ -251,7 +258,7 @@ public class MapGeneratorWindow : EditorWindow
         for (int i = 1; i < rampLength; i++)
         {
             int x = head.x - DX[upDir] * i, z = head.y - DZ[upDir] * i;
-            if (!InBounds(x, z) || levels[x, z] != lv || blocked[x, z] || ramps[x, z]) break;
+            if (!InBounds(x, z) || levels[x, z] != lv || ramps[x, z]) break;
 
             // 꼬리 칸이 다른 고원에 닿으면 의도치 않은 경사면이 생기므로 중단
             bool touchesUp = false;
@@ -270,11 +277,6 @@ public class MapGeneratorWindow : EditorWindow
     // 같은 층으로 이어진 경사로 묶음 중 어느 칸도 +1 칸에 닿지 않으면 묶음 전체 제거
     void SanitizeRamps()
     {
-        // blocked 위 경사로부터 제거
-        for (int z = 0; z < depth; z++)
-            for (int x = 0; x < width; x++)
-                if (ramps[x, z] && blocked[x, z]) ramps[x, z] = false;
-
         foreach (var group in FindRampGroups())
             if (!GroupHasUpNeighbor(group))
                 foreach (var c in group)
@@ -333,28 +335,28 @@ public class MapGeneratorWindow : EditorWindow
         return false;
     }
 
-    // ---- 바위벽 ----
-    void GenerateRocks()
+    // ---- 바위 돌출 지형 (구 blocked 대체) ----
+    // 층 +2 = 어떤 이웃에서도 경사로 없이는 못 오르는 절벽 덩어리
+    void GenerateCrags()
     {
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
             {
-                if (ramps[x, z]) continue;
-                float v = Noise(x, z, rockNoiseScale, 2000f);
-                if (v >= rockThreshold)
-                    blocked[x, z] = true;
+                if (ramps[x, z] || HasRampNeighbor(x, z)) continue; // 경사로 방향 모호해지는 것 방지
+                float v = Noise(x, z, cragNoiseScale, 2000f);
+                if (v >= cragThreshold)
+                    levels[x, z] = Mathf.Min(9, levels[x, z] + 2);
             }
-        // 경사로 상하좌우는 뚫어줌 (통로가 벽에 막히는 것 방지)
-        for (int z = 0; z < depth; z++)
-            for (int x = 0; x < width; x++)
-            {
-                if (!ramps[x, z]) continue;
-                for (int d = 0; d < 4; d++)
-                {
-                    int nx = x + DX[d], nz = z + DZ[d];
-                    if (InBounds(nx, nz)) blocked[nx, nz] = false;
-                }
-            }
+    }
+
+    bool HasRampNeighbor(int x, int z)
+    {
+        for (int d = 0; d < 4; d++)
+        {
+            int nx = x + DX[d], nz = z + DZ[d];
+            if (InBounds(nx, nz) && ramps[nx, nz]) return true;
+        }
+        return false;
     }
 
     // ---- 시작 지점 ----
@@ -365,7 +367,7 @@ public class MapGeneratorWindow : EditorWindow
                 foreach (int x in new[] { width / 2 + off, width / 2 - off })
                 {
                     if (!InBounds(x, z)) continue;
-                    if (levels[x, z] == 0 && !blocked[x, z] && !ramps[x, z])
+                    if (levels[x, z] == 0 && !ramps[x, z])
                         return new Vector2Int(x, z);
                 }
         Debug.LogWarning("[MapGenerator] 시작 지점을 못 찾아 (0,0) 사용. 파라미터 확인 필요.");
@@ -378,14 +380,12 @@ public class MapGeneratorWindow : EditorWindow
             for (int x = Mathf.Max(0, center.x - radius); x <= Mathf.Min(width - 1, center.x + radius); x++)
             {
                 if ((new Vector2Int(x, z) - center).sqrMagnitude > radius * radius) continue;
-                blocked[x, z] = false;
                 levels[x, z] = 0;
                 ramps[x, z] = false;
             }
     }
 
-    // ---- 도달성 ----
-    // 규격의 통행 규칙 그대로 BFS. 거리 배열 반환(-1 = 도달 불가)
+    // ---- 도달성 (지형 기준, 배치물 미고려) ----
     int[,] ComputeReachability(Vector2Int start)
     {
         reachable = new bool[width, depth];
@@ -405,13 +405,8 @@ public class MapGeneratorWindow : EditorWindow
             for (int d = 0; d < 4; d++)
             {
                 int nx = c.x + DX[d], nz = c.y + DZ[d];
-                if (!InBounds(nx, nz) || reachable[nx, nz] || blocked[nx, nz]) continue;
-
-                int diff = Mathf.Abs(levels[nx, nz] - levels[c.x, c.y]);
-                bool passable = diff == 0
-                    || (diff == 1 && (ramps[c.x, c.y] || ramps[nx, nz]));
-                if (!passable) continue;
-
+                if (!InBounds(nx, nz) || reachable[nx, nz]) continue;
+                if (!Passable(c.x, c.y, nx, nz)) continue;
                 reachable[nx, nz] = true;
                 dist[nx, nz] = dist[c.x, c.y] + 1;
                 queue.Enqueue(new Vector2Int(nx, nz));
@@ -420,15 +415,22 @@ public class MapGeneratorWindow : EditorWindow
         return dist;
     }
 
-    // 고립 구역 금지: 도달 불가능한 열린 칸을 전부 blocked로 봉인
+    // 규격의 통행 규칙 1~3 (층/경사로)
+    bool Passable(int x1, int z1, int x2, int z2)
+    {
+        int diff = Mathf.Abs(levels[x2, z2] - levels[x1, z1]);
+        return diff == 0 || (diff == 1 && (ramps[x1, z1] || ramps[x2, z2]));
+    }
+
+    // 고립 구역 금지: 도달 불가능한 열린 칸은 층을 올려 바위 덩어리로 봉인
     int SealUnreachable()
     {
         int count = 0;
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
             {
-                if (blocked[x, z] || reachable[x, z]) continue;
-                blocked[x, z] = true;
+                if (reachable[x, z]) continue;
+                levels[x, z] = Mathf.Min(9, levels[x, z] + 2);
                 ramps[x, z] = false;
                 count++;
             }
@@ -452,7 +454,7 @@ public class MapGeneratorWindow : EditorWindow
             int z = center.y + rng.Next(-rMax, rMax + 1);
             int sq = (new Vector2Int(x, z) - center).sqrMagnitude;
             if (!InBounds(x, z) || sq < rMin * rMin || sq > rMax * rMax) continue;
-            if (blocked[x, z] || ramps[x, z] || occupied[x, z] || !reachable[x, z]) continue;
+            if (!CanPlaceAt(x, z)) continue;
             AddPlacement(id, x, z, rng.Next(4) * 90f);
             placed++;
         }
@@ -460,12 +462,22 @@ public class MapGeneratorWindow : EditorWindow
             Debug.LogWarning($"[MapGenerator] 시작 지점 근처 {id} {count}개 중 {placed}개만 배치됨.");
     }
 
+    // 배치물은 칸을 막으므로(규칙 4) 경사로와 그 옆칸은 피함 — 통로 입구를 막지 않도록
+    bool CanPlaceAt(int x, int z)
+    {
+        return InBounds(x, z)
+            && reachable[x, z]
+            && !occupied[x, z]
+            && !ramps[x, z]
+            && !HasRampNeighbor(x, z);
+    }
+
     void ScatterVegetation(Vector2Int start)
     {
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
             {
-                if (blocked[x, z] || ramps[x, z] || occupied[x, z] || !reachable[x, z]) continue;
+                if (!CanPlaceAt(x, z)) continue;
                 if ((new Vector2Int(x, z) - start).sqrMagnitude <= startClearRadius * startClearRadius) continue;
                 if (HasNeighborPlacement(x, z, minSpacing)) continue;
 
@@ -497,7 +509,7 @@ public class MapGeneratorWindow : EditorWindow
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
             {
-                if (!reachable[x, z] || blocked[x, z] || ramps[x, z] || occupied[x, z]) continue;
+                if (!CanPlaceAt(x, z)) continue;
                 if (dist[x, z] < maxDist * 7 / 10) continue;              // 충분히 먼 곳만
                 int score = dist[x, z] + levels[x, z] * width;            // 고지 크게 우대
                 if (score > bestScore) { bestScore = score; best = new Vector2Int(x, z); }
@@ -526,6 +538,76 @@ public class MapGeneratorWindow : EditorWindow
         occupied[x, z] = true;
     }
 
+    // ---- 배치물 길막 해소 ----
+    // 규칙 4(배치물 칸 통행 불가) 기준으로 BFS를 다시 돌려, 배치물 때문에 생긴
+    // 고립 구역이 있으면 경계의 배치물을 하나씩 걷어내며 뚫는다.
+    int UnpinchPlacements(Vector2Int start)
+    {
+        int removed = 0;
+        for (int guard = 0; guard < 100; guard++)
+        {
+            var vis = BfsWithPlacements(start);
+
+            // 고립: 배치물 없는 열린 칸인데 도달 불가
+            var isolated = new List<Vector2Int>();
+            for (int z = 0; z < depth; z++)
+                for (int x = 0; x < width; x++)
+                    if (!occupied[x, z] && reachable[x, z] && !vis[x, z])
+                        isolated.Add(new Vector2Int(x, z));
+            if (isolated.Count == 0) return removed;
+
+            // 도달 영역과 고립 영역 양쪽에 접한 배치물 = 길막 주범 → 제거
+            MapPlacement culprit = null;
+            foreach (var p in placements)
+            {
+                if (!RemovableIds.Contains(p.id)) continue;
+                bool touchVis = false, touchIso = false;
+                for (int d = 0; d < 4; d++)
+                {
+                    int nx = p.x + DX[d], nz = p.z + DZ[d];
+                    if (!InBounds(nx, nz) || occupied[nx, nz]) continue;
+                    if (!Passable(p.x, p.z, nx, nz)) continue;
+                    if (vis[nx, nz]) touchVis = true;
+                    else if (reachable[nx, nz]) touchIso = true;
+                }
+                if (touchVis && touchIso) { culprit = p; break; }
+            }
+
+            if (culprit == null)
+            {
+                Debug.LogWarning($"[MapGenerator] 배치물 고립 구역 {isolated.Count}칸을 해소하지 못했습니다. 시드를 바꿔보세요.");
+                return removed;
+            }
+            placements.Remove(culprit);
+            occupied[culprit.x, culprit.z] = false;
+            removed++;
+        }
+        return removed;
+    }
+
+    // 통행 규칙 1~3 + 규칙 4(배치물 칸 차단). 시작 칸(hearth)은 예외적으로 허용.
+    bool[,] BfsWithPlacements(Vector2Int start)
+    {
+        var vis = new bool[width, depth];
+        var queue = new Queue<Vector2Int>();
+        vis[start.x, start.y] = true;
+        queue.Enqueue(start);
+
+        while (queue.Count > 0)
+        {
+            var c = queue.Dequeue();
+            for (int d = 0; d < 4; d++)
+            {
+                int nx = c.x + DX[d], nz = c.y + DZ[d];
+                if (!InBounds(nx, nz) || vis[nx, nz] || occupied[nx, nz]) continue;
+                if (!Passable(c.x, c.y, nx, nz)) continue;
+                vis[nx, nz] = true;
+                queue.Enqueue(new Vector2Int(nx, nz));
+            }
+        }
+        return vis;
+    }
+
     // ---- 검증 (규격의 체크리스트) ----
     bool Validate(Vector2Int start)
     {
@@ -543,13 +625,14 @@ public class MapGeneratorWindow : EditorWindow
                 Fail($"경사로 체인 ({group[0].x},{group[0].y}): Ramp Length 1인데 {group.Count}칸이 붙어 있음 (서로 다른 경사로가 인접)");
         }
 
-        // placements: id 유효, 범위 내, blocked 아님
+        // placements: id 유효, 범위 내, 칸 중복 없음(occupied로 보장되지만 재확인)
         var counts = new Dictionary<string, int>();
+        var cells = new HashSet<(int, int)>();
         foreach (var p in placements)
         {
             if (!ValidIds.Contains(p.id)) Fail($"알 수 없는 id '{p.id}' ({p.x},{p.z})");
             if (!InBounds(p.x, p.z)) { Fail($"범위 밖 placement ({p.x},{p.z})"); continue; }
-            if (blocked[p.x, p.z]) Fail($"blocked 칸 위 placement '{p.id}' ({p.x},{p.z})");
+            if (!cells.Add((p.x, p.z))) Fail($"같은 칸에 배치물 중복 ({p.x},{p.z})");
             counts[p.id] = counts.GetValueOrDefault(p.id) + 1;
         }
 
@@ -557,10 +640,27 @@ public class MapGeneratorWindow : EditorWindow
         if (counts.GetValueOrDefault("hearth") != 1) Fail("hearth가 정확히 1개가 아님");
         if (counts.GetValueOrDefault("hearth_site") != 1) Fail("hearth_site가 정확히 1개가 아님");
 
-        // 두 화로 사이 경로 (hearth_site가 reachable 위에만 놓이므로 사실상 보장, 재확인)
+        // 두 화로 사이 실제 보행 경로 (배치물 차단 포함).
+        // hearth_site 칸 자체도 배치물이라 막히므로 "그 칸 또는 인접 칸 도달"이면 통과
+        var vis = BfsWithPlacements(start);
         var site = placements.FirstOrDefault(p => p.id == "hearth_site");
-        if (site != null && (!InBounds(site.x, site.z) || !reachable[site.x, site.z]))
-            Fail("hearth → hearth_site 경로 없음");
+        if (site != null && InBounds(site.x, site.z))
+        {
+            bool reached = vis[site.x, site.z];
+            for (int d = 0; d < 4 && !reached; d++)
+            {
+                int nx = site.x + DX[d], nz = site.z + DZ[d];
+                if (InBounds(nx, nz) && vis[nx, nz] && Passable(site.x, site.z, nx, nz)) reached = true;
+            }
+            if (!reached) Fail("hearth → hearth_site 보행 경로 없음 (배치물 차단 포함)");
+        }
+
+        // 고립 구역 (배치물 차단 포함 기준)
+        int isolated = 0;
+        for (int z = 0; z < depth; z++)
+            for (int x = 0; x < width; x++)
+                if (!occupied[x, z] && reachable[x, z] && !vis[x, z]) isolated++;
+        if (isolated > 0) Fail($"고립 구역 {isolated}칸 잔존");
 
         // 시작 자원
         bool anyStickNear = placements.Any(p => p.id == "stick" && Near(p, start, startClearRadius + 1));
@@ -584,7 +684,6 @@ public class MapGeneratorWindow : EditorWindow
             width = width,
             depth = depth,
             levels = RowsFrom((x, z) => (char)('0' + levels[x, z])),
-            blocked = RowsFrom((x, z) => blocked[x, z] ? '#' : '.'),
             ramps = RowsFrom((x, z) => ramps[x, z] ? '/' : '.'),
             placements = placements.ToArray()
         };
