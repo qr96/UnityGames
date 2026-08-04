@@ -1,76 +1,60 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-// 제작대. 여러 레시피를 갖고, E를 누르면 CraftingUI 목록을 연다.
-// 실제 제작 판정·소모·수납은 이 스크립트가 담당(UI는 표시와 선택만).
-public class CraftingStation : InteractableBase
+// 제작 시설(제작대·모루·요리솥). 자신을 등록해 두고, 근처 판정에만 쓰인다.
+// 제작 실행은 PlayerCrafting이 담당하며, 이 컴포넌트는 "무슨 시설이 어디 있는지"만 알린다.
+public class CraftingStation : MonoBehaviour
 {
-    [SerializeField] private CraftingRecipe[] recipes;
-    [SerializeField] private Inventory inventory;  // 비우면 씬에서 찾음
-    [SerializeField] private CraftingUI craftingUI; // 비우면 씬에서 찾음
-    [SerializeField] private string stationName = "제작대";
+    public static readonly List<CraftingStation> All = new List<CraftingStation>();
 
-    public CraftingRecipe[] Recipes => recipes;
-    public string StationName => stationName;
+    [SerializeField] private CraftStation stationType = CraftStation.Workbench;
+    [Tooltip("이 거리 안이면 해당 시설을 쓸 수 있다")]
+    [SerializeField] private float useRadius = 3f;
 
-    private void Start()
+    public CraftStation StationType => stationType;
+    public float UseRadius => useRadius;
+
+    private void OnEnable() { if (!All.Contains(this)) All.Add(this); }
+    private void OnDisable() { All.Remove(this); }
+
+    // 지점 근처에 해당 등급 시설이 있는지 (Hand는 항상 참)
+    public static bool IsAvailable(CraftStation type, Vector3 point)
     {
-        if (inventory == null) inventory = FindObjectOfType<Inventory>();
-        if (craftingUI == null) craftingUI = FindObjectOfType<CraftingUI>();
-    }
+        if (type == CraftStation.Hand) return true;
 
-    public override string Prompt => stationName;
-
-    public override bool CanInteract(GameObject interactor)
-        => recipes != null && recipes.Length > 0 && inventory != null;
-
-    public override void Interact(GameObject interactor)
-    {
-        if (craftingUI == null) craftingUI = FindObjectOfType<CraftingUI>();
-        if (craftingUI == null)
+        for (int i = 0; i < All.Count; i++)
         {
-            Debug.LogWarning("[제작대] CraftingUI가 씬에 없음");
-            return;
+            CraftingStation s = All[i];
+            if (s.stationType != type) continue;
+            Vector3 d = point - s.transform.position; d.y = 0f;
+            if (d.sqrMagnitude <= s.useRadius * s.useRadius) return true;
         }
-        craftingUI.Open(this, inventory);
+        return false;
     }
 
-    public bool HasMaterials(CraftingRecipe recipe)
+    public static string Label(CraftStation type)
     {
-        if (recipe == null || inventory == null) return false;
-        if (recipe.costs == null) return true;
-        for (int i = 0; i < recipe.costs.Length; i++)
-            if (!inventory.Has(recipe.costs[i].kind, recipe.costs[i].amount)) return false;
-        return true;
-    }
-
-    public bool HasRoom(CraftingRecipe recipe)
-        => recipe != null && inventory != null &&
-           inventory.FreeSpaceFor(recipe.outputKind) >= recipe.outputAmount;
-
-    // 1회 제작. 성공 시 true.
-    public bool TryCraft(CraftingRecipe recipe)
-    {
-        if (recipe == null || inventory == null) return false;
-        if (!HasMaterials(recipe)) { Debug.Log("[제작대] 재료 부족"); return false; }
-        if (!HasRoom(recipe)) { Debug.Log("[제작대] 넣을 칸 없음"); return false; }
-
-        for (int i = 0; i < recipe.costs.Length; i++)
-            inventory.TrySpend(recipe.costs[i].kind, recipe.costs[i].amount);
-
-        inventory.Add(recipe.outputKind, recipe.outputAmount);
-        return true;
-    }
-
-    public static string KindLabel(ResourceKind kind)
-    {
-        switch (kind)
+        switch (type)
         {
-            case ResourceKind.Stick: return "나뭇가지";
-            case ResourceKind.Stone: return "돌";
-            case ResourceKind.Firewood: return "장작";
-            case ResourceKind.Food: return "식량";
-            case ResourceKind.Axe: return "도끼";
-            default: return kind.ToString();
+            case CraftStation.Hand: return "맨손";
+            case CraftStation.Workbench: return "제작대";
+            case CraftStation.Anvil: return "모루";
+            case CraftStation.CookingPot: return "요리솥";
+            default: return type.ToString();
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(0.6f, 0.9f, 1f, 0.8f);
+        const int seg = 24;
+        Vector3 prev = transform.position + new Vector3(useRadius, 0f, 0f);
+        for (int i = 1; i <= seg; i++)
+        {
+            float a = (i / (float)seg) * Mathf.PI * 2f;
+            Vector3 p = transform.position + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * useRadius;
+            Gizmos.DrawLine(prev, p);
+            prev = p;
         }
     }
 }

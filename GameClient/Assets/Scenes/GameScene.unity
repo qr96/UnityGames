@@ -823,6 +823,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d03e6a0b3358b149bc3ea1f83d0f0ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CraftingUI
+  crafting: {fileID: 0}
+  inventory: {fileID: 0}
+  openKey: 99
+  showLocked: 1
 --- !u!114 &698629213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1061,6 +1065,7 @@ GameObject:
   - component: {fileID: 802411308}
   - component: {fileID: 802411309}
   - component: {fileID: 802411310}
+  - component: {fileID: 802411311}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1228,11 +1233,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9d499d6b379144aa726a41b8862a85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackExecutor
-  attackKey: 32
+  mouseButton: 0
+  fallbackKey: 32
   cooldown: 0.25
+  aimCamera: {fileID: 0}
+  faceCursorOnSwing: 1
   quickBar: {fileID: 0}
   inventory: {fileID: 0}
   verboseLog: 1
+--- !u!114 &802411311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 802411301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec66e3714995fff4aa7b6867d7e10c06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCrafting
+  book: {fileID: 11400000, guid: ea3204f6a36449f4680acda5e59ae611, type: 2}
+  inventory: {fileID: 0}
 --- !u!1 &851429552
 GameObject:
   m_ObjectHideFlags: 0
@@ -1743,6 +1765,7 @@ MonoBehaviour:
   origin: {x: 0, y: 0, z: 0}
   levelHeight: 1
   warmthCrossesLevels: 0
+  blockMovementOnOccupied: 1
   drawGizmo: 1
 --- !u!114 &1977076628
 MonoBehaviour:
