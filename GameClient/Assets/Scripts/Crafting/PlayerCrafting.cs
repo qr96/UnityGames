@@ -49,23 +49,42 @@ public class PlayerCrafting : MonoBehaviour
         string reason = BlockReason(r);
         if (reason != null) { Debug.Log($"[제작] {r?.outputName} — {reason}"); return false; }
 
-        for (int i = 0; i < r.costs.Length; i++)
-            inventory.TrySpend(r.costs[i].kind, r.costs[i].amount);
+        // 산출물 정의가 조회표에 없으면 재료만 사라진다 → 미리 막는다
+        if (inventory.Database == null || inventory.Database.Find(r.outputKind) == null)
+        {
+            Debug.LogWarning($"[제작] {r.outputName}: ItemDatabase에 {r.outputKind} 정의가 없어 중단 " +
+                             "(ItemDef를 만들고 ItemDatabase.items에 등록할 것)");
+            return false;
+        }
 
-        inventory.Add(r.outputKind, r.outputAmount);
-        return true;
+        int before = inventory.Get(r.outputKind);
+
+        if (r.costs != null)
+            for (int i = 0; i < r.costs.Length; i++)
+                inventory.TrySpend(r.costs[i].kind, r.costs[i].amount);
+
+        int stored = inventory.Add(r.outputKind, r.outputAmount);
+        int after = inventory.Get(r.outputKind);
+
+        if (stored < r.outputAmount)
+            Debug.LogWarning($"[제작] {r.outputName}: {r.outputAmount}개 중 {stored}개만 수납됨 " +
+                             $"(칸/스택 상한 확인). 보유 {before} → {after}");
+        else
+            Debug.Log($"[제작] {r.outputName} 완료 — 보유 {before} → {after}");
+
+        return stored > 0;
     }
 
     public static string KindLabel(ResourceKind kind)
     {
         switch (kind)
         {
-            case ResourceKind.Stick:    return "나뭇가지";
-            case ResourceKind.Stone:    return "돌";
+            case ResourceKind.Stick: return "나뭇가지";
+            case ResourceKind.Stone: return "돌";
             case ResourceKind.Firewood: return "장작";
-            case ResourceKind.Food:     return "식량";
-            case ResourceKind.Axe:      return "도끼";
-            default:                    return kind.ToString();
+            case ResourceKind.Food: return "식량";
+            case ResourceKind.Axe: return "도끼";
+            default: return kind.ToString();
         }
     }
 }

@@ -2,8 +2,9 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-// 제작 목록. 열기 키(기본 C), 위/아래 선택, E 제작(1회, 목록 유지), Q/ESC 닫기.
-// 맨손 레시피는 항상 보이고, 시설 레시피는 잠금 사유가 함께 표시된다.
+// 제작 목록. 열기 = 제작대에서 E, 또는 어디서나 열기 키(기본 C).
+// 시설에서 열면 그 시설 레시피 + 맨손 레시피만 보인다. 키로 열면 전체.
+// 위/아래 선택, E 제작(1회, 목록 유지), Q/ESC 닫기.
 // (v0.7의 Tab 통합은 탭 전환 키가 정해지면 반영)
 public class CraftingUI : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class CraftingUI : MonoBehaviour
     private readonly List<CraftingRecipe> shown = new List<CraftingRecipe>();
     private int cursor;
     private bool skipFirstInput;
+    private CraftStation? filter;   // null이면 전체 표시
 
     private GUIStyle rowStyle;
     private GUIStyle headStyle;
@@ -33,17 +35,31 @@ public class CraftingUI : MonoBehaviour
         if (IsOpen) { IsOpen = false; UIInputLock.Release(); }
     }
 
+    // 제작대 등에서 호출 — 해당 시설 레시피만 보여준다
+    public void Open(CraftStation? stationFilter = null)
+    {
+        filter = stationFilter;
+        cursor = 0;
+        SetOpen(true);
+    }
+
+    public void Close() => SetOpen(false);
+
     private void SetOpen(bool open)
     {
         if (IsOpen == open) return;
         IsOpen = open;
         if (open) { UIInputLock.Push(); skipFirstInput = true; }
-        else UIInputLock.Release();
+        else { UIInputLock.Release(); filter = null; }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(openKey)) SetOpen(!IsOpen);
+        if (Input.GetKeyDown(openKey))
+        {
+            if (IsOpen) SetOpen(false);
+            else Open(null); // 키로 열면 전체 목록
+        }
         if (!IsOpen) return;
 
         RefreshList();
@@ -70,6 +86,9 @@ public class CraftingUI : MonoBehaviour
         {
             CraftingRecipe r = all[i];
             if (r == null) continue;
+            if (filter.HasValue &&
+                r.requiredStation != filter.Value &&
+                r.requiredStation != CraftStation.Hand) continue;
             if (!showLocked && crafting.BlockReason(r) != null) continue;
             shown.Add(r);
         }
@@ -95,7 +114,8 @@ public class CraftingUI : MonoBehaviour
         float py = (Screen.height - panelH) * 0.5f;
 
         GUI.Box(new Rect(px, py, w, panelH), GUIContent.none);
-        GUI.Label(new Rect(px + 14f, py + 8f, w - 28f, 22f), "제작", headStyle);
+        string title = filter.HasValue ? $"제작 — {CraftingStation.Label(filter.Value)}" : "제작";
+        GUI.Label(new Rect(px + 14f, py + 8f, w - 28f, 22f), title, headStyle);
 
         if (shown.Count == 0)
         {

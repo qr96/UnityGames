@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 9106157759199106522}
   - component: {fileID: 1862999535341040640}
   - component: {fileID: 8283481296366193112}
+  - component: {fileID: 7447871245657460317}
   m_Layer: 0
   m_Name: CraftingBox
   m_TagString: Untagged
@@ -126,11 +127,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6adf6bb39411a4a4ea1087df82bf292c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CraftingStation
-  recipes:
-  - {fileID: 11400000, guid: dfa711b8518be0c46b2b968ade23517d, type: 2}
-  inventory: {fileID: 0}
-  craftingUI: {fileID: 0}
-  stationName: "\uC81C\uC791\uB300"
+  stationType: 1
+  useRadius: 3
 --- !u!114 &1862999535341040640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -159,3 +157,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DevTint
   applyToAllInScene: 1
+--- !u!114 &7447871245657460317
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4187521956452554282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c42aa5f735d49e45b7fcf4a795918ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridOccupant
+  footprint: {x: 1, y: 1}
+  snapOnStart: 1

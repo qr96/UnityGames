@@ -1740,6 +1740,7 @@ GameObject:
   - component: {fileID: 1977076628}
   - component: {fileID: 1977076627}
   - component: {fileID: 1977076630}
+  - component: {fileID: 1977076631}
   m_Layer: 0
   m_Name: WorldManager
   m_TagString: Untagged
@@ -1818,6 +1819,28 @@ MonoBehaviour:
   offsetCells: 2
   offsetDirection: {x: 0, y: -1}
   verboseLog: 1
+--- !u!114 &1977076631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1977076626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5353220a6ea430741bdff8c814789b98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildMode
+  toggleKey: 98
+  placeKey: 101
+  rotateKey: 114
+  maxDistanceCells: 6
+  okColor: {r: 0.4, g: 1, b: 0.5, a: 0.5}
+  badColor: {r: 1, g: 0.35, b: 0.3, a: 0.5}
+  quickBar: {fileID: 0}
+  inventory: {fileID: 0}
+  grid: {fileID: 0}
+  player: {fileID: 802411302}
 --- !u!1 &1986016849
 GameObject:
   m_ObjectHideFlags: 0

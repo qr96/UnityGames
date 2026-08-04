@@ -28,6 +28,12 @@ public class ItemDef : ScriptableObject
     [Tooltip("판정 방식(반경형·직선형 등). 없으면 공격해도 아무것도 맞지 않음")]
     public AttackPattern attackPattern;
 
+    [Header("설치물 (건설 모드로 놓는 아이템)")]
+    [Tooltip("설치할 프리팹. 비어 있으면 설치 불가 아이템")]
+    public GameObject placementPrefab;
+    [Tooltip("차지하는 칸 수. 프리팹의 GridOccupant가 있으면 그 값이 우선")]
+    public Vector2Int placementFootprint = new Vector2Int(1, 1);
+
     [Header("연료")]
     [Tooltip("화로에 넣었을 때 1개당 연료량. 0이면 연료로 쓸 수 없음")]
     public float fuelValue = 0f;
@@ -37,6 +43,7 @@ public class ItemDef : ScriptableObject
     public float hungerRestore = 25f;
 
     public bool IsFuel => fuelValue > 0f;
+    public bool IsPlaceable => placementPrefab != null;
     public bool IsTool => category == ItemCategory.Tool;
     public bool IsFood => category == ItemCategory.Food;
 }

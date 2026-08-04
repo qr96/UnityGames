@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// 제작 시설(제작대·모루·요리솥). 자신을 등록해 두고, 근처 판정에만 쓰인다.
-// 제작 실행은 PlayerCrafting이 담당하며, 이 컴포넌트는 "무슨 시설이 어디 있는지"만 알린다.
-public class CraftingStation : MonoBehaviour
+// 제작 시설(제작대·모루·요리솥). 자신을 등록해 근처 판정에 쓰이고,
+// E 상호작용으로 제작 창을 연다. 제작 실행은 PlayerCrafting이 담당.
+public class CraftingStation : InteractableBase
 {
     public static readonly List<CraftingStation> All = new List<CraftingStation>();
 
@@ -11,11 +11,43 @@ public class CraftingStation : MonoBehaviour
     [Tooltip("이 거리 안이면 해당 시설을 쓸 수 있다")]
     [SerializeField] private float useRadius = 3f;
 
+    [SerializeField] private CraftingUI craftingUI; // 비우면 씬에서 찾음
+
     public CraftStation StationType => stationType;
     public float UseRadius => useRadius;
 
-    private void OnEnable() { if (!All.Contains(this)) All.Add(this); }
-    private void OnDisable() { All.Remove(this); }
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        if (!All.Contains(this)) All.Add(this);
+    }
+
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        All.Remove(this);
+    }
+
+    private void Start()
+    {
+        if (craftingUI == null) craftingUI = FindObjectOfType<CraftingUI>();
+    }
+
+    // ---- 상호작용 ----
+    public override string Prompt => $"{Label(stationType)} — 제작";
+
+    public override bool CanInteract(GameObject interactor) => true;
+
+    public override void Interact(GameObject interactor)
+    {
+        if (craftingUI == null) craftingUI = FindObjectOfType<CraftingUI>();
+        if (craftingUI == null)
+        {
+            Debug.LogWarning("[제작대] CraftingUI가 씬에 없음");
+            return;
+        }
+        craftingUI.Open(stationType);
+    }
 
     // 지점 근처에 해당 등급 시설이 있는지 (Hand는 항상 참)
     public static bool IsAvailable(CraftStation type, Vector3 point)

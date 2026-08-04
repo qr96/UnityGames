@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da73b8c9ec6dca04c92554bf407f0357, type: 3}
+  m_Name: WorkbenchItemDef
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDef
+  kind: 5
+  displayName: "\uC81C\uC791\uB300"
+  category: 0
+  stackLimit: 1
+  weightPerUnit: 1
+  toolType: 0
+  hitPower: 1
+  attackPattern: {fileID: 0}
+  placementPrefab: {fileID: 4187521956452554282, guid: e9f031bf9007b284c978f07ada0cdad5, type: 3}
+  placementFootprint: {x: 1, y: 1}
+  fuelValue: 0
+  hungerRestore: 25

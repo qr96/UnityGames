@@ -55,7 +55,7 @@ public class QuickSlotBar : MonoBehaviour
             if (s.IsEmpty) continue;
 
             ItemDef def = s.def;
-            if (!def.IsTool && !def.IsFood && def.hungerRestore <= 0f) continue;
+            if (!def.IsTool && !def.IsFood && !def.IsPlaceable && def.hungerRestore <= 0f) continue;
             if (IsAssigned(def)) continue;
 
             int empty = FirstEmptySlot();

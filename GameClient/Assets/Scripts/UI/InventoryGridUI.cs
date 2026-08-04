@@ -61,9 +61,9 @@ public class InventoryGridUI : MonoBehaviour
 
             Inventory.Slot s = inventory.Slots[cursor];
             if (s.IsEmpty) { Debug.Log("[격자] 빈 칸 — 배정할 것 없음"); break; }
-            if (!s.def.IsTool && !s.def.IsFood)
+            if (!s.def.IsTool && !s.def.IsFood && !s.def.IsPlaceable)
             {
-                Debug.Log("[격자] 퀵슬롯에는 도구·음식만 배정");
+                Debug.Log("[격자] 퀵슬롯에는 도구·음식·설치물만 배정");
                 break;
             }
             if (quickBar != null) quickBar.Assign(i, s.def);
