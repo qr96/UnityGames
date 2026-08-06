@@ -8,6 +8,7 @@ public class DebugHud : MonoBehaviour
     [SerializeField] private AttackExecutor attack;
     [SerializeField] private Inventory inventory;
     [SerializeField] private PlayerStats stats;
+    [SerializeField] private PickupCollector collector;
 
     private GUIStyle style;
 
@@ -27,6 +28,7 @@ public class DebugHud : MonoBehaviour
         if (attack == null) attack = FindObjectOfType<AttackExecutor>();
         if (inventory == null) inventory = FindObjectOfType<Inventory>();
         if (stats == null) stats = FindObjectOfType<PlayerStats>();
+        if (collector == null) collector = FindObjectOfType<PickupCollector>();
     }
 
     private void OnGUI()
@@ -58,6 +60,9 @@ public class DebugHud : MonoBehaviour
             sb.AppendLine($"장작 {inventory.Get(ResourceKind.Firewood)}   식량 {inventory.Get(ResourceKind.Food)}");
             sb.AppendLine($"골드 {inventory.Gold}");
         }
+
+        if (collector != null && collector.NearbyCount > 0)
+            sb.AppendLine($"바닥 아이템 {collector.NearbyCount}묶음 — F로 줍기");
 
         if (stats != null)
             sb.AppendLine($"온기 {stats.Warmth:0}   허기 {stats.Hunger:0}   {(stats.IsDown ? "[쓰러짐]" : "")}");

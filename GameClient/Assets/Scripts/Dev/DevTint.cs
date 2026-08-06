@@ -14,6 +14,9 @@ public class DevTint : MonoBehaviour
             InteractableBase[] all = FindObjectsOfType<InteractableBase>();
             for (int i = 0; i < all.Length; i++) Apply(all[i].gameObject);
 
+            DroppedItem[] drops = FindObjectsOfType<DroppedItem>();
+            for (int i = 0; i < drops.Length; i++) Apply(drops[i].gameObject);
+
             Hearth[] hearths = FindObjectsOfType<Hearth>();
             for (int i = 0; i < hearths.Length; i++) Apply(hearths[i].gameObject);
         }
@@ -31,10 +34,11 @@ public class DevTint : MonoBehaviour
         if (go.GetComponent<Hearth>() != null) { color = new Color(1.0f, 0.45f, 0.1f); height = 1.0f; } // 주황: 화로
         else if (go.GetComponent<CraftingStation>() != null) { color = new Color(0.6f, 0.4f, 0.2f); height = 1.2f; } // 갈색: 제작대
         else if (go.GetComponent<Merchant>() != null) { color = new Color(0.9f, 0.8f, 0.2f); height = 1.8f; } // 노랑: 행상인
-        else if (go.GetComponent<DroppedItem>() != null)
+        else if (go.GetComponent<DroppedItem>() != null || go.GetComponent<GatherPoint>() != null)
         {
             DroppedItem d = go.GetComponent<DroppedItem>();
-            switch (d.Kind)
+            ResourceKind kind = d != null ? d.Kind : ResourceKind.Stick;
+            switch (kind)
             {
                 case ResourceKind.Stone: color = new Color(0.55f, 0.55f, 0.6f); height = 0.3f; break; // 회색: 돌
                 case ResourceKind.Firewood: color = new Color(0.45f, 0.3f, 0.15f); height = 0.4f; break; // 짙은 갈색: 장작

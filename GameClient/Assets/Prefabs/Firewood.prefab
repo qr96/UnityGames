@@ -154,6 +154,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29b81e648617da34a9e0844544b35036, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroppedItem
-  kind: 1
+  kind: 2
   amount: 1
-  inventory: {fileID: 0}
+  despawnSeconds: 120
