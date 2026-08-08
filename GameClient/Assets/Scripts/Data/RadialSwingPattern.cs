@@ -85,6 +85,12 @@ public class RadialSwingPattern : AttackPattern
         }
     }
 
+    public override bool TryGetArc(out float r, out float angleDeg)
+    {
+        r = radius; angleDeg = facingAngle;
+        return true;
+    }
+
     public override void DrawGizmos(Transform t)
     {
         if (t == null) return;

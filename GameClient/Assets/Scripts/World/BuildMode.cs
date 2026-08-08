@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // 건설 모드. B로 진입/종료, 방향키로 고스트 커서 이동, E 설치, R 회전, Q/ESC 취소.
-// 놓을 물건은 퀵슬롯에서 선택한 설치물 아이템(ItemDef.placementPrefab이 있는 것).
+// 놓을 물건은 이 모드 안에서 Q로 순환해 고른다(인벤토리에 있는 설치물 목록). 핫바와 무관.
 // 설치 가능 판정: 격자 범위 안 · 점유 없음 · 발판 전체가 같은 층.
 public class BuildMode : MonoBehaviour
 {
@@ -9,6 +9,8 @@ public class BuildMode : MonoBehaviour
     [SerializeField] private KeyCode toggleKey = KeyCode.B;
     [SerializeField] private KeyCode placeKey = KeyCode.E;
     [SerializeField] private KeyCode rotateKey = KeyCode.R;
+    [Tooltip("놓을 설치물 순환")]
+    [SerializeField] private KeyCode cycleKey = KeyCode.Q;
 
     [Header("커서")]
     [Tooltip("플레이어로부터 이 칸 수까지만 설치 가능")]
@@ -18,7 +20,6 @@ public class BuildMode : MonoBehaviour
     [SerializeField] private Color okColor = new Color(0.4f, 1f, 0.5f, 0.5f);
     [SerializeField] private Color badColor = new Color(1f, 0.35f, 0.3f, 0.5f);
 
-    [SerializeField] private QuickSlotBar quickBar; // 비우면 씬에서 찾음
     [SerializeField] private Inventory inventory;   // 비우면 씬에서 찾음
     [SerializeField] private WorldGrid grid;        // 비우면 씬에서 찾음
     [SerializeField] private Transform player;      // 비우면 PlayerMovement로 찾음
@@ -35,7 +36,6 @@ public class BuildMode : MonoBehaviour
 
     private void Start()
     {
-        if (quickBar == null) quickBar = FindObjectOfType<QuickSlotBar>();
         if (inventory == null) inventory = FindObjectOfType<Inventory>();
         if (grid == null) grid = WorldGrid.Instance != null ? WorldGrid.Instance : FindObjectOfType<WorldGrid>();
         if (player == null)
@@ -50,17 +50,32 @@ public class BuildMode : MonoBehaviour
         if (IsActive) Exit();
     }
 
-    // 퀵슬롯에서 선택 중이고 보유한 설치물
-    private ItemDef SelectedPlaceable
+    private readonly System.Collections.Generic.List<ItemDef> placeables =
+        new System.Collections.Generic.List<ItemDef>();
+    private int placeableIndex;
+
+    // 인벤토리에 있는 설치물 목록 갱신
+    private void RefreshPlaceables()
     {
-        get
+        ItemDef prev = SelectedPlaceable;
+        placeables.Clear();
+        if (inventory == null) return;
+
+        for (int i = 0; i < inventory.SlotCount; i++)
         {
-            if (quickBar == null || inventory == null) return null;
-            ItemDef def = quickBar.SelectedDef;
-            if (def == null || !def.IsPlaceable) return null;
-            return inventory.Has(def.kind, 1) ? def : null;
+            Inventory.Slot s = inventory.Slots[i];
+            if (s.IsEmpty || !s.def.IsPlaceable) continue;
+            if (!placeables.Contains(s.def)) placeables.Add(s.def);
         }
+
+        // 이전 선택 유지
+        int idx = prev != null ? placeables.IndexOf(prev) : -1;
+        placeableIndex = idx >= 0 ? idx : 0;
     }
+
+    // 지금 놓으려는 설치물
+    private ItemDef SelectedPlaceable
+        => (placeableIndex >= 0 && placeableIndex < placeables.Count) ? placeables[placeableIndex] : null;
 
     private void Update()
     {
@@ -74,15 +89,21 @@ public class BuildMode : MonoBehaviour
 
         if (skipFirstInput) { skipFirstInput = false; return; }
 
-        if (Input.GetKeyDown(KeyCode.Q) || Input.GetKeyDown(KeyCode.Escape)) { Exit(); return; }
+        if (Input.GetKeyDown(KeyCode.Escape)) { Exit(); return; }
 
         // 커서 이동
         if (Input.GetKeyDown(KeyCode.RightArrow)) MoveCursor(new Vector2Int(1, 0));
-        if (Input.GetKeyDown(KeyCode.LeftArrow))  MoveCursor(new Vector2Int(-1, 0));
-        if (Input.GetKeyDown(KeyCode.UpArrow))    MoveCursor(new Vector2Int(0, 1));
-        if (Input.GetKeyDown(KeyCode.DownArrow))  MoveCursor(new Vector2Int(0, -1));
+        if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveCursor(new Vector2Int(-1, 0));
+        if (Input.GetKeyDown(KeyCode.UpArrow)) MoveCursor(new Vector2Int(0, 1));
+        if (Input.GetKeyDown(KeyCode.DownArrow)) MoveCursor(new Vector2Int(0, -1));
 
         if (Input.GetKeyDown(rotateKey)) rotationStep = (rotationStep + 1) % 4;
+
+        if (Input.GetKeyDown(cycleKey) && placeables.Count > 1)
+        {
+            placeableIndex = (placeableIndex + 1) % placeables.Count;
+            DestroyGhost();
+        }
 
         UpdateGhost();
 
@@ -92,9 +113,11 @@ public class BuildMode : MonoBehaviour
     private void Enter()
     {
         if (grid == null) { Debug.LogWarning("[건설] WorldGrid가 없음"); return; }
+
+        RefreshPlaceables();
         if (SelectedPlaceable == null)
         {
-            Debug.Log("[건설] 퀵슬롯에서 설치물을 선택하세요 (보유한 설치 가능 아이템)");
+            Debug.Log("[건설] 설치할 수 있는 아이템이 없음 (제작 후 다시 시도)");
             return;
         }
 
@@ -154,14 +177,14 @@ public class BuildMode : MonoBehaviour
         int level = grid.GetLevel(cursor);
 
         for (int x = 0; x < f.x; x++)
-        for (int z = 0; z < f.y; z++)
-        {
-            Vector2Int c = new Vector2Int(cursor.x + x, cursor.y + z);
-            if (!grid.InBounds(c)) { reason = "범위 밖"; return false; }
-            if (grid.GetOccupant(c) != null) { reason = "이미 무언가 있음"; return false; }
-            if (grid.GetLevel(c) != level) { reason = "높이가 다름"; return false; }
-            if (grid.IsRamp(c)) { reason = "경사로 위"; return false; }
-        }
+            for (int z = 0; z < f.y; z++)
+            {
+                Vector2Int c = new Vector2Int(cursor.x + x, cursor.y + z);
+                if (!grid.InBounds(c)) { reason = "범위 밖"; return false; }
+                if (grid.GetOccupant(c) != null) { reason = "이미 무언가 있음"; return false; }
+                if (grid.GetLevel(c) != level) { reason = "높이가 다름"; return false; }
+                if (grid.IsRamp(c)) { reason = "경사로 위"; return false; }
+            }
         return true;
     }
 
@@ -205,7 +228,7 @@ public class BuildMode : MonoBehaviour
         {
             Material m = rs[i].material;
             if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c);
-            if (m.HasProperty("_Color"))     m.SetColor("_Color", c);
+            if (m.HasProperty("_Color")) m.SetColor("_Color", c);
         }
     }
 
@@ -235,9 +258,14 @@ public class BuildMode : MonoBehaviour
         Vector3 pos = grid.CellToWorldCenter(cursor, f);
         Instantiate(def.placementPrefab, pos, Quaternion.Euler(0f, rotationStep * 90f, 0f));
 
-        // 더 놓을 게 없으면 모드 종료
-        if (!inventory.Has(def.kind, 1)) Exit();
-        else UpdateGhost();
+        // 더 놓을 게 없으면 목록 갱신 후 종료 판단
+        if (!inventory.Has(def.kind, 1))
+        {
+            RefreshPlaceables();
+            DestroyGhost();
+            if (SelectedPlaceable == null) { Exit(); return; }
+        }
+        UpdateGhost();
     }
 
     private void OnGUI()
@@ -255,9 +283,11 @@ public class BuildMode : MonoBehaviour
         int have = (def != null && inventory != null) ? inventory.Get(def.kind) : 0;
         CanPlaceHere(def, out string reason);
 
-        string text = $"건설 — {name} x{have}   칸 ({cursor.x},{cursor.y})   회전 {rotationStep * 90}°" +
+        string text = $"건설 — {name} x{have}" +
+                      (placeables.Count > 1 ? $"  ({placeableIndex + 1}/{placeables.Count})" : "") +
+                      $"   칸 ({cursor.x},{cursor.y})   회전 {rotationStep * 90}°" +
                       (reason != null ? $"   ({reason})" : "   설치 가능") +
-                      "\n방향키 이동 · E 설치 · R 회전 · Q/ESC 취소";
+                      "\n방향키 이동 · E 설치 · R 회전 · Q 다음 설치물 · ESC 취소";
 
         GUI.Box(new Rect((Screen.width - 520f) * 0.5f, 20f, 520f, 48f), text, labelStyle);
     }

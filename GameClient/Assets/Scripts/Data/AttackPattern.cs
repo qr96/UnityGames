@@ -31,6 +31,13 @@ public abstract class AttackPattern : ScriptableObject
     // 실제 타격 실행.
     public abstract void Execute(in AttackContext ctx);
 
+    // 궤적 연출용 부채꼴 정보. 반경형만 의미가 있다.
+    public virtual bool TryGetArc(out float radius, out float angleDeg)
+    {
+        radius = 0f; angleDeg = 0f;
+        return false;
+    }
+
     // 씬뷰 표시용(선택)
     public virtual void DrawGizmos(Transform origin) { }
 }

@@ -135,909 +135,99 @@
         },
         {
             "id": "stick",
-            "x": 34,
-            "z": 1,
+            "x": 32,
+            "z": 8,
+            "rotationY": 0.0
+        },
+        {
+            "id": "stick",
+            "x": 35,
+            "z": 6,
             "rotationY": 90.0
         },
         {
             "id": "stick",
-            "x": 27,
-            "z": 6,
+            "x": 28,
+            "z": 3,
+            "rotationY": 0.0
+        },
+        {
+            "id": "stick",
+            "x": 32,
+            "z": 1,
             "rotationY": 270.0
         },
         {
             "id": "stick",
-            "x": 29,
-            "z": 5,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 34,
-            "z": 0,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stone",
-            "x": 28,
-            "z": 5,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stone",
-            "x": 4,
-            "z": 0,
-            "rotationY": 180.0
+            "x": 32,
+            "z": 6,
+            "rotationY": 270.0
         },
         {
             "id": "berry",
-            "x": 7,
-            "z": 0,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 37,
-            "z": 0,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
             "x": 42,
-            "z": 0,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stick",
-            "x": 46,
-            "z": 0,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 51,
-            "z": 0,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 57,
-            "z": 0,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 10,
-            "z": 1,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 5,
-            "z": 3,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 38,
-            "z": 3,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 41,
-            "z": 3,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 57,
-            "z": 3,
-            "rotationY": 270.0
-        },
-        {
-            "id": "stick",
-            "x": 14,
-            "z": 4,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 35,
-            "z": 4,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 18,
-            "z": 6,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 39,
-            "z": 6,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 48,
-            "z": 6,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 11,
-            "z": 7,
-            "rotationY": 270.0
-        },
-        {
-            "id": "berry",
-            "x": 36,
-            "z": 7,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 43,
-            "z": 7,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 51,
-            "z": 7,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 22,
-            "z": 8,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 31,
-            "z": 8,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stone",
-            "x": 26,
-            "z": 10,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 35,
-            "z": 10,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 22,
-            "z": 11,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stick",
-            "x": 57,
-            "z": 11,
-            "rotationY": 270.0
-        },
-        {
-            "id": "stick",
-            "x": 14,
             "z": 12,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stone",
-            "x": 52,
-            "z": 12,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 22,
-            "z": 14,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 48,
-            "z": 14,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stone",
-            "x": 15,
-            "z": 15,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 51,
-            "z": 15,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stone",
-            "x": 58,
-            "z": 15,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 6,
-            "z": 16,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 48,
-            "z": 18,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 51,
-            "z": 18,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 6,
-            "z": 19,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stone",
-            "x": 13,
-            "z": 19,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 29,
-            "z": 19,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 37,
-            "z": 19,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stick",
-            "x": 44,
-            "z": 19,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 21,
-            "z": 20,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 40,
-            "z": 20,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 9,
-            "z": 21,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 54,
-            "z": 21,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 26,
-            "z": 23,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 38,
-            "z": 23,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 23,
-            "z": 24,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stick",
-            "x": 52,
-            "z": 25,
-            "rotationY": 270.0
-        },
-        {
-            "id": "stick",
-            "x": 13,
-            "z": 26,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 28,
-            "z": 26,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 36,
-            "z": 26,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 20,
-            "z": 27,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 23,
-            "z": 27,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stick",
-            "x": 56,
-            "z": 27,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 17,
-            "z": 29,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 26,
-            "z": 29,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 30,
-            "z": 29,
-            "rotationY": 270.0
-        },
-        {
-            "id": "stick",
-            "x": 33,
-            "z": 29,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 20,
-            "z": 30,
-            "rotationY": 270.0
-        },
-        {
-            "id": "berry",
-            "x": 54,
-            "z": 30,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 57,
-            "z": 30,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 23,
-            "z": 31,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 40,
-            "z": 31,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 45,
-            "z": 31,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 50,
-            "z": 31,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 26,
-            "z": 32,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 29,
-            "z": 32,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 34,
-            "z": 32,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 13,
-            "z": 33,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 16,
-            "z": 33,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 19,
-            "z": 33,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 53,
-            "z": 33,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 57,
-            "z": 33,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 37,
-            "z": 34,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 9,
-            "z": 35,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 23,
-            "z": 35,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 31,
-            "z": 35,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 34,
-            "z": 35,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stone",
-            "x": 44,
-            "z": 35,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 12,
-            "z": 36,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 16,
-            "z": 36,
             "rotationY": 90.0
         },
         {
             "id": "berry",
-            "x": 27,
-            "z": 36,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 53,
-            "z": 36,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 57,
-            "z": 36,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 20,
-            "z": 37,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 37,
-            "z": 37,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 40,
-            "z": 37,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 9,
-            "z": 38,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 24,
-            "z": 38,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 34,
-            "z": 38,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stick",
-            "x": 4,
-            "z": 39,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 15,
-            "z": 39,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 55,
-            "z": 39,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 59,
-            "z": 39,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 12,
-            "z": 40,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 40,
-            "z": 40,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 44,
-            "z": 40,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stick",
-            "x": 29,
-            "z": 41,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 35,
-            "z": 41,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stick",
-            "x": 5,
-            "z": 42,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 9,
-            "z": 42,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 51,
-            "z": 42,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 54,
-            "z": 42,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 12,
-            "z": 43,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 38,
-            "z": 43,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 41,
-            "z": 43,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 59,
-            "z": 43,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 18,
-            "z": 44,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 23,
-            "z": 44,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 35,
-            "z": 44,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 46,
-            "z": 44,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 0,
-            "z": 45,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 27,
-            "z": 45,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 49,
-            "z": 45,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 52,
-            "z": 45,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 56,
-            "z": 45,
-            "rotationY": 270.0
-        },
-        {
-            "id": "stick",
-            "x": 14,
-            "z": 46,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stick",
-            "x": 47,
-            "z": 48,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 52,
-            "z": 48,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 15,
-            "z": 49,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stone",
-            "x": 31,
-            "z": 49,
-            "rotationY": 90.0
-        },
-        {
-            "id": "stone",
-            "x": 35,
-            "z": 49,
-            "rotationY": 270.0
-        },
-        {
-            "id": "stone",
-            "x": 11,
-            "z": 50,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stick",
-            "x": 3,
-            "z": 51,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 48,
-            "z": 51,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 29,
-            "z": 53,
-            "rotationY": 180.0
-        },
-        {
-            "id": "stick",
             "x": 43,
-            "z": 53,
+            "z": 14,
+            "rotationY": 270.0
+        },
+        {
+            "id": "stone",
+            "x": 57,
+            "z": 55,
             "rotationY": 0.0
+        },
+        {
+            "id": "stone",
+            "x": 54,
+            "z": 48,
+            "rotationY": 90.0
         },
         {
             "id": "stone",
             "x": 55,
-            "z": 53,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 15,
             "z": 54,
-            "rotationY": 0.0
-        },
-        {
-            "id": "stick",
-            "x": 21,
-            "z": 55,
             "rotationY": 270.0
         },
         {
-            "id": "stick",
-            "x": 38,
-            "z": 55,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 0,
-            "z": 56,
-            "rotationY": 270.0
-        },
-        {
-            "id": "tree",
-            "x": 30,
-            "z": 56,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 49,
-            "z": 56,
-            "rotationY": 180.0
-        },
-        {
-            "id": "tree",
-            "x": 52,
-            "z": 56,
-            "rotationY": 270.0
-        },
-        {
-            "id": "stick",
-            "x": 59,
-            "z": 56,
-            "rotationY": 270.0
-        },
-        {
-            "id": "berry",
-            "x": 16,
-            "z": 57,
+            "id": "stone",
+            "x": 53,
+            "z": 50,
             "rotationY": 0.0
         },
         {
             "id": "stone",
-            "x": 35,
-            "z": 57,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 12,
-            "z": 58,
-            "rotationY": 0.0
+            "x": 56,
+            "z": 52,
+            "rotationY": 90.0
         },
         {
             "id": "stone",
-            "x": 44,
-            "z": 58,
+            "x": 50,
+            "z": 48,
             "rotationY": 180.0
         },
         {
-            "id": "tree",
-            "x": 1,
-            "z": 59,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 31,
-            "z": 59,
-            "rotationY": 0.0
-        },
-        {
-            "id": "tree",
-            "x": 48,
-            "z": 59,
-            "rotationY": 90.0
-        },
-        {
-            "id": "tree",
-            "x": 51,
-            "z": 59,
+            "id": "stone",
+            "x": 19,
+            "z": 14,
             "rotationY": 180.0
+        },
+        {
+            "id": "stone",
+            "x": 18,
+            "z": 12,
+            "rotationY": 180.0
+        },
+        {
+            "id": "stone",
+            "x": 17,
+            "z": 14,
+            "rotationY": 90.0
         },
         {
             "id": "hearth_site",

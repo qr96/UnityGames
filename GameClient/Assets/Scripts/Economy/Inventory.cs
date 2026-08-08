@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 격자 인벤토리. 칸 수 확장 가능, 칸별 스택 상한(ItemDef), 종류별 무게.
-// 무게 한계 초과 시 획득은 막지 않고 이동 속도만 감소(PlayerMovement가 SpeedMultiplier 사용).
-// 골드는 칸/무게에 포함하지 않음.
+// 격자 인벤토리. 칸 수 확장 가능, 칸별 스택 상한(ItemDef). 무게 시스템 없음(v0.7).
+// 골드는 칸에 포함하지 않음.
 public class Inventory : MonoBehaviour
 {
     [Serializable]
@@ -23,16 +22,10 @@ public class Inventory : MonoBehaviour
     [Header("칸")]
     [SerializeField] private int slotCount = 10;
 
-    [Header("무게")]
-    [SerializeField] private float baseWeightLimit = 40f;
-    [Tooltip("한계 초과가 심할 때의 최저 이동 속도 배율")]
-    [SerializeField] private float minSpeedMultiplier = 0.5f;
-
     [Header("시작값")]
     [SerializeField] private int gold = 0;
 
     private readonly List<Slot> slots = new List<Slot>();
-    private float bonusWeightLimit;   // 확장분
     private int bonusSlotCount;       // 확장분
 
     public event Action OnChanged;
@@ -41,35 +34,6 @@ public class Inventory : MonoBehaviour
     public IReadOnlyList<Slot> Slots => slots;
     public int SlotCount => slots.Count;
     public ItemDatabase Database => database;
-
-    public float WeightLimit => baseWeightLimit + bonusWeightLimit;
-
-    public float CurrentWeight
-    {
-        get
-        {
-            float w = 0f;
-            for (int i = 0; i < slots.Count; i++)
-                if (!slots[i].IsEmpty) w += slots[i].def.weightPerUnit * slots[i].count;
-            return w;
-        }
-    }
-
-    public bool IsOverweight => CurrentWeight > WeightLimit;
-
-    // 한계 초과분 비율에 따라 1 → minSpeedMultiplier 로 감속
-    public float SpeedMultiplier
-    {
-        get
-        {
-            float limit = WeightLimit;
-            if (limit <= 0f) return 1f;
-            float over = CurrentWeight - limit;
-            if (over <= 0f) return 1f;
-            float t = Mathf.Clamp01(over / limit); // 한계의 2배에서 최저치
-            return Mathf.Lerp(1f, minSpeedMultiplier, t);
-        }
-    }
 
     private void Awake()
     {
@@ -92,12 +56,6 @@ public class Inventory : MonoBehaviour
         OnChanged?.Invoke();
     }
 
-    public void AddWeightLimit(float amount)
-    {
-        bonusWeightLimit += amount;
-        OnChanged?.Invoke();
-    }
-
     // ---- 수량 조회 ----
     public int Get(ResourceKind kind)
     {
@@ -109,7 +67,7 @@ public class Inventory : MonoBehaviour
 
     public bool Has(ResourceKind kind, int amount) => Get(kind) >= amount;
 
-    // 남은 수납 여력(칸·스택 상한 기준). 무게는 여력에 관여하지 않음.
+    // 남은 수납 여력(칸·스택 상한 기준).
     public int FreeSpaceFor(ResourceKind kind)
     {
         ItemDef def = database != null ? database.Find(kind) : null;

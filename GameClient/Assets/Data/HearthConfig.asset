@@ -15,4 +15,34 @@ MonoBehaviour:
   baseWarmthRadius: 5
   baseFuelCapacity: 100
   fuelBurnPerSec: 1
-  upgrades: []
+  upgrades:
+  - goldCost: 0
+    resourceCost: 1
+    resourceAmount: 5
+    addedFuelCapacity: 20
+    addedWarmthRadius: 0
+  - goldCost: 0
+    resourceCost: 1
+    resourceAmount: 10
+    addedFuelCapacity: 20
+    addedWarmthRadius: 0
+  - goldCost: 0
+    resourceCost: 1
+    resourceAmount: 20
+    addedFuelCapacity: 20
+    addedWarmthRadius: 0
+  - goldCost: 0
+    resourceCost: 1
+    resourceAmount: 40
+    addedFuelCapacity: 20
+    addedWarmthRadius: 0
+  - goldCost: 0
+    resourceCost: 1
+    resourceAmount: 80
+    addedFuelCapacity: 20
+    addedWarmthRadius: 0
+  - goldCost: 0
+    resourceCost: 1
+    resourceAmount: 80
+    addedFuelCapacity: 60
+    addedWarmthRadius: 0

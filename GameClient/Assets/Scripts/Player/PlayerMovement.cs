@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // 쿼터뷰 이동. 물리(Rigidbody) 미사용. CharacterController로 충돌/중력 처리.
-// 입력은 카메라 시점 기준으로 변환. 인벤토리 무게 한계 초과 시 이동 속도 감소.
+// 입력은 카메라 시점 기준으로 변환. 격자가 있으면 통행 판정·층 높이를 따른다.
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
@@ -23,10 +23,6 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("캡슐 밑면을 지면에 맞춘 뒤 추가로 올릴 값. 모델이 가라앉으면 늘리기")]
     [SerializeField] private float groundExtraOffset = 0f;
 
-    [Header("무게")]
-    [Tooltip("비우면 씬에서 찾음. 없으면 감속 없음")]
-    [SerializeField] private Inventory inventory;
-
     private CharacterController controller;
     private float verticalVelocity;
     private WorldGrid grid;
@@ -40,7 +36,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        if (inventory == null) inventory = FindObjectOfType<Inventory>();
         if (stats == null) stats = GetComponent<PlayerStats>();
         if (stats == null) stats = FindObjectOfType<PlayerStats>();
         grid = WorldGrid.Instance != null ? WorldGrid.Instance : FindObjectOfType<WorldGrid>();
@@ -101,7 +96,7 @@ public class PlayerMovement : MonoBehaviour
                           && stats != null && stats.CanSprint;
         if (stats != null) stats.SetSprinting(wantSprint);
 
-        float speed = moveSpeed * (inventory != null ? inventory.SpeedMultiplier : 1f);
+        float speed = moveSpeed;
         if (wantSprint) speed *= Mathf.Max(1f, sprintMultiplier);
 
         Vector3 horizontal = inputDir * speed * Time.deltaTime;

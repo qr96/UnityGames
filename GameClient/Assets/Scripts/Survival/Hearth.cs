@@ -20,10 +20,23 @@ public class Hearth : MonoBehaviour
     [SerializeField] private float fuel = 100f;
     [SerializeField] private bool isLit = true;
 
+    [Header("강화 (1회)")]
+    [Tooltip("강화에 드는 돌 개수")]
+    [SerializeField] private int upgradeStoneCost = 5;
+    [Tooltip("강화 후 연료 소모율 배수 (0.66 = 34% 절약)")]
+    [SerializeField] private float upgradedBurnMultiplier = 0.66f;
+    [SerializeField] private bool isUpgraded = false;
+
     [Header("비주얼 (선택) — 반경에 맞춰 XZ 스케일(눈 물러남)")]
     [SerializeField] private Transform meltedGroundVisual;
 
-    private int upgradeLevel = 0;
+    [Header("강화 비주얼 (선택)")]
+    [Tooltip("강화 시 켜질 오브젝트. 없으면 색·크기만 바뀜")]
+    [SerializeField] private GameObject upgradedVisual;
+    [SerializeField] private Color upgradedTint = new Color(0.55f, 0.75f, 1f);
+    [Tooltip("강화 시 곱해질 크기")]
+    [SerializeField] private float upgradedScale = 1.2f;
+
     private float currentRadius;
     private float currentCapacity;
     private float currentBurn;
@@ -37,9 +50,10 @@ public class Hearth : MonoBehaviour
 
     // 현재 연료로 남은 지속 시간(초). 소모율이 0이면 무한.
     public float RemainingSeconds => currentBurn > 0f ? fuel / currentBurn : Mathf.Infinity;
-    public int UpgradeLevel => upgradeLevel;
-    public bool CanUpgrade =>
-        config != null && config.upgrades != null && upgradeLevel < config.upgrades.Length;
+    public bool IsUpgraded => isUpgraded;
+    public int UpgradeStoneCost => Mathf.Max(1, upgradeStoneCost);
+    public bool CanUpgrade => !isUpgraded;
+    public string DisplayName => isUpgraded ? "강화 화로" : "화로";
 
     private void OnEnable() { if (!All.Contains(this)) All.Add(this); }
     private void OnDisable() { All.Remove(this); }
@@ -49,6 +63,7 @@ public class Hearth : MonoBehaviour
         RecalcStats();
         fuel = Mathf.Min(fuel, currentCapacity);
         ApplyRadiusVisual();
+        ApplyUpgradeVisual();
     }
 
     private void Update()
@@ -104,47 +119,60 @@ public class Hearth : MonoBehaviour
         isLit = true;
     }
 
-    // 강화: 다음 단계 골드+자원 소모 → 용량/반경 증가.
+    // 강화(1회): 돌 소모 → 연료 소모율 감소. 성공 시 true.
     public bool TryUpgrade(Inventory inv)
     {
-        if (!CanUpgrade || inv == null) return false;
-        HearthConfig.UpgradeStep step = config.upgrades[upgradeLevel];
-        if (inv.Gold < step.goldCost) return false;
-        if (!inv.Has(step.resourceCost, step.resourceAmount)) return false;
+        if (isUpgraded || inv == null) return false;
+        if (!inv.Has(ResourceKind.Stone, UpgradeStoneCost)) return false;
 
-        inv.TrySpendGold(step.goldCost);
-        inv.TrySpend(step.resourceCost, step.resourceAmount);
-        upgradeLevel++;
-        RecalcStats();
-        ApplyRadiusVisual();
+        inv.TrySpend(ResourceKind.Stone, UpgradeStoneCost);
+        SetUpgraded(true);
         return true;
     }
 
-    public bool TryGetNextUpgrade(out HearthConfig.UpgradeStep step)
+    // 세이브 복원용 (세이브 시스템 도입 시 이 값을 저장/복원)
+    public void LoadUpgraded(bool value) => SetUpgraded(value);
+
+    private void SetUpgraded(bool value)
     {
-        if (CanUpgrade) { step = config.upgrades[upgradeLevel]; return true; }
-        step = default;
-        return false;
+        isUpgraded = value;
+        RecalcStats();
+        ApplyUpgradeVisual();
+    }
+
+    private void ApplyUpgradeVisual()
+    {
+        if (upgradedVisual != null)
+        {
+            upgradedVisual.SetActive(isUpgraded);
+            return;
+        }
+
+        // 지정 비주얼이 없으면 색·크기로 구분
+        Renderer[] rs = GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < rs.Length; i++)
+        {
+            if (meltedGroundVisual != null && rs[i].transform.IsChildOf(meltedGroundVisual)) continue;
+            Material m = rs[i].material;
+            Color c = isUpgraded ? upgradedTint : Color.white;
+            if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c);
+            if (m.HasProperty("_Color")) m.SetColor("_Color", c);
+        }
+
+        if (!Mathf.Approximately(upgradedScale, 1f))
+        {
+            float k = isUpgraded ? upgradedScale : 1f;
+            transform.localScale = Vector3.one * k;
+        }
     }
 
     private void RecalcStats()
     {
-        float radius = config != null ? config.baseWarmthRadius : baseWarmthRadius;
-        float cap = config != null ? config.baseFuelCapacity : baseFuelCapacity;
+        currentRadius = config != null ? config.baseWarmthRadius : baseWarmthRadius;
+        currentCapacity = config != null ? config.baseFuelCapacity : baseFuelCapacity;
+
         float burn = config != null ? config.fuelBurnPerSec : fuelBurnPerSec;
-
-        if (config != null && config.upgrades != null)
-        {
-            int n = Mathf.Min(upgradeLevel, config.upgrades.Length);
-            for (int i = 0; i < n; i++)
-            {
-                radius += config.upgrades[i].addedWarmthRadius;
-                cap += config.upgrades[i].addedFuelCapacity;
-            }
-        }
-
-        currentRadius = radius;
-        currentCapacity = cap;
+        if (isUpgraded) burn *= Mathf.Max(0.01f, upgradedBurnMultiplier);
         currentBurn = burn;
     }
 

@@ -1,12 +1,14 @@
 using UnityEngine;
 
 // 격자 인벤토리 UI. 키보드 전용:
-//  Tab 열기/닫기, 방향키 커서 이동, 숫자키 1~5 = 선택한 칸의 아이템을 그 퀵슬롯에 배정,
+//  Tab 열기/닫기, 방향키 커서 이동,
+//  숫자키 1~5 = 선택한 장비를 그 핫바 슬롯에 배정, F = 선택한 음식을 퀵푸드로 지정,
 //  Q/ESC 닫기. 임시 그래픽(OnGUI).
 public class InventoryGridUI : MonoBehaviour
 {
     [SerializeField] private Inventory inventory;   // 비우면 씬에서 찾음
-    [SerializeField] private QuickSlotBar quickBar; // 비우면 씬에서 찾음
+    [SerializeField] private Hotbar hotbar;        // 비우면 씬에서 찾음
+    [SerializeField] private QuickFood quickFood;  // 비우면 씬에서 찾음
     [SerializeField] private KeyCode toggleKey = KeyCode.Tab;
     [SerializeField] private int columns = 5;
 
@@ -31,7 +33,8 @@ public class InventoryGridUI : MonoBehaviour
     private void Start()
     {
         if (inventory == null) inventory = FindObjectOfType<Inventory>();
-        if (quickBar == null) quickBar = FindObjectOfType<QuickSlotBar>();
+        if (hotbar == null) hotbar = FindObjectOfType<Hotbar>();
+        if (quickFood == null) quickFood = FindObjectOfType<QuickFood>();
     }
 
     private void Update()
@@ -54,20 +57,29 @@ public class InventoryGridUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.DownArrow)) cursor = Mathf.Min(n - 1, cursor + columns);
         if (Input.GetKeyDown(KeyCode.UpArrow)) cursor = Mathf.Max(0, cursor - columns);
 
-        // 숫자키: 선택한 칸의 아이템을 퀵슬롯에 배정 (도구·음식만)
-        for (int i = 0; i < QuickSlotBar.SlotCount; i++)
+        Inventory.Slot slot = inventory.Slots[cursor];
+
+        // 숫자키: 선택한 장비를 핫바에 배정
+        for (int i = 0; i < Hotbar.SlotCount; i++)
         {
             if (!Input.GetKeyDown(KeyCode.Alpha1 + i)) continue;
 
-            Inventory.Slot s = inventory.Slots[cursor];
-            if (s.IsEmpty) { Debug.Log("[격자] 빈 칸 — 배정할 것 없음"); break; }
-            if (!s.def.IsTool && !s.def.IsFood && !s.def.IsPlaceable)
+            if (slot.IsEmpty) { Debug.Log("[격자] 빈 칸 — 배정할 것 없음"); break; }
+            if (!slot.def.IsEquipment)
             {
-                Debug.Log("[격자] 퀵슬롯에는 도구·음식·설치물만 배정");
+                Debug.Log("[격자] 핫바에는 장비만 올릴 수 있음 (음식은 F, 설치물은 건설 모드)");
                 break;
             }
-            if (quickBar != null) quickBar.Assign(i, s.def);
+            if (hotbar != null) hotbar.Assign(i, slot.def);
             break;
+        }
+
+        // F: 선택한 음식을 퀵푸드로 지정
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            if (slot.IsEmpty) Debug.Log("[격자] 빈 칸 — 지정할 것 없음");
+            else if (quickFood == null) Debug.LogWarning("[격자] QuickFood가 씬에 없음");
+            else if (!quickFood.Assign(slot.def)) Debug.Log("[격자] 음식만 F 슬롯에 지정할 수 있음");
         }
     }
 
@@ -98,12 +110,14 @@ public class InventoryGridUI : MonoBehaviour
 
         GUI.Box(new Rect(px, py, panelW, panelH), GUIContent.none);
 
-        string over = inventory.IsOverweight
-            ? $"  — 초과 (속도 x{inventory.SpeedMultiplier:0.00})" : "";
+        int used = 0;
+        for (int i = 0; i < inventory.SlotCount; i++)
+            if (!inventory.Slots[i].IsEmpty) used++;
+
         GUI.Label(new Rect(px + 16f, py + 8f, panelW - 32f, 22f),
-            $"무게 {inventory.CurrentWeight:0.#}/{inventory.WeightLimit:0.#}{over}   골드 {inventory.Gold}", headStyle);
+            $"칸 {used}/{inventory.SlotCount}   골드 {inventory.Gold}", headStyle);
         GUI.Label(new Rect(px + 16f, py + panelH - 26f, panelW - 32f, 22f),
-            "방향키 이동 · 숫자키 1~5 퀵슬롯 배정 · Q/ESC 닫기", headStyle);
+            "방향키 이동 · 숫자키 1~5 핫바 배정 · F 퀵푸드 지정 · Q/ESC 닫기", headStyle);
 
         float gx = px + 16f;
         float gy = py + 34f;

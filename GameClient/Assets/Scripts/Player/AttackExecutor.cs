@@ -1,12 +1,20 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 // 공격 실행기. 무기가 늘어도 이 컴포넌트는 그대로다.
-// 사용 도구 = 퀵슬롯에서 선택 중이고 보유한 도구. 판정 방식은 그 도구의 AttackPattern이 결정.
+// 사용 도구 = 핫바에서 손에 든 장비. 판정 방식은 그 장비의 AttackPattern이 결정.
+// 스페이스 = "손에 든 것 실행" 하나만 의미한다.
 // 입력(키보드 전용): 공격 키 = 바라보는 방향 스윙, 누른 채로 = 쿨다운마다 자동 스윙.
 //       근접 자동 보정 — 정면 일정 각도 안에 대상이 있으면 그쪽으로 조준을 당겨준다.
 public class AttackExecutor : MonoBehaviour
 {
+    [Header("타이밍")]
+    [Tooltip("입력 → 판정까지의 예비동작 시간")]
+    [SerializeField] private float windupSeconds = 0.05f;
+    [Tooltip("판정 후 복귀 시간(연출용)")]
+    [SerializeField] private float recoverySeconds = 0.15f;
+
     [Header("입력")]
     [SerializeField] private KeyCode attackKey = KeyCode.Space;
     [Tooltip("스윙 간격(초). 홀드 시 이 간격으로 자동 스윙")]
@@ -17,7 +25,7 @@ public class AttackExecutor : MonoBehaviour
     [Range(0f, 180f)]
     [SerializeField] private float snapAngle = 70f;
 
-    [SerializeField] private QuickSlotBar quickBar; // 비우면 씬에서 찾음
+    [SerializeField] private Hotbar hotbar;         // 비우면 씬에서 찾음
     [SerializeField] private Inventory inventory;   // 비우면 씬에서 찾음
 
     [Header("디버그")]
@@ -25,20 +33,22 @@ public class AttackExecutor : MonoBehaviour
 
     private float nextTime;
 
-    // 공격 동작이 나갈 때마다 발생(대상 유무와 무관) — 연출이 구독
+    // 입력 순간(예비동작 시작) — 기울기·도구 스윙이 여기서 시작
+    public event Action OnSwingStart;
+    // 판정 순간 — 궤적 표시가 여기서 뜬다(판정과 시각이 일치)
+    public event Action<AttackPattern, Vector3> OnSwingHit;
+    // 복귀 완료
+    public event Action OnSwingEnd;
+
+    // 하위 호환: 입력 순간과 동일
     public event Action OnAttack;
 
-    // 퀵슬롯에서 선택 중이고 실제로 보유한 도구. 없으면 null.
-    public ItemDef EquippedTool
-    {
-        get
-        {
-            if (quickBar == null || inventory == null) return null;
-            ItemDef def = quickBar.SelectedDef;
-            if (def == null || !def.IsTool) return null;
-            return inventory.Has(def.kind, 1) ? def : null;
-        }
-    }
+    public float WindupSeconds => Mathf.Max(0f, windupSeconds);
+    public float RecoverySeconds => Mathf.Max(0f, recoverySeconds);
+    public bool IsSwinging { get; private set; }
+
+    // 손에 든 장비. 없으면 null(빈손).
+    public ItemDef EquippedTool => hotbar != null ? hotbar.EquippedItem : null;
 
     public AttackPattern CurrentPattern
     {
@@ -57,10 +67,10 @@ public class AttackExecutor : MonoBehaviour
 
     private void Start()
     {
-        if (quickBar == null) quickBar = FindObjectOfType<QuickSlotBar>();
+        if (hotbar == null) hotbar = FindObjectOfType<Hotbar>();
         if (inventory == null) inventory = FindObjectOfType<Inventory>();
 
-        if (quickBar == null) Debug.LogWarning("[공격] QuickSlotBar를 찾지 못함 — 도구 선택 불가");
+        if (hotbar == null) Debug.LogWarning("[공격] Hotbar를 찾지 못함 — 장비 사용 불가");
         if (inventory == null) Debug.LogWarning("[공격] Inventory를 찾지 못함");
     }
 
@@ -165,18 +175,29 @@ public class AttackExecutor : MonoBehaviour
 
     private void DoAttack()
     {
+        if (IsSwinging) return;
+        StartCoroutine(SwingRoutine());
+    }
+
+    private IEnumerator SwingRoutine()
+    {
+        IsSwinging = true;
+
         ItemDef tool = EquippedTool;
         AttackPattern pattern = tool != null ? tool.attackPattern : null;
 
-        OnAttack?.Invoke(); // 대상이 없어도 동작은 나간다(허공 휘두름)
+        // 조준 방향은 입력 순간에 고정 (판정과 연출이 같은 방향을 쓰도록)
+        Vector3 aim = AimDirection;
+
+        OnSwingStart?.Invoke();
+        OnAttack?.Invoke();
 
         if (verboseLog)
         {
             string toolText;
-            if (quickBar == null) toolText = "퀵슬롯 없음";
-            else if (quickBar.SelectedDef == null) toolText = $"{quickBar.Selected + 1}번 슬롯 비어 있음";
-            else if (!quickBar.SelectedDef.IsTool) toolText = $"{quickBar.SelectedDef.displayName}(도구 아님)";
-            else if (tool == null) toolText = $"{quickBar.SelectedDef.displayName}(보유 없음)";
+            if (hotbar == null) toolText = "핫바 없음";
+            else if (hotbar.GetAssigned(hotbar.EquippedIndex) == null) toolText = $"{hotbar.EquippedIndex + 1}번 슬롯 비어 있음(빈손)";
+            else if (tool == null) toolText = $"{hotbar.GetAssigned(hotbar.EquippedIndex).displayName}(보유 없음)";
             else if (pattern == null) toolText = $"{tool.displayName}(Attack Pattern 미지정)";
             else toolText = $"{tool.displayName} 위력 {tool.hitPower} / {pattern.name}";
 
@@ -184,9 +205,28 @@ public class AttackExecutor : MonoBehaviour
             Debug.Log($"[공격] 도구: {toolText} / 대상: {targetText}");
         }
 
-        if (pattern == null) return;
+        // 예비동작
+        if (WindupSeconds > 0f) yield return new WaitForSeconds(WindupSeconds);
 
-        pattern.Execute(BuildContext(Mathf.Max(1, tool.hitPower)));
+        // 판정 + 궤적(같은 프레임)
+        if (pattern != null)
+        {
+            AttackContext ctx = new AttackContext
+            {
+                attacker = gameObject,
+                origin = transform.position,
+                forward = aim,
+                power = Mathf.Max(1, tool.hitPower),
+            };
+            pattern.Execute(ctx);
+        }
+        OnSwingHit?.Invoke(pattern, aim);
+
+        // 복귀
+        if (RecoverySeconds > 0f) yield return new WaitForSeconds(RecoverySeconds);
+
+        OnSwingEnd?.Invoke();
+        IsSwinging = false;
     }
 
     private void OnDrawGizmosSelected()

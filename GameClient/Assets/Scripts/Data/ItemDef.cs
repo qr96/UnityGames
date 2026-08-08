@@ -5,7 +5,7 @@ public enum ItemCategory { Resource, Tool, Food }
 // 도구 종류. 같은 종류 안에서 위력이 높은 것이 자동으로 쓰인다(도구 사다리).
 public enum ToolType { None = 0, Axe = 1 }
 
-// 아이템 1종의 정의. 칸별 스택 상한 / 단위 무게 / 분류 / 음식 회복량.
+// 아이템 1종의 정의. 칸별 스택 상한 / 분류 / 음식 회복량 / 연료·도구·설치물 속성.
 [CreateAssetMenu(fileName = "ItemDef", menuName = "혹한/Item Def")]
 public class ItemDef : ScriptableObject
 {
@@ -16,10 +16,6 @@ public class ItemDef : ScriptableObject
     [Header("칸")]
     [Tooltip("한 칸에 쌓이는 최대 수량. 도구는 1")]
     public int stackLimit = 99;
-
-    [Header("무게")]
-    [Tooltip("1개당 무게")]
-    public float weightPerUnit = 1f;
 
     [Header("도구 (category=Tool일 때)")]
     public ToolType toolType = ToolType.None;
@@ -43,6 +39,8 @@ public class ItemDef : ScriptableObject
     public float hungerRestore = 25f;
 
     public bool IsFuel => fuelValue > 0f;
+    // 핫바에 올릴 수 있는 것 = 장비(도끼·곡괭이·창·활·횃불)
+    public bool IsEquipment => category == ItemCategory.Tool;
     public bool IsPlaceable => placementPrefab != null;
     public bool IsTool => category == ItemCategory.Tool;
     public bool IsFood => category == ItemCategory.Food;

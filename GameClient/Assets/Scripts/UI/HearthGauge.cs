@@ -77,11 +77,12 @@ public class HearthGauge : MonoBehaviour
 
             // 라벨
             string text;
-            if (!h.IsLit) text = "꺼짐";
+            if (!h.IsLit) text = $"{h.DisplayName} 꺼짐";
             else if (readout == Readout.RemainingTime)
                 text = HearthInteractable.FormatTime(h.RemainingSeconds);
             else
-                text = $"연료 {Mathf.FloorToInt(h.Fuel)}/{Mathf.FloorToInt(h.FuelCapacity)}";
+                text = (h.IsUpgraded ? "강화 " : "") +
+                       $"연료 {Mathf.FloorToInt(h.Fuel)}/{Mathf.FloorToInt(h.FuelCapacity)}";
             GUI.Label(new Rect(x, y + barHeight, barWidth, 18f), text, labelStyle);
         }
     }

@@ -8,18 +8,21 @@ using UnityEngine;
 // 맵 생성기 (에디터 전용). Assets/Editor/ 폴더에 넣을 것.
 // 메뉴: Tools > Map Generator
 //
-// "혹한 정착지 — 맵 파일 규격" 준수 (blocked 삭제판):
+// "혹한 정착지 — 맵 파일 규격" 준수 (blocked 삭제판) + 군락형 자원 배치:
+//  - 자원 금지 구역: 모닥불 빛 반경 × 배율(기본 1.75) 안쪽엔 잔가지 3~5개만.
+//    나무·돌·식량은 스폰하지 않음
+//  - 총량: 기존 균등 산포를 시뮬레이션해 개수를 추정한 뒤 그 25%만 배치
+//  - 군락 배치: 나무/돌/식량 군락을 캠프 기준 서로 다른 방향(부채꼴 분할)에 생성
+//  - 거리 비례 품질: 캠프에서 먼 군락일수록 크고 알차게.
+//    나무 군락은 가까우면 잔가지 위주, 멀면 나무(통나무) 위주로 구성이 바뀜
+//    ※ 카탈로그에 '통나무' 등 상위 자원 id가 없어 tree/stick 구성비와 밀도로 표현.
+//      log 같은 id가 추가되면 PlaceOneCluster의 id 결정부에 끼우면 됨
 //  - 벽 = 층 차이(절벽) 또는 배치물. 바위 지대는 "층 +2 돌출 지형(crag)"으로 생성
 //  - 배치물이 놓인 칸은 통행 불가(규칙 4) → 배치물까지 고려한 최종 통행 검사 수행,
 //    배치물이 길목을 막으면 자동으로 걷어냄(unpinch)
-//  - 경사로는 낮은 쪽 칸에 표시, 한 단 높은 이웃이 정확히 한 방향(대각선 없음)
-//  - 경사 완급: 같은 층 경사로를 한 줄로 이어 칠하면 완만해짐 (Ramp Length 1=45°, 2=27°, 3=18°)
-//    ※ 규격 체크리스트("모든 / 칸에 +1 이웃")와 완만 경사로 규칙이 상충함 — 여기선
-//      "체인 중 한 칸 이상이 +1 칸에 닿으면 유효"로 해석. 규격 확정 전까지 기본값 1 권장.
+//  - 경사로는 낮은 쪽 칸에 표시, 완만 경사(Ramp Length)는 체인 단위 해석
 //  - hearth 1개(시작) + hearth_site 1개(멀리, 도달 가능 보장)
-//  - 시작 지점 주변에 stick/stone 배치 (도끼 제작용)
 //  - 고립 구역 없음: 도달 불가능한 열린 칸은 층을 올려 바위 덩어리로 봉인
-//  - 생성 후 규격의 검증 체크리스트를 코드로 자체 검사, 콘솔에 결과 출력
 public class MapGeneratorWindow : EditorWindow
 {
     // ---- 파라미터 ----
@@ -38,19 +41,34 @@ public class MapGeneratorWindow : EditorWindow
     float cragNoiseScale = 0.09f;
     float cragThreshold = 0.78f;      // 이 값 이상이면 바위 돌출 지형(층 +2)
 
+    // 자원 금지 구역 (규칙 1)
+    float hearthLightRadius = 4f;     // 모닥불 빛 반경(칸). 게임 쪽 값과 맞출 것
+    float exclusionFactor = 1.75f;    // 금지 구역 R = 빛 반경 × 이 값 (1.5~2 권장)
+    int innerSticksMin = 3;           // 금지 구역 안 잔가지 수
+    int innerSticksMax = 5;
+
+    // 총량 (규칙 2): 기존 균등 산포 추정치 × 비율
+    float budgetRatio = 0.25f;
+    // 기존 산포 밀도 파라미터 — 이제 총량 산정 기준으로만 쓰임
     float treeNoiseScale = 0.07f;
-    float treeThreshold = 0.55f;      // 숲 판정
+    float treeThreshold = 0.55f;
     float treeChance = 0.45f;
-    float berryChance = 0.03f;        // 숲 칸에서 나무 대신 열매
+    float berryChance = 0.03f;
     float stoneChance = 0.02f;
     float stickChance = 0.02f;
-    int minSpacing = 2;               // placement 간 최소 간격(칸). 1 이상이어야 길이 안 막힘
+    int minSpacing = 2;
 
-    int startClearRadius = 5;
-    int starterSticks = 3;            // 시작 지점 근처 보장 수량
-    int starterStones = 2;
+    // 군락 (규칙 3, 4)
+    int treeClusterCount = 3;
+    int stoneClusterCount = 2;
+    int berryClusterCount = 2;
+    float clusterRadiusMin = 3f;      // 가까운(빈약한) 군락 반경
+    float clusterRadiusMax = 6f;      // 먼(풍부한) 군락 반경
+
+    int startClearRadius = 5;         // 시작 지점 지형 평탄화 반경
 
     string outputPath = "Assets/Maps/generated_map.json";
+    Vector2 scrollPos;
 
     // ---- 내부 버퍼 ----
     int[,] levels;
@@ -68,11 +86,26 @@ public class MapGeneratorWindow : EditorWindow
     static readonly HashSet<string> RemovableIds = new HashSet<string>
     { "tree", "stone", "stick", "berry" };  // 길막 해소 시 걷어내도 되는 것들
 
+    class ClusterSpec
+    {
+        public string type;           // "tree" / "stone" / "berry"
+        public float dNorm;           // 0 = 가장 가까운 군락, 1 = 가장 먼 군락
+        public int budget;            // 이 군락에 배치할 개수
+        public float angleMin, angleMax; // 배정된 부채꼴(도)
+    }
+
     [MenuItem("Tools/Map Generator")]
     static void Open() => GetWindow<MapGeneratorWindow>("Map Generator");
 
     void OnGUI()
     {
+        // 버튼은 스크롤 밖 상단 고정 — 파라미터가 많아도 항상 보임
+        if (GUILayout.Button("Generate", GUILayout.Height(32)))
+            Generate();
+        EditorGUILayout.Space();
+
+        scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
         EditorGUILayout.LabelField("기본", EditorStyles.boldLabel);
         seed = EditorGUILayout.IntField("Seed", seed);
         width = EditorGUILayout.IntField("Width", width);
@@ -94,24 +127,38 @@ public class MapGeneratorWindow : EditorWindow
         cragThreshold = EditorGUILayout.Slider("Threshold", cragThreshold, 0.5f, 0.95f);
 
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField("산포 (placements)", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("자원 금지 구역", EditorStyles.boldLabel);
+        hearthLightRadius = EditorGUILayout.Slider("Hearth Light Radius", hearthLightRadius, 2f, 10f);
+        exclusionFactor = EditorGUILayout.Slider("Exclusion Factor", exclusionFactor, 1.5f, 2f);
+        EditorGUILayout.LabelField(" ", $"→ 금지 구역 반경 R = {hearthLightRadius * exclusionFactor:0.0}칸");
+        innerSticksMin = EditorGUILayout.IntSlider("Inner Sticks Min", innerSticksMin, 1, 8);
+        innerSticksMax = EditorGUILayout.IntSlider("Inner Sticks Max", innerSticksMax, innerSticksMin, 10);
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("자원 총량", EditorStyles.boldLabel);
+        budgetRatio = EditorGUILayout.Slider("Budget Ratio", budgetRatio, 0.05f, 1f);
+        EditorGUILayout.HelpBox("기존 균등 산포로 뿌렸을 때의 추정 개수 × 이 비율이 총량. 아래 밀도 값들은 그 추정의 기준.", MessageType.None);
         treeNoiseScale = EditorGUILayout.Slider("Forest Noise Scale", treeNoiseScale, 0.02f, 0.2f);
         treeThreshold = EditorGUILayout.Slider("Forest Threshold", treeThreshold, 0.3f, 0.8f);
         treeChance = EditorGUILayout.Slider("Tree Chance", treeChance, 0.05f, 1f);
         berryChance = EditorGUILayout.Slider("Berry Chance", berryChance, 0f, 0.2f);
         stoneChance = EditorGUILayout.Slider("Stone Chance", stoneChance, 0f, 0.1f);
         stickChance = EditorGUILayout.Slider("Stick Chance", stickChance, 0f, 0.1f);
-        minSpacing = EditorGUILayout.IntSlider("Min Spacing", minSpacing, 1, 4);
+        minSpacing = EditorGUILayout.IntSlider("Min Spacing (산정용)", minSpacing, 1, 4);
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("군락", EditorStyles.boldLabel);
+        treeClusterCount = EditorGUILayout.IntSlider("Tree Clusters", treeClusterCount, 1, 5);
+        stoneClusterCount = EditorGUILayout.IntSlider("Stone Clusters", stoneClusterCount, 1, 4);
+        berryClusterCount = EditorGUILayout.IntSlider("Berry Clusters", berryClusterCount, 1, 4);
+        clusterRadiusMin = EditorGUILayout.Slider("Cluster Radius Min", clusterRadiusMin, 2f, 6f);
+        clusterRadiusMax = EditorGUILayout.Slider("Cluster Radius Max", clusterRadiusMax, clusterRadiusMin, 10f);
 
         EditorGUILayout.Space();
         startClearRadius = EditorGUILayout.IntSlider("Start Clear Radius", startClearRadius, 2, 10);
-        starterSticks = EditorGUILayout.IntSlider("Starter Sticks", starterSticks, 1, 6);
-        starterStones = EditorGUILayout.IntSlider("Starter Stones", starterStones, 1, 6);
         outputPath = EditorGUILayout.TextField("Output Path", outputPath);
 
-        EditorGUILayout.Space();
-        if (GUILayout.Button("Generate", GUILayout.Height(32)))
-            Generate();
+        EditorGUILayout.EndScrollView();
     }
 
     // =========================================================
@@ -141,8 +188,8 @@ public class MapGeneratorWindow : EditorWindow
         int[,] dist = ComputeReachability(start);        // 지형 확정 후 재계산
 
         AddPlacement("hearth", start.x, start.y, 0f);
-        PlaceStarterResources(start);
-        ScatterVegetation(start);
+        PlaceInnerSticks(start);                         // 규칙 1: 금지 구역 안 잔가지만
+        PlaceResourceClusters(start);                    // 규칙 2~4: 군락 배치
         PlaceHearthSite(start, dist);
 
         int unpinched = UnpinchPlacements(start);        // 배치물이 막은 길목 해소
@@ -151,6 +198,8 @@ public class MapGeneratorWindow : EditorWindow
         WriteJson();
         Debug.Log($"[MapGenerator] {(ok ? "완료" : "완료(경고 있음)")}: {outputPath} | placements {placements.Count}개 | 고립 봉인 {sealedCells}칸 | 길막 해소 {unpinched}개 | seed {seed}");
     }
+
+    float ExclusionRadius => hearthLightRadius * exclusionFactor;
 
     // ---- 층 ----
     void GenerateLevels()
@@ -186,7 +235,6 @@ public class MapGeneratorWindow : EditorWindow
     // ---- 경사로 (규격: 낮은 쪽 칸에 표시) ----
     void CarveRamps()
     {
-        // 낮은 층 고원부터 처리해야 2층까지 "한 단씩 오르는 사다리"가 자연히 이어짐
         var regions = FindRegions();
         regions.Sort((a, b) => a.level.CompareTo(b.level));
 
@@ -195,7 +243,6 @@ public class MapGeneratorWindow : EditorWindow
             if (region.level == 0) continue;
             int L = region.level;
 
-            // 후보 = 이 고원과 인접한 한 층 아래(L-1) 칸
             var candidates = new List<Vector2Int>();
             var seen = new HashSet<Vector2Int>();
             foreach (var c in region.cells)
@@ -210,7 +257,6 @@ public class MapGeneratorWindow : EditorWindow
 
             if (candidates.Count == 0)
             {
-                // 경사로를 놓을 자리가 없는 고립 고원 → 한 층 낮춰서 포기
                 foreach (var c in region.cells)
                     levels[c.x, c.y] = L - 1;
                 Debug.LogWarning($"[MapGenerator] 경사로 후보가 없는 고원(level {L}, {region.cells.Count}칸)을 평탄화했습니다.");
@@ -230,9 +276,6 @@ public class MapGeneratorWindow : EditorWindow
         }
     }
 
-    // 규격의 유효 경사로 + 생성기 자체 기준:
-    //  - 한 단 높은 이웃이 정확히 1방향 (경사 방향 유일, 대각선 없음)
-    //  - 그 반대쪽 이웃은 같은 층 (진입로가 걸어서 이어짐)
     bool IsGoodRampCell(Vector2Int c, out int upDir)
     {
         int lv = levels[c.x, c.y];
@@ -248,10 +291,9 @@ public class MapGeneratorWindow : EditorWindow
         return InBounds(ox, oz) && levels[ox, oz] == lv;
     }
 
-    // 완만 경사: 머리 칸(+1 칸에 닿는 칸)에서 경사 반대 방향으로 rampLength만큼 이어 칠함
     void PaintRampChain(Vector2Int head)
     {
-        IsGoodRampCell(head, out int upDir); // 후보 검증을 통과한 칸이므로 방향 보장
+        IsGoodRampCell(head, out int upDir);
         ramps[head.x, head.y] = true;
         int lv = levels[head.x, head.y];
 
@@ -260,7 +302,6 @@ public class MapGeneratorWindow : EditorWindow
             int x = head.x - DX[upDir] * i, z = head.y - DZ[upDir] * i;
             if (!InBounds(x, z) || levels[x, z] != lv || ramps[x, z]) break;
 
-            // 꼬리 칸이 다른 고원에 닿으면 의도치 않은 경사면이 생기므로 중단
             bool touchesUp = false;
             for (int d = 0; d < 4; d++)
             {
@@ -273,8 +314,6 @@ public class MapGeneratorWindow : EditorWindow
         }
     }
 
-    // 무효 경사로 제거. 체인 단위 해석:
-    // 같은 층으로 이어진 경사로 묶음 중 어느 칸도 +1 칸에 닿지 않으면 묶음 전체 제거
     void SanitizeRamps()
     {
         foreach (var group in FindRampGroups())
@@ -283,7 +322,6 @@ public class MapGeneratorWindow : EditorWindow
                     ramps[c.x, c.y] = false;
     }
 
-    // 같은 층으로 인접한 경사로 칸 묶음(체인)들을 찾음
     List<List<Vector2Int>> FindRampGroups()
     {
         var groups = new List<List<Vector2Int>>();
@@ -335,14 +373,13 @@ public class MapGeneratorWindow : EditorWindow
         return false;
     }
 
-    // ---- 바위 돌출 지형 (구 blocked 대체) ----
-    // 층 +2 = 어떤 이웃에서도 경사로 없이는 못 오르는 절벽 덩어리
+    // ---- 바위 돌출 지형 ----
     void GenerateCrags()
     {
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
             {
-                if (ramps[x, z] || HasRampNeighbor(x, z)) continue; // 경사로 방향 모호해지는 것 방지
+                if (ramps[x, z] || HasRampNeighbor(x, z)) continue;
                 float v = Noise(x, z, cragNoiseScale, 2000f);
                 if (v >= cragThreshold)
                     levels[x, z] = Mathf.Min(9, levels[x, z] + 2);
@@ -415,14 +452,12 @@ public class MapGeneratorWindow : EditorWindow
         return dist;
     }
 
-    // 규격의 통행 규칙 1~3 (층/경사로)
     bool Passable(int x1, int z1, int x2, int z2)
     {
         int diff = Mathf.Abs(levels[x2, z2] - levels[x1, z1]);
         return diff == 0 || (diff == 1 && (ramps[x1, z1] || ramps[x2, z2]));
     }
 
-    // 고립 구역 금지: 도달 불가능한 열린 칸은 층을 올려 바위 덩어리로 봉인
     int SealUnreachable()
     {
         int count = 0;
@@ -437,32 +472,178 @@ public class MapGeneratorWindow : EditorWindow
         return count;
     }
 
-    // ---- 배치 ----
-    // 시작 지점 근처 stick/stone 보장 (도끼 제작용)
-    void PlaceStarterResources(Vector2Int start)
+    // ---- 규칙 1: 금지 구역 안 잔가지만 ----
+    void PlaceInnerSticks(Vector2Int start)
     {
-        PlaceNear(start, "stick", starterSticks, 2, startClearRadius);
-        PlaceNear(start, "stone", starterStones, 2, startClearRadius);
-    }
-
-    void PlaceNear(Vector2Int center, string id, int count, int rMin, int rMax)
-    {
+        int target = rng.Next(innerSticksMin, innerSticksMax + 1);
+        float R = ExclusionRadius;
         int placed = 0, guard = 0;
-        while (placed < count && guard++ < 500)
+        while (placed < target && guard++ < 500)
         {
-            int x = center.x + rng.Next(-rMax, rMax + 1);
-            int z = center.y + rng.Next(-rMax, rMax + 1);
-            int sq = (new Vector2Int(x, z) - center).sqrMagnitude;
-            if (!InBounds(x, z) || sq < rMin * rMin || sq > rMax * rMax) continue;
+            int x = start.x + rng.Next(-(int)R, (int)R + 1);
+            int z = start.y + rng.Next(-(int)R, (int)R + 1);
+            int sq = (new Vector2Int(x, z) - start).sqrMagnitude;
+            if (sq < 2 * 2 || sq > R * R) continue;   // 화로 바로 옆은 피하고 R 안쪽만
             if (!CanPlaceAt(x, z)) continue;
-            AddPlacement(id, x, z, rng.Next(4) * 90f);
+            if (HasNeighborPlacement(x, z, 1)) continue;
+            AddPlacement("stick", x, z, rng.Next(4) * 90f);
             placed++;
         }
-        if (placed < count)
-            Debug.LogWarning($"[MapGenerator] 시작 지점 근처 {id} {count}개 중 {placed}개만 배치됨.");
+        if (placed < innerSticksMin)
+            Debug.LogWarning($"[MapGenerator] 금지 구역 안 잔가지 {target}개 중 {placed}개만 배치됨.");
     }
 
-    // 배치물은 칸을 막으므로(규칙 4) 경사로와 그 옆칸은 피함 — 통로 입구를 막지 않도록
+    // ---- 규칙 2~4: 군락 배치 ----
+    void PlaceResourceClusters(Vector2Int start)
+    {
+        // 규칙 2: 기존 균등 산포를 드라이런으로 시뮬레이션해 총량 추정 → 25%
+        int legacy = EstimateLegacyCount();
+        int totalBudget = Mathf.Max(1, Mathf.RoundToInt(legacy * budgetRatio));
+        Debug.Log($"[MapGenerator] 기존 산포 추정 {legacy}개 → 총량 {totalBudget}개 (×{budgetRatio:0.00})");
+
+        // 유형별 예산 (기존 산포의 대략적 비율을 따름: 나무 위주)
+        int treeBudget = Mathf.RoundToInt(totalBudget * 0.55f);
+        int stoneBudget = Mathf.RoundToInt(totalBudget * 0.25f);
+        int berryBudget = Mathf.Max(0, totalBudget - treeBudget - stoneBudget);
+
+        var specs = new List<ClusterSpec>();
+        AddClusterSpecs(specs, "tree", treeClusterCount, treeBudget);
+        AddClusterSpecs(specs, "stone", stoneClusterCount, stoneBudget);
+        AddClusterSpecs(specs, "berry", berryClusterCount, berryBudget);
+
+        // 규칙 3: 부채꼴 분할로 방향 겹침 방지 — 군락 수만큼 360°를 나누고 무작위 배정
+        Shuffle(specs);
+        float rot = (float)(rng.NextDouble() * 360.0);
+        float sector = 360f / specs.Count;
+        for (int i = 0; i < specs.Count; i++)
+        {
+            specs[i].angleMin = rot + i * sector + sector * 0.15f; // 부채꼴 경계에 여유
+            specs[i].angleMax = rot + (i + 1) * sector - sector * 0.15f;
+        }
+
+        // 거리 범위: 금지 구역 밖 ~ 도달 가능한 가장 먼 곳
+        float minDist = ExclusionRadius + clusterRadiusMax + 1f;
+        float maxDist = minDist + 5f;
+        for (int z = 0; z < depth; z++)
+            for (int x = 0; x < width; x++)
+                if (reachable[x, z])
+                    maxDist = Mathf.Max(maxDist, Vector2.Distance(new Vector2(x, z), new Vector2(start.x, start.y)));
+
+        foreach (var spec in specs)
+            PlaceOneCluster(start, spec, minDist, maxDist);
+    }
+
+    // 규칙 4: 먼 군락일수록 예산(양)을 더 받음
+    void AddClusterSpecs(List<ClusterSpec> specs, string type, int count, int typeBudget)
+    {
+        var weights = new float[count];
+        float sum = 0f;
+        for (int i = 0; i < count; i++)
+        {
+            float dNorm = count == 1 ? 0.6f : (float)i / (count - 1);
+            weights[i] = 0.7f + 0.6f * dNorm;   // 먼 군락이 약 2배까지 풍부
+            sum += weights[i];
+        }
+        for (int i = 0; i < count; i++)
+        {
+            float dNorm = count == 1 ? 0.6f : (float)i / (count - 1);
+            specs.Add(new ClusterSpec
+            {
+                type = type,
+                dNorm = dNorm,
+                budget = Mathf.Max(1, Mathf.RoundToInt(typeBudget * weights[i] / sum))
+            });
+        }
+    }
+
+    void PlaceOneCluster(Vector2Int start, ClusterSpec spec, float minDist, float maxDist)
+    {
+        // 목표 거리: dNorm에 비례. 부채꼴 안에서 도달 가능한 중심 칸 탐색
+        float target = Mathf.Lerp(minDist, maxDist, Mathf.Lerp(0.05f, 0.95f, spec.dNorm));
+        Vector2Int center = default;
+        bool found = false;
+
+        for (int attempt = 0; attempt < 300 && !found; attempt++)
+        {
+            float ang = Mathf.Lerp(spec.angleMin, spec.angleMax, (float)rng.NextDouble()) * Mathf.Deg2Rad;
+            float d = target * (0.85f + 0.3f * (float)rng.NextDouble());
+            d = Mathf.Clamp(d, minDist, maxDist);
+            int x = start.x + Mathf.RoundToInt(Mathf.Cos(ang) * d);
+            int z = start.y + Mathf.RoundToInt(Mathf.Sin(ang) * d);
+            if (!InBounds(x, z) || !reachable[x, z]) continue;
+            center = new Vector2Int(x, z);
+            found = true;
+        }
+        if (!found)
+        {
+            Debug.LogWarning($"[MapGenerator] {spec.type} 군락(dNorm {spec.dNorm:0.0}) 중심을 부채꼴 안에서 못 찾아 건너뜀. 시드/파라미터 조정 권장.");
+            return;
+        }
+
+        // 규칙 4: 먼 군락일수록 반경도 큼
+        float cr = Mathf.Lerp(clusterRadiusMin, clusterRadiusMax, spec.dNorm);
+        // 나무 군락 구성비: 가까우면 잔가지 위주(0.7), 멀면 나무(통나무) 100%
+        float stickRatio = spec.type == "tree" ? Mathf.Lerp(0.7f, 0f, spec.dNorm) : 0f;
+
+        var cells = new List<Vector2Int>();
+        int r = Mathf.CeilToInt(cr);
+        for (int z = center.y - r; z <= center.y + r; z++)
+            for (int x = center.x - r; x <= center.x + r; x++)
+            {
+                if (!InBounds(x, z)) continue;
+                if ((new Vector2Int(x, z) - center).sqrMagnitude > cr * cr) continue;
+                cells.Add(new Vector2Int(x, z));
+            }
+        Shuffle(cells);
+
+        float R = ExclusionRadius;
+        int placed = 0;
+        foreach (var c in cells)
+        {
+            if (placed >= spec.budget) break;
+            if ((c - start).sqrMagnitude <= R * R) continue;   // 금지 구역 침범 금지
+            if (!CanPlaceAt(c.x, c.y)) continue;
+            if (HasNeighborPlacement(c.x, c.y, 1)) continue;   // 군락 내 간격 1 (빽빽하되 길은 남김)
+
+            string id = spec.type == "tree"
+                ? (rng.NextDouble() < stickRatio ? "stick" : "tree")
+                : spec.type;
+            AddPlacement(id, c.x, c.y, rng.Next(4) * 90f);
+            placed++;
+        }
+        if (placed < spec.budget / 2)
+            Debug.LogWarning($"[MapGenerator] {spec.type} 군락({center.x},{center.y}): 예산 {spec.budget} 중 {placed}개만 배치됨 (지형 협소).");
+    }
+
+    // 기존 균등 산포를 그대로 드라이런해 개수를 추정 (실제 배치 없음, 별도 RNG)
+    int EstimateLegacyCount()
+    {
+        var rng2 = new System.Random(seed * 397 + 13);
+        var occ = new bool[width, depth];
+        int count = 0;
+
+        for (int z = 0; z < depth; z++)
+            for (int x = 0; x < width; x++)
+            {
+                if (!reachable[x, z] || ramps[x, z] || HasRampNeighbor(x, z)) continue;
+
+                bool near = false;
+                for (int zz = Mathf.Max(0, z - minSpacing); zz <= Mathf.Min(depth - 1, z + minSpacing) && !near; zz++)
+                    for (int xx = Mathf.Max(0, x - minSpacing); xx <= Mathf.Min(width - 1, x + minSpacing) && !near; xx++)
+                        if (occ[xx, zz]) near = true;
+                if (near) continue;
+
+                float forest = Noise(x, z, treeNoiseScale, 4000f);
+                double roll = rng2.NextDouble();
+                bool hit = forest >= treeThreshold
+                    ? roll < treeChance + berryChance
+                    : roll < stoneChance + stickChance;
+                if (hit) { occ[x, z] = true; count++; }
+            }
+        return count;
+    }
+
+    // 배치물은 칸을 막으므로(규칙 4) 경사로와 그 옆칸은 피함
     bool CanPlaceAt(int x, int z)
     {
         return InBounds(x, z)
@@ -470,30 +651,6 @@ public class MapGeneratorWindow : EditorWindow
             && !occupied[x, z]
             && !ramps[x, z]
             && !HasRampNeighbor(x, z);
-    }
-
-    void ScatterVegetation(Vector2Int start)
-    {
-        for (int z = 0; z < depth; z++)
-            for (int x = 0; x < width; x++)
-            {
-                if (!CanPlaceAt(x, z)) continue;
-                if ((new Vector2Int(x, z) - start).sqrMagnitude <= startClearRadius * startClearRadius) continue;
-                if (HasNeighborPlacement(x, z, minSpacing)) continue;
-
-                float forest = Noise(x, z, treeNoiseScale, 4000f);
-                double roll = rng.NextDouble();
-                if (forest >= treeThreshold)
-                {
-                    if (roll < treeChance) AddPlacement("tree", x, z, rng.Next(4) * 90f);
-                    else if (roll < treeChance + berryChance) AddPlacement("berry", x, z, 0f);
-                }
-                else
-                {
-                    if (roll < stoneChance) AddPlacement("stone", x, z, rng.Next(4) * 90f);
-                    else if (roll < stoneChance + stickChance) AddPlacement("stick", x, z, rng.Next(4) * 90f);
-                }
-            }
     }
 
     // 두 번째 화로 터: 시작점에서 먼(보행 거리 기준) 도달 가능 칸. 고지 우대.
@@ -510,16 +667,19 @@ public class MapGeneratorWindow : EditorWindow
             for (int x = 0; x < width; x++)
             {
                 if (!CanPlaceAt(x, z)) continue;
-                if (dist[x, z] < maxDist * 7 / 10) continue;              // 충분히 먼 곳만
-                int score = dist[x, z] + levels[x, z] * width;            // 고지 크게 우대
+                if (dist[x, z] < maxDist * 7 / 10) continue;
+                int score = dist[x, z] + levels[x, z] * width;
                 if (score > bestScore) { bestScore = score; best = new Vector2Int(x, z); }
             }
 
         if (bestScore == int.MinValue)
         {
-            Debug.LogWarning("[MapGenerator] hearth_site 후보를 못 찾았습니다. 시작점 근처에 강제 배치.");
-            PlaceNear(start, "hearth_site", 1, startClearRadius, startClearRadius * 2);
-            return;
+            Debug.LogWarning("[MapGenerator] hearth_site 후보를 못 찾았습니다. 임의 도달 가능 칸에 배치.");
+            for (int z = 0; z < depth && bestScore == int.MinValue; z++)
+                for (int x = 0; x < width && bestScore == int.MinValue; x++)
+                    if (CanPlaceAt(x, z) && dist[x, z] > (int)ExclusionRadius)
+                    { best = new Vector2Int(x, z); bestScore = 0; }
+            if (bestScore == int.MinValue) { Debug.LogWarning("[MapGenerator] hearth_site 배치 실패."); return; }
         }
         AddPlacement("hearth_site", best.x, best.y, 0f);
     }
@@ -539,8 +699,6 @@ public class MapGeneratorWindow : EditorWindow
     }
 
     // ---- 배치물 길막 해소 ----
-    // 규칙 4(배치물 칸 통행 불가) 기준으로 BFS를 다시 돌려, 배치물 때문에 생긴
-    // 고립 구역이 있으면 경계의 배치물을 하나씩 걷어내며 뚫는다.
     int UnpinchPlacements(Vector2Int start)
     {
         int removed = 0;
@@ -548,7 +706,6 @@ public class MapGeneratorWindow : EditorWindow
         {
             var vis = BfsWithPlacements(start);
 
-            // 고립: 배치물 없는 열린 칸인데 도달 불가
             var isolated = new List<Vector2Int>();
             for (int z = 0; z < depth; z++)
                 for (int x = 0; x < width; x++)
@@ -556,7 +713,6 @@ public class MapGeneratorWindow : EditorWindow
                         isolated.Add(new Vector2Int(x, z));
             if (isolated.Count == 0) return removed;
 
-            // 도달 영역과 고립 영역 양쪽에 접한 배치물 = 길막 주범 → 제거
             MapPlacement culprit = null;
             foreach (var p in placements)
             {
@@ -585,7 +741,6 @@ public class MapGeneratorWindow : EditorWindow
         return removed;
     }
 
-    // 통행 규칙 1~3 + 규칙 4(배치물 칸 차단). 시작 칸(hearth)은 예외적으로 허용.
     bool[,] BfsWithPlacements(Vector2Int start)
     {
         var vis = new bool[width, depth];
@@ -608,24 +763,22 @@ public class MapGeneratorWindow : EditorWindow
         return vis;
     }
 
-    // ---- 검증 (규격의 체크리스트) ----
+    // ---- 검증 ----
     bool Validate(Vector2Int start)
     {
         bool ok = true;
         void Fail(string msg) { ok = false; Debug.LogWarning("[MapGenerator/검증] " + msg); }
 
-        // 경사로: 체인 단위로 검사 — 묶음 중 한 칸 이상이 한 단 높은 칸에 닿아야 함
-        // (완만 경사로의 꼬리 칸은 +1 이웃이 없는 게 정상. 규격 체크리스트의 칸 단위
-        //  문구와 상충하므로 규격 담당과 해석 확정 필요)
+        // 경사로: 체인 단위 — 묶음 중 한 칸 이상이 한 단 높은 칸에 닿아야 함
         foreach (var group in FindRampGroups())
         {
             if (!GroupHasUpNeighbor(group))
                 Fail($"무효 경사로 체인 ({group[0].x},{group[0].y}) 외 {group.Count - 1}칸: 한 단 높은 이웃 없음");
             if (rampLength == 1 && group.Count > 1)
-                Fail($"경사로 체인 ({group[0].x},{group[0].y}): Ramp Length 1인데 {group.Count}칸이 붙어 있음 (서로 다른 경사로가 인접)");
+                Fail($"경사로 체인 ({group[0].x},{group[0].y}): Ramp Length 1인데 {group.Count}칸이 붙어 있음");
         }
 
-        // placements: id 유효, 범위 내, 칸 중복 없음(occupied로 보장되지만 재확인)
+        // placements: id 유효, 범위 내, 칸 중복 없음
         var counts = new Dictionary<string, int>();
         var cells = new HashSet<(int, int)>();
         foreach (var p in placements)
@@ -636,12 +789,34 @@ public class MapGeneratorWindow : EditorWindow
             counts[p.id] = counts.GetValueOrDefault(p.id) + 1;
         }
 
-        // hearth / hearth_site 각 1개
         if (counts.GetValueOrDefault("hearth") != 1) Fail("hearth가 정확히 1개가 아님");
         if (counts.GetValueOrDefault("hearth_site") != 1) Fail("hearth_site가 정확히 1개가 아님");
 
-        // 두 화로 사이 실제 보행 경로 (배치물 차단 포함).
-        // hearth_site 칸 자체도 배치물이라 막히므로 "그 칸 또는 인접 칸 도달"이면 통과
+        // 규칙 1: 금지 구역 검사 — 안쪽엔 잔가지만, 수량 3~5
+        float R = ExclusionRadius;
+        int innerSticks = 0;
+        foreach (var p in placements)
+        {
+            if (!Near(p, start, Mathf.FloorToInt(R))) continue;
+            if (p.id == "stick") innerSticks++;
+            else if (p.id == "tree" || p.id == "stone" || p.id == "berry")
+                Fail($"금지 구역(R={R:0.0}) 안에 자원 '{p.id}' ({p.x},{p.z})");
+        }
+        if (innerSticks < innerSticksMin || innerSticks > innerSticksMax)
+            Fail($"금지 구역 안 잔가지 {innerSticks}개 (목표 {innerSticksMin}~{innerSticksMax})");
+
+        // 돌 접근성: 규격의 "시작 주변 돌" 제약 ↔ 금지 구역 규칙이 상충하므로
+        // "가장 가까운 돌이 지나치게 멀지 않은지"로 완화해서 검사
+        var stones = placements.Where(p => p.id == "stone").ToList();
+        if (stones.Count == 0) Fail("맵에 돌이 하나도 없음 (도끼 제작 불가)");
+        else
+        {
+            float nearest = stones.Min(p => Vector2.Distance(new Vector2(p.x, p.z), new Vector2(start.x, start.y)));
+            if (nearest > R * 3f)
+                Fail($"가장 가까운 돌이 {nearest:0.0}칸 거리 (권장 {R * 3f:0.0} 이내). 돌 군락 배치 확인 필요");
+        }
+
+        // 두 화로 사이 실제 보행 경로 (배치물 차단 포함)
         var vis = BfsWithPlacements(start);
         var site = placements.FirstOrDefault(p => p.id == "hearth_site");
         if (site != null && InBounds(site.x, site.z))
@@ -656,17 +831,11 @@ public class MapGeneratorWindow : EditorWindow
         }
 
         // 고립 구역 (배치물 차단 포함 기준)
-        int isolated = 0;
+        int isolatedCount = 0;
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
-                if (!occupied[x, z] && reachable[x, z] && !vis[x, z]) isolated++;
-        if (isolated > 0) Fail($"고립 구역 {isolated}칸 잔존");
-
-        // 시작 자원
-        bool anyStickNear = placements.Any(p => p.id == "stick" && Near(p, start, startClearRadius + 1));
-        bool anyStoneNear = placements.Any(p => p.id == "stone" && Near(p, start, startClearRadius + 1));
-        if (!anyStickNear) Fail("시작 지점 근처에 stick 없음");
-        if (!anyStoneNear) Fail("시작 지점 근처에 stone 없음");
+                if (!occupied[x, z] && reachable[x, z] && !vis[x, z]) isolatedCount++;
+        if (isolatedCount > 0) Fail($"고립 구역 {isolatedCount}칸 잔존");
 
         if (ok) Debug.Log("[MapGenerator/검증] 체크리스트 전 항목 통과");
         return ok;
@@ -694,7 +863,6 @@ public class MapGeneratorWindow : EditorWindow
         AssetDatabase.Refresh();
     }
 
-    // rows[0] = z=0 규격 준수. 파일에서 첫 줄이 맵 남쪽(아래)임에 주의.
     string[] RowsFrom(Func<int, int, char> f)
     {
         var rows = new string[depth];
