@@ -1448,7 +1448,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GunVisuals
   executor: {fileID: 0}
-  alwaysFullRange: 1
+  alwaysFullRange: 0
   muzzleHeight: 0.4
   fadeSeconds: 0.7
   segments: 14
@@ -1473,9 +1473,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AimConeVisual
   executor: {fileID: 0}
   origin: {fileID: 0}
-  rangeScale: 0.3
+  rangeScale: 1
   color: {r: 1, g: 0.9, b: 0.4, a: 0.22}
-  heightOffset: 0.12
+  heightOffset: 0.03
   segments: 24
 --- !u!1 &844676586
 GameObject:

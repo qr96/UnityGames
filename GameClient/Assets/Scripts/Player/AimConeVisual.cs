@@ -8,11 +8,12 @@ public class AimConeVisual : MonoBehaviour
     [SerializeField] private Transform origin;        // 비우면 이 오브젝트
 
     [Header("표시")]
-    [Tooltip("실제 사거리 대비 원뿔을 얼마나 길게 그릴지 (1 = 사거리와 동일)")]
+    [Tooltip("실제 사거리 대비 원뿔 길이 (1 = 사거리 끝까지)")]
     [Range(0.2f, 1f)]
     [SerializeField] private float rangeScale = 1f;
     [SerializeField] private Color color = new Color(1f, 0.9f, 0.4f, 0.22f);
-    [SerializeField] private float heightOffset = 0.12f;
+    [Tooltip("바닥에서 살짝만 띄운다 — 지형에 붙어 보이도록")]
+    [SerializeField] private float heightOffset = 0.03f;
     [SerializeField] private int segments = 24;
 
     private GameObject coneObject;
@@ -102,7 +103,11 @@ public class AimConeVisual : MonoBehaviour
             shownAngle = angle;
         }
 
-        coneObject.transform.position = origin.position + Vector3.up * heightOffset;
+        // 지면에 붙이기 — 격자가 있으면 그 칸의 지면 높이를 쓴다
+        Vector3 pos = origin.position;
+        WorldGrid grid = WorldGrid.Instance;
+        if (grid != null) pos.y = grid.SampleHeight(pos);
+        coneObject.transform.position = pos + Vector3.up * heightOffset;
         coneObject.transform.rotation = Quaternion.LookRotation(
             dir.sqrMagnitude > 0.0001f ? dir : Vector3.forward, Vector3.up);
         coneObject.SetActive(true);

@@ -8,8 +8,8 @@ public class GunVisuals : MonoBehaviour
     [SerializeField] private AttackExecutor executor; // 비우면 자기/씬에서 찾음
 
     [Header("길이")]
-    [Tooltip("켜면 명중해도 사거리 끝까지 연기가 남는다. 끄면 맞은 지점까지만")]
-    [SerializeField] private bool alwaysFullRange = true;
+    [Tooltip("켜면 명중해도 사거리 끝까지 연기가 남는다. 끄면 실제 탄이 도달한 지점까지만")]
+    [SerializeField] private bool alwaysFullRange = false;
     [SerializeField] private float muzzleHeight = 1f;
 
     [Header("연기")]
