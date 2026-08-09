@@ -39,6 +39,7 @@ public class MapGeneratorWindow : EditorWindow
     // 경사로 스타일: Protruding = 절벽 밖(낮은 땅)에 부착 / Inset = 절벽 안쪽을 파서 새김(노치)
     enum RampStyle { Protruding, Inset }
     RampStyle rampStyle = RampStyle.Protruding;
+    [Range(1, 3)] int rampWidth = 2;    // 경사로 최대 폭(칸). 경사로마다 1~이 값 무작위, 지형 협소 시 자동 축소
 
     float cragNoiseScale = 0.09f;
     float cragThreshold = 0.78f;
@@ -100,7 +101,9 @@ public class MapGeneratorWindow : EditorWindow
     bool[,] ramps;
     bool[,] isCrag;
     bool[,] occupied;
-    bool[,] reachable;
+    bool[,] reachable;                // 시작점에서 갈 수 있는 칸 (전진, 낙하 포함)
+    bool[,] canReturn;                // 시작점으로 돌아올 수 있는 칸 (역방향)
+    bool[,] roundTrip;                // 왕복 가능 = reachable ∧ canReturn
     bool[,] resourceAllowed;
     List<MapPlacement> placements;
     List<MapPlacement> decorations;
@@ -155,6 +158,7 @@ public class MapGeneratorWindow : EditorWindow
         rampsPerPlateau = EditorGUILayout.IntSlider("Ramps / Plateau (최소 2)", rampsPerPlateau, 2, 4);
         rampLength = EditorGUILayout.IntSlider("Ramp Length (고정 N타일)", rampLength, 1, 3);
         rampStyle = (RampStyle)EditorGUILayout.EnumPopup("Ramp Style", rampStyle);
+        rampWidth = EditorGUILayout.IntSlider("Ramp Width (최대 폭)", rampWidth, 1, 3);
         if (rampStyle == RampStyle.Inset)
             EditorGUILayout.HelpBox("절벽 안쪽을 파서 새기는 노치형. 경사로 칸의 +1 이웃이 여러 개(양옆 벽)가 되므로 로더의 경사 방향 추론이 이를 지원하는지 확인 필요.", MessageType.Warning);
         emitDecorations = EditorGUILayout.Toggle("Ramp Decorations", emitDecorations);
@@ -256,7 +260,13 @@ public class MapGeneratorWindow : EditorWindow
         int backgroundPlateaus = CarveRamps();
         ComputeReachability(start);
         int decorativeRamps = RemoveUnreachableRamps();
+        ComputeReachability(start);
+        int escapeRamps = CarveEscapeRamps(start);       // 원웨이 포켓 보정 (내부에서 반복 재검사)
         int[,] dist = ComputeReachability(start);
+        ComputeReturnability(start);
+        BuildRoundTrip();
+        if (escapeRamps > 0)
+            Debug.Log($"[MapGenerator] 탈출 경사로 {escapeRamps}개 추가됨");
 
         if (emitDecorations) BuildRampDecorations();
 
@@ -457,15 +467,18 @@ public class MapGeneratorWindow : EditorWindow
             {
                 if (chains >= rampsPerPlateau) break;
                 if (TooCloseToExistingRamp(cell, region.cells.Count)) continue;
+                int targetW = rng.Next(1, rampWidth + 1);   // 경사로마다 폭 1~rampWidth 무작위
                 if (rampStyle == RampStyle.Protruding)
                 {
                     if (ramps[cell.x, cell.y] || !CanPaintFullChain(cell, dir)) continue;
-                    PaintRampChain(cell, dir, painted);
+                    foreach (var col in CollectWideColumns(cell, dir, targetW, protruding: true))
+                        PaintRampChain(col, dir, painted);
                 }
                 else
                 {
                     if (ramps[cell.x, cell.y] || !CanCarveInset(cell, dir)) continue; // 앞선 트렌치로 무효화됐을 수 있어 재확인
-                    PaintInsetTrench(cell, dir, painted);
+                    foreach (var col in CollectWideColumns(cell, dir, targetW, protruding: false))
+                        PaintInsetTrench(col, dir, painted);
                 }
                 chains++;
             }
@@ -613,6 +626,45 @@ public class MapGeneratorWindow : EditorWindow
         }
     }
 
+    // 폭 넓은 경사로: 기준 열(primary) 좌우로 유효한 열을 붙여 폭을 넓힘.
+    // 열들은 반드시 연속이어야 하고(±1 다음에야 ±2), 지형이 안 되면 그만큼 좁아짐.
+    // 판정은 전부 칠하기 전(원본 지형)에 수행 — Inset은 열끼리 서로의 옆벽 조건을 공유하므로 순서 중요
+    List<Vector2Int> CollectWideColumns(Vector2Int primary, int dir, int targetW, bool protruding)
+    {
+        var cols = new List<Vector2Int> { primary };
+        if (targetW <= 1) return cols;
+
+        int px = DZ[dir], pz = DX[dir];   // dir에 수직인 방향
+        var have = new HashSet<int> { 0 };
+        foreach (int o in new[] { 1, -1, 2, -2 })
+        {
+            if (cols.Count >= targetW) break;
+            if (!have.Contains(o > 0 ? o - 1 : o + 1)) continue;   // 연속성
+
+            var c2 = new Vector2Int(primary.x + px * o, primary.y + pz * o);
+            if (!InBounds(c2.x, c2.y) || ramps[c2.x, c2.y]) continue;
+
+            bool ok;
+            if (protruding)
+            {
+                ok = IsGoodRampCell(c2, out int d2) && d2 == dir && CanPaintFullChain(c2, dir);
+            }
+            else
+            {
+                // Inset 열: 같은 층이고, 입구(바깥) 방향이 한 단 아래로 열려 있어야 함
+                int ex = c2.x + DX[dir], ez = c2.y + DZ[dir];
+                ok = levels[c2.x, c2.y] == levels[primary.x, primary.y]
+                    && InBounds(ex, ez)
+                    && levels[ex, ez] == levels[c2.x, c2.y] - 1
+                    && CanCarveInset(c2, dir);
+            }
+            if (!ok) continue;
+            cols.Add(c2);
+            have.Add(o);
+        }
+        return cols;
+    }
+
     // 경사로 체인 주변(대각 어깨·노치 옆벽 포함)의 절벽(+1) 칸에 장식 좌표 생성.
     // 통로(출구) 판정: 체인 칸 c의 정방향 d에 +1 칸이 있고, 반대편(c-d)이 체인과 같은 층이면
     // 플레이어가 실제로 걸어 오르는 방향이므로 장식 제외. (노치의 옆벽은 반대편도 +1이라 장식 대상)
@@ -710,7 +762,18 @@ public class MapGeneratorWindow : EditorWindow
         return removed;
     }
 
-    // ---- 도달성 ----
+    // 방향성 통행 규칙: (x1,z1) → (x2,z2)
+    //  같은 층 = 통과 / 한 단 아래 = 뛰어내리기 자유 / 한 단 위 = 경사로 필요 / 그 외 불가
+    bool PassableFrom(int x1, int z1, int x2, int z2)
+    {
+        int diff = levels[x2, z2] - levels[x1, z1];
+        if (diff == 0) return true;
+        if (diff == -1) return true;
+        if (diff == 1) return ramps[x1, z1] || ramps[x2, z2];
+        return false;
+    }
+
+    // 연결성 검사 1: 시작점에서 갈 수 있는가 (전진 BFS)
     int[,] ComputeReachability(Vector2Int start)
     {
         reachable = new bool[width, depth];
@@ -731,7 +794,7 @@ public class MapGeneratorWindow : EditorWindow
             {
                 int nx = c.x + DX[d], nz = c.y + DZ[d];
                 if (!InBounds(nx, nz) || reachable[nx, nz]) continue;
-                if (!Passable(c.x, c.y, nx, nz)) continue;
+                if (!PassableFrom(c.x, c.y, nx, nz)) continue;
                 reachable[nx, nz] = true;
                 dist[nx, nz] = dist[c.x, c.y] + 1;
                 queue.Enqueue(new Vector2Int(nx, nz));
@@ -740,10 +803,81 @@ public class MapGeneratorWindow : EditorWindow
         return dist;
     }
 
-    bool Passable(int x1, int z1, int x2, int z2)
+    // 연결성 검사 2: 시작점으로 돌아올 수 있는가 (간선을 뒤집은 역방향 BFS)
+    void ComputeReturnability(Vector2Int start)
     {
-        int diff = Mathf.Abs(levels[x2, z2] - levels[x1, z1]);
-        return diff == 0 || (diff == 1 && (ramps[x1, z1] || ramps[x2, z2]));
+        canReturn = new bool[width, depth];
+        var queue = new Queue<Vector2Int>();
+        canReturn[start.x, start.y] = true;
+        queue.Enqueue(start);
+
+        while (queue.Count > 0)
+        {
+            var c = queue.Dequeue();
+            for (int d = 0; d < 4; d++)
+            {
+                int nx = c.x + DX[d], nz = c.y + DZ[d];
+                if (!InBounds(nx, nz) || canReturn[nx, nz]) continue;
+                if (!PassableFrom(nx, nz, c.x, c.y)) continue;   // n에서 c로 올 수 있으면 n도 귀환 가능
+                canReturn[nx, nz] = true;
+                queue.Enqueue(new Vector2Int(nx, nz));
+            }
+        }
+    }
+
+    void BuildRoundTrip()
+    {
+        roundTrip = new bool[width, depth];
+        for (int z = 0; z < depth; z++)
+            for (int x = 0; x < width; x++)
+                roundTrip[x, z] = reachable[x, z] && canReturn[x, z];
+    }
+
+    // 원웨이 포켓(뛰어내리면 못 돌아오는 구역) 탈출 경사로 자동 보정.
+    // 포켓 칸 중 유효한 경사로 자리(+1 방향 유일, 목표 칸이 귀환 가능 지역)에 폭 1 경사로를 파고 재검사
+    int CarveEscapeRamps(Vector2Int start)
+    {
+        int added = 0;
+        for (int iter = 0; iter < 24; iter++)
+        {
+            ComputeReturnability(start);
+            var oneWay = new List<Vector2Int>();
+            for (int z = 0; z < depth; z++)
+                for (int x = 0; x < width; x++)
+                    if (reachable[x, z] && !canReturn[x, z])
+                        oneWay.Add(new Vector2Int(x, z));
+            if (oneWay.Count == 0) break;
+
+            Shuffle(oneWay);
+            bool carved = false;
+            foreach (var c in oneWay)
+            {
+                if (ramps[c.x, c.y]) continue;
+                if (!IsGoodRampCell(c, out int upDir) || !CanPaintFullChain(c, upDir)) continue;
+                int tx = c.x + DX[upDir], tz = c.y + DZ[upDir];
+                if (!canReturn[tx, tz]) continue;   // 오른 곳에서 집에 갈 수 있어야 탈출로가 됨
+                var dummy = new List<(Vector2Int, int)>();
+                PaintRampChain(c, upDir, dummy);
+                ComputeReachability(start);          // 새 경사로로 전진 도달성도 갱신
+                added++;
+                carved = true;
+                Debug.Log($"[MapGenerator] 원웨이 포켓 탈출 경사로 추가 ({c.x},{c.y})");
+                break;
+            }
+            if (!carved)
+            {
+                // 경사로 자리가 없는 구덩이(폭 1칸 등)는 층을 올려 메움 →
+                // 둘러싼 링과 같은 층의 평지가 되어 걸어서 오갈 수 있음
+                foreach (var c in oneWay)
+                {
+                    levels[c.x, c.y] = Mathf.Min(maxLevel, levels[c.x, c.y] + 1);
+                    ramps[c.x, c.y] = false;
+                }
+                ComputeReachability(start);
+                Debug.Log($"[MapGenerator] 탈출 경사로 자리가 없는 원웨이 구덩이 {oneWay.Count}칸을 메움 (층 +1)");
+            }
+        }
+        return added;
     }
 
     // ---- 자원 마스크 ----
@@ -777,15 +911,15 @@ public class MapGeneratorWindow : EditorWindow
         for (int i = 0; i < regions.Count; i++)
         {
             if (regions[i].level == 0) continue;
-            bool anyReachable = regions[i].cells.Any(c => reachable[c.x, c.y]);
-            if (anyReachable && chainCount[i] >= 2) eligiblePlateaus++;
+            bool anyRoundTrip = regions[i].cells.Any(c => roundTrip[c.x, c.y]);
+            if (anyRoundTrip && chainCount[i] >= 2) eligiblePlateaus++;
             else maskedPlateaus++;
         }
 
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
             {
-                if (!reachable[x, z]) continue;
+                if (!roundTrip[x, z]) continue;   // 자원은 왕복 가능 지역에만 (원웨이 구덩이 미끼 방지)
                 int rid = regionId[x, z];
                 resourceAllowed[x, z] = regions[rid].level == 0 || chainCount[rid] >= 2;
             }
@@ -793,14 +927,17 @@ public class MapGeneratorWindow : EditorWindow
 
     void LogTerrainStats(int backgroundPlateaus, int decorativeRamps, int eligiblePlateaus, int maskedPlateaus)
     {
-        int unreachableOpen = 0;
+        int unreachableOpen = 0, oneWay = 0;
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
+            {
                 if (!reachable[x, z]) unreachableOpen++;
+                else if (!canReturn[x, z]) oneWay++;
+            }
 
         Debug.Log($"[MapGenerator/지형] 배경 고원 {backgroundPlateaus}개, 장식 경사로 회수 {decorativeRamps}칸, " +
                   $"자원 허용 고원 {eligiblePlateaus}개 / 자원 금지 고원 {maskedPlateaus}개, " +
-                  $"도달 불가(배경) {unreachableOpen}칸");
+                  $"도달 불가(배경) {unreachableOpen}칸, 원웨이(가면 못 돌아옴) {oneWay}칸");
     }
 
     // ---- 배치: 예전 균등 산포 (UniformLegacy 모드) ----
@@ -937,7 +1074,7 @@ public class MapGeneratorWindow : EditorWindow
         float maxDist = ExclusionRadius + clusterRadiusMax + 6f;
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
-                if (reachable[x, z])
+                if (roundTrip[x, z])
                     maxDist = Mathf.Max(maxDist, Vector2.Distance(new Vector2(x, z), new Vector2(start.x, start.y)));
 
         foreach (var spec in specs)
@@ -1232,12 +1369,14 @@ public class MapGeneratorWindow : EditorWindow
         int removed = 0;
         for (int guard = 0; guard < 100; guard++)
         {
-            var vis = BfsWithPlacements(start);
+            var visF = BfsWithPlacements(start);
+            var visR = BfsReturnWithPlacements(start);
+            bool Ok(int x, int z) => visF[x, z] && visR[x, z];
 
             var isolated = new List<Vector2Int>();
             for (int z = 0; z < depth; z++)
                 for (int x = 0; x < width; x++)
-                    if (!occupied[x, z] && reachable[x, z] && !vis[x, z])
+                    if (!occupied[x, z] && roundTrip[x, z] && !Ok(x, z))
                         isolated.Add(new Vector2Int(x, z));
             if (isolated.Count == 0) return removed;
 
@@ -1253,9 +1392,9 @@ public class MapGeneratorWindow : EditorWindow
                 {
                     int nx = p.x + DX[d], nz = p.z + DZ[d];
                     if (!InBounds(nx, nz) || occupied[nx, nz]) continue;
-                    if (!Passable(p.x, p.z, nx, nz)) continue;
-                    if (vis[nx, nz]) touchVis = true;
-                    else if (reachable[nx, nz]) touchIso = true;
+                    if (!PassableFrom(p.x, p.z, nx, nz) && !PassableFrom(nx, nz, p.x, p.z)) continue;
+                    if (Ok(nx, nz)) touchVis = true;
+                    else if (roundTrip[nx, nz]) touchIso = true;
                 }
                 if (touchVis && touchIso) { culprit = p; break; }
             }
@@ -1272,6 +1411,7 @@ public class MapGeneratorWindow : EditorWindow
         return removed;
     }
 
+    // 배치물 차단 포함 전진 BFS (갈 수 있는가)
     bool[,] BfsWithPlacements(Vector2Int start)
     {
         var vis = new bool[width, depth];
@@ -1286,7 +1426,30 @@ public class MapGeneratorWindow : EditorWindow
             {
                 int nx = c.x + DX[d], nz = c.y + DZ[d];
                 if (!InBounds(nx, nz) || vis[nx, nz] || occupied[nx, nz]) continue;
-                if (!Passable(c.x, c.y, nx, nz)) continue;
+                if (!PassableFrom(c.x, c.y, nx, nz)) continue;
+                vis[nx, nz] = true;
+                queue.Enqueue(new Vector2Int(nx, nz));
+            }
+        }
+        return vis;
+    }
+
+    // 배치물 차단 포함 역방향 BFS (돌아올 수 있는가)
+    bool[,] BfsReturnWithPlacements(Vector2Int start)
+    {
+        var vis = new bool[width, depth];
+        var queue = new Queue<Vector2Int>();
+        vis[start.x, start.y] = true;
+        queue.Enqueue(start);
+
+        while (queue.Count > 0)
+        {
+            var c = queue.Dequeue();
+            for (int d = 0; d < 4; d++)
+            {
+                int nx = c.x + DX[d], nz = c.y + DZ[d];
+                if (!InBounds(nx, nz) || vis[nx, nz] || occupied[nx, nz]) continue;
+                if (!PassableFrom(nx, nz, c.x, c.y)) continue;
                 vis[nx, nz] = true;
                 queue.Enqueue(new Vector2Int(nx, nz));
             }
@@ -1312,13 +1475,19 @@ public class MapGeneratorWindow : EditorWindow
                         Fail($"층 2단 절벽 ({x},{z})↔({nx},{nz}): 계단화 실패");
                 }
 
-        // 경사로: 고정 길이 N, +1 이웃 보유
+        // 경사로: 묶음이 "길이 N × 폭 1~rampWidth" 직사각형이어야 함, +1 이웃 보유
         foreach (var group in FindRampGroups())
         {
             if (!GroupHasUpNeighbor(group))
                 Fail($"무효 경사로 체인 ({group[0].x},{group[0].y}) 외 {group.Count - 1}칸: 한 단 높은 이웃 없음");
-            if (group.Count != rampLength)
-                Fail($"경사로 체인 ({group[0].x},{group[0].y}): 길이 {group.Count} (고정 규격 {rampLength} 위반)");
+
+            int minX = group.Min(c => c.x), maxX = group.Max(c => c.x);
+            int minZ = group.Min(c => c.y), maxZ = group.Max(c => c.y);
+            int dx = maxX - minX + 1, dz = maxZ - minZ + 1;
+            bool rect = group.Count == dx * dz;
+            bool dims = (dx == rampLength && dz <= rampWidth) || (dz == rampLength && dx <= rampWidth);
+            if (!rect || !dims)
+                Fail($"경사로 묶음 ({group[0].x},{group[0].y}): {group.Count}칸 {dx}x{dz} (규격: 길이 {rampLength} × 폭 ≤{rampWidth} 직사각형)");
         }
 
         // placements 공통
@@ -1329,7 +1498,7 @@ public class MapGeneratorWindow : EditorWindow
             if (!ValidIds.Contains(p.id)) Fail($"알 수 없는 id '{p.id}' ({p.x},{p.z})");
             if (!InBounds(p.x, p.z)) { Fail($"범위 밖 placement ({p.x},{p.z})"); continue; }
             if (!cells.Add((p.x, p.z))) Fail($"같은 칸에 배치물 중복 ({p.x},{p.z})");
-            if (!reachable[p.x, p.z]) Fail($"도달 불가 칸 위 placement '{p.id}' ({p.x},{p.z})");
+            if (!roundTrip[p.x, p.z]) Fail($"왕복 불가 칸 위 placement '{p.id}' ({p.x},{p.z})");
             counts[p.id] = counts.GetValueOrDefault(p.id) + 1;
         }
 
@@ -1391,28 +1560,37 @@ public class MapGeneratorWindow : EditorWindow
             if (counts.GetValueOrDefault("stone") == 0) Fail("맵에 돌이 하나도 없음 (도끼 제작 불가)");
         }
 
-        // 두 화로 사이 실제 보행 경로 (배치물 차단 포함)
-        var vis = BfsWithPlacements(start);
+        // 연결성 이중 검사 (배치물 차단 포함): 가는 길 + 돌아오는 길
+        var visF = BfsWithPlacements(start);
+        var visR = BfsReturnWithPlacements(start);
         var site = placements.FirstOrDefault(p => p.id == "hearth_site");
         if (site != null && InBounds(site.x, site.z))
         {
-            bool reached = vis[site.x, site.z];
+            // 화로 터 옆에 서서 왕복할 수 있어야 함 (터 칸 자체는 배치물이라 막힘)
+            bool reached = false;
             for (int d = 0; d < 4 && !reached; d++)
             {
                 int nx = site.x + DX[d], nz = site.z + DZ[d];
-                if (InBounds(nx, nz) && vis[nx, nz] && Passable(site.x, site.z, nx, nz)) reached = true;
+                if (InBounds(nx, nz) && !occupied[nx, nz] && visF[nx, nz] && visR[nx, nz]) reached = true;
             }
-            if (!reached) Fail("hearth → hearth_site 보행 경로 없음 (배치물 차단 포함)");
+            if (!reached) Fail("hearth ↔ hearth_site 왕복 보행 경로 없음 (배치물 차단 포함)");
         }
 
-        // 배치물이 만든 고립
+        // 지형 원웨이 잔존 (탈출 경사로 보정 실패분) = 소프트락 위험
+        int terrainOneWay = 0;
+        for (int z = 0; z < depth; z++)
+            for (int x = 0; x < width; x++)
+                if (reachable[x, z] && !canReturn[x, z]) terrainOneWay++;
+        if (terrainOneWay > 0) Fail($"원웨이 지형 {terrainOneWay}칸 잔존 (뛰어내리면 못 돌아옴). 시드 변경 권장");
+
+        // 배치물이 만든 고립/원웨이
         int pinchIsolated = 0;
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)
-                if (!occupied[x, z] && reachable[x, z] && !vis[x, z]) pinchIsolated++;
-        if (pinchIsolated > 0) Fail($"배치물로 인한 고립 {pinchIsolated}칸 잔존");
+                if (!occupied[x, z] && roundTrip[x, z] && !(visF[x, z] && visR[x, z])) pinchIsolated++;
+        if (pinchIsolated > 0) Fail($"배치물로 인한 고립/원웨이 {pinchIsolated}칸 잔존");
 
-        // 배경(도달 불가)은 허용 — 정보 로그
+        // 배경(전진 도달 불가)은 허용 — 정보 로그
         int backgroundCells = 0;
         for (int z = 0; z < depth; z++)
             for (int x = 0; x < width; x++)

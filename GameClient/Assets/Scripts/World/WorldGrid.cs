@@ -23,6 +23,9 @@ public class WorldGrid : MonoBehaviour
     [Tooltip("켜면 층이 달라도 온기가 넘어간다. 끄면 절벽 위아래는 서로 데우지 않음")]
     [SerializeField] private bool warmthCrossesLevels = false;
 
+    [Tooltip("켜면 한 단(1층) 아래로는 경사로 없이도 뛰어내릴 수 있다. 올라가는 것은 경사로만")]
+    [SerializeField] private bool allowDropDown = true;
+
     [Tooltip("켜면 격자를 점유한 칸 자체가 통행 불가가 된다(네모난 차단). " +
              "기본은 꺼짐 — 물리적 차단은 콜라이더가 맡고, 격자 점유는 설치 가능 여부·경로 정보로만 쓴다")]
     [SerializeField] private bool blockMovementOnOccupied = false;
@@ -292,8 +295,9 @@ public class WorldGrid : MonoBehaviour
 
     // 이웃 칸으로 넘어갈 수 있는지 (동물의 숲식 절벽 규칙)
     //  - 같은 층: 통행 가능
-    //  - 1층 차이: 경사로를 '경사 축 방향으로' 지날 때만 가능
-    //             (노치형에서 양옆 벽을 타고 오르는 것을 막는다)
+    //  - 1층 차이 올라가기: 경사로를 '경사 축 방향으로' 지날 때만 가능
+    //                      (노치형에서 양옆 벽을 타고 오르는 것을 막는다)
+    //  - 1층 차이 내려가기: allowDropDown이 켜져 있으면 어디서든 뛰어내릴 수 있다
     //  - 2층 이상: 불가
     public bool CanMoveBetween(Vector2Int from, Vector2Int to)
     {
@@ -312,7 +316,10 @@ public class WorldGrid : MonoBehaviour
         }
         else
         {
-            // 내려가기: 목적지가 경사로이고, 지금 칸이 그 경사 축의 위쪽이어야 한다
+            // 내려가기: 한 단이면 뛰어내릴 수 있다(설정으로 끌 수 있음)
+            if (allowDropDown) return true;
+
+            // 끈 경우엔 경사로 축으로만 내려간다
             if (!TryGetRampInfo(to, out Vector2Int downDir, out _, out _)) return false;
             return from == to + downDir;
         }

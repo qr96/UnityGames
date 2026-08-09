@@ -19,6 +19,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float sprintMultiplier = 1.6f;
     [SerializeField] private PlayerStats stats; // 비우면 자기/씬에서 찾음
 
+    [Header("높이 추종 (격자 모드)")]
+    [Tooltip("올라갈 때 높이가 따라붙는 속도")]
+    [SerializeField] private float climbLerpSpeed = 12f;
+    [Tooltip("내려갈 때 속도 — 크게 하면 툭 떨어지는 느낌")]
+    [SerializeField] private float dropLerpSpeed = 20f;
+
     [Header("지면 맞춤 (격자 모드)")]
     [Tooltip("캡슐 밑면을 지면에 맞춘 뒤 추가로 올릴 값. 모델이 가라앉으면 늘리기")]
     [SerializeField] private float groundExtraOffset = 0f;
@@ -112,7 +118,10 @@ public class PlayerMovement : MonoBehaviour
 
             // 캡슐 밑면이 지면에 닿도록 오브젝트 원점을 올린다
             float targetY = groundY + FootToOriginOffset() + groundExtraOffset;
-            float dy = Mathf.Lerp(transform.position.y, targetY, 12f * Time.deltaTime) - transform.position.y;
+
+            float lerpSpeed = targetY < transform.position.y ? dropLerpSpeed : climbLerpSpeed;
+            float dy = Mathf.Lerp(transform.position.y, targetY, lerpSpeed * Time.deltaTime)
+                       - transform.position.y;
             controller.Move(horizontal + Vector3.up * dy);
         }
         else

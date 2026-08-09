@@ -51,8 +51,10 @@ public class PlayerStats : MonoBehaviour
 
     public float Warmth => warmth;
     public float Hunger => hunger;
+    public float MaxWarmth => maxWarmth;
     public float WarmthNormalized => maxWarmth > 0f ? warmth / maxWarmth : 0f;
     public float Health => health;
+    public float MaxHealth => maxHealth;
     public float HealthNormalized => maxHealth > 0f ? health / maxHealth : 0f;
 
     public float Stamina => stamina;
@@ -69,6 +71,7 @@ public class PlayerStats : MonoBehaviour
 
     // 이동 속도 배수 (탈진 시 감속)
     public float MoveSpeedMultiplier => IsExhausted ? exhaustedSpeedMultiplier : 1f;
+    public float MaxHunger => maxHunger;
     public float HungerNormalized => maxHunger > 0f ? hunger / maxHunger : 0f;
     public bool IsDown { get; private set; }
 

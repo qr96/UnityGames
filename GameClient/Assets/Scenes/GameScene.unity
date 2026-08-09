@@ -975,6 +975,9 @@ MonoBehaviour:
   collector: {fileID: 0}
   worldCamera: {fileID: 0}
   targetCanvas: {fileID: 199013396}
+  gaugeWorldHeight: 2.2
+  hideGaugeWhenTargeted: 1
+  labelBackColor: {r: 0, g: 0, b: 0, a: 0.55}
   statFontSize: 16
   slotFontSize: 16
   counterFontSize: 20
@@ -1373,13 +1376,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AttackExecutor
   windupSeconds: 0.05
   recoverySeconds: 0.15
-  mouseButton: 0
   attackKey: 32
   cooldown: 0.25
   snapAngle: 70
   hotbar: {fileID: 0}
   inventory: {fileID: 0}
-  mouseAim: {fileID: 0}
   verboseLog: 1
 --- !u!114 &802411311
 MonoBehaviour:

@@ -316,23 +316,23 @@ public class HudUI : MonoBehaviour
         tr.sizeDelta = new Vector2(w, h);
     }
 
-    private void SetBar(Bar bar, string name, float ratio, Color color)
+    private void SetBar(Bar bar, string name, float current, float max, Color color)
     {
         if (bar == null) return;
 
-        ratio = Mathf.Clamp01(ratio);
+        float ratio = max > 0f ? Mathf.Clamp01(current / max) : 0f;
         bar.fillRect.sizeDelta = new Vector2(bar.width * ratio, barSize.y);
         bar.fill.color = ratio <= lowThreshold ? lowColor : color;
-        bar.label.text = $"{name}  {Mathf.RoundToInt(ratio * 100f)}%";
+        bar.label.text = $"{name}  {Mathf.CeilToInt(current)}/{Mathf.RoundToInt(max)}";
     }
 
     private void UpdateBars()
     {
         if (stats == null) return;
 
-        SetBar(healthBar, "생명력", stats.HealthNormalized, healthColor);
-        SetBar(warmthBar, "온기", stats.WarmthNormalized, warmthColor);
-        SetBar(hungerBar, "허기", stats.HungerNormalized, hungerColor);
+        SetBar(healthBar, "생명력", stats.Health, stats.MaxHealth, healthColor);
+        SetBar(warmthBar, "온기", stats.Warmth, stats.MaxWarmth, warmthColor);
+        SetBar(hungerBar, "허기", stats.Hunger, stats.MaxHunger, hungerColor);
     }
 
     private void UpdateHotbar()
