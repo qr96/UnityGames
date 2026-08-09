@@ -35,8 +35,13 @@ public static class UIKit
         return img;
     }
 
+    // 글자에 두를 테두리 색·두께 (밝은 배경에서도 읽히도록)
+    public static Color TextOutlineColor = new Color(0f, 0f, 0f, 0.9f);
+    public static Vector2 TextOutlineDistance = new Vector2(1.4f, -1.4f);
+
     public static Text CreateText(string name, Transform parent, int fontSize,
-                                  TextAnchor anchor = TextAnchor.MiddleLeft)
+                                  TextAnchor anchor = TextAnchor.MiddleLeft,
+                                  bool withOutline = true)
     {
         var go = new GameObject(name, typeof(RectTransform), typeof(Text));
         go.transform.SetParent(parent, false);
@@ -49,6 +54,15 @@ public static class UIKit
         text.raycastTarget = false;
         text.horizontalOverflow = HorizontalWrapMode.Overflow;
         text.verticalOverflow = VerticalWrapMode.Overflow;
+
+        if (withOutline)
+        {
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = TextOutlineColor;
+            outline.effectDistance = TextOutlineDistance;
+            outline.useGraphicAlpha = false;
+        }
+
         return text;
     }
 

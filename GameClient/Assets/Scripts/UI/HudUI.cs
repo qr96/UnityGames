@@ -19,6 +19,16 @@ public class HudUI : MonoBehaviour
     [Tooltip("씬의 Canvas를 연결. 크기·해상도 설정은 그 Canvas Scaler에서 한다")]
     [SerializeField] private Canvas targetCanvas;
 
+    [Header("화로 게이지")]
+    [Tooltip("화로 머리 위 높이(월드)")]
+    [SerializeField] private float gaugeWorldHeight = 2.2f;
+    [Tooltip("그 화로가 지금 상호작용 대상이면 게이지를 숨김(라벨과 겹치지 않게)")]
+    [SerializeField] private bool hideGaugeWhenTargeted = true;
+
+    [Header("가독성")]
+    [Tooltip("라벨·카운터 뒤에 깔 반투명 배경 색")]
+    [SerializeField] private Color labelBackColor = new Color(0f, 0f, 0f, 0.55f);
+
     [Header("글자 크기")]
     [SerializeField] private int statFontSize = 12;
     [SerializeField] private int slotFontSize = 12;
@@ -73,9 +83,11 @@ public class HudUI : MonoBehaviour
     private Slot foodSlot;
 
     private Text counterText;
+    private RectTransform counterBackRect;
     private Text targetLabel;
     private RectTransform targetLabelRect;
     private Text pickupPrompt;
+    private RectTransform pickupBackRect;
 
     private class Gauge
     {
@@ -149,22 +161,39 @@ public class HudUI : MonoBehaviour
             new Vector2(92f, slotH), new Vector2(0.5f, 0f));
 
         // ── 인벤 카운터 (우상단) ──
-        counterText = UIKit.CreateText("Counter", root, counterFontSize, TextAnchor.UpperRight);
-        UIKit.SetRect(counterText.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f),
-                      new Vector2(-16f, -16f), new Vector2(320f, 48f));
+        Image counterBack = UIKit.CreateImage("CounterBack", root, labelBackColor);
+        UIKit.SetRect(counterBack.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f),
+                      new Vector2(-12f, -12f), new Vector2(240f, 56f));
 
-        // ── 타겟 라벨 (월드 추적) ──
-        targetLabel = UIKit.CreateText("TargetLabel", root, worldLabelFontSize, TextAnchor.MiddleCenter);
-        targetLabelRect = targetLabel.rectTransform;
+        counterBackRect = counterBack.rectTransform;
+        counterText = UIKit.CreateText("Counter", counterBack.transform, counterFontSize,
+                                       TextAnchor.MiddleRight);
+        UIKit.SetRect(counterText.rectTransform, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
+                      new Vector2(-10f, 0f), new Vector2(220f, 52f));
+
+        // ── 타겟 라벨 (월드 추적) — 반투명 배경판 위에 ──
+        Image targetBack = UIKit.CreateImage("TargetLabelBack", root, labelBackColor);
+        targetLabelRect = targetBack.rectTransform;
         UIKit.SetRect(targetLabelRect, new Vector2(0f, 0f), new Vector2(0.5f, 0f),
-                      Vector2.zero, new Vector2(300f, 24f));
-        targetLabel.gameObject.SetActive(false);
+                      Vector2.zero, new Vector2(300f, 26f));
 
-        // ── 줍기 안내 (하단 중앙 위) ──
-        pickupPrompt = UIKit.CreateText("PickupPrompt", root, worldLabelFontSize, TextAnchor.MiddleCenter);
-        UIKit.SetRect(pickupPrompt.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
-                      new Vector2(0f, 96f), new Vector2(300f, 24f));
-        pickupPrompt.gameObject.SetActive(false);
+        targetLabel = UIKit.CreateText("TargetLabel", targetBack.transform,
+                                       worldLabelFontSize, TextAnchor.MiddleCenter);
+        UIKit.SetRect(targetLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                      Vector2.zero, new Vector2(300f, 26f));
+        targetBack.gameObject.SetActive(false);
+
+        // ── 줍기 안내 ──
+        Image pickupBack = UIKit.CreateImage("PickupPromptBack", root, labelBackColor);
+        UIKit.SetRect(pickupBack.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
+                      new Vector2(0f, 96f), new Vector2(300f, 26f));
+
+        pickupBackRect = pickupBack.rectTransform;
+        pickupPrompt = UIKit.CreateText("PickupPrompt", pickupBack.transform,
+                                        worldLabelFontSize, TextAnchor.MiddleCenter);
+        UIKit.SetRect(pickupPrompt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                      Vector2.zero, new Vector2(300f, 26f));
+        pickupBack.gameObject.SetActive(false);
 
         // 화로 게이지 부모
         gaugeParent = UIKit.CreateRect("HearthGauges", root);
@@ -274,6 +303,19 @@ public class HudUI : MonoBehaviour
         UpdateHearthGauges();
     }
 
+    // 배경판을 글자 크기에 맞춘다
+    private static void FitBackground(Text text, RectTransform back, Vector2 padding)
+    {
+        if (text == null || back == null) return;
+
+        float w = text.preferredWidth + padding.x;
+        float h = Mathf.Max(text.preferredHeight + padding.y, 20f);
+        back.sizeDelta = new Vector2(w, h);
+
+        RectTransform tr = text.rectTransform;
+        tr.sizeDelta = new Vector2(w, h);
+    }
+
     private void SetBar(Bar bar, string name, float ratio, Color color)
     {
         if (bar == null) return;
@@ -336,28 +378,32 @@ public class HudUI : MonoBehaviour
                            (inventory.IsFull ? "  — 가득 참" : "") +
                            $"\n골드 {inventory.Gold}";
         counterText.color = inventory.IsFull ? new Color(1f, 0.5f, 0.4f) : Color.white;
+        FitBackground(counterText, counterBackRect, new Vector2(24f, 12f));
     }
 
     private void UpdateTargetLabel()
     {
         if (interactor == null || targetLabel == null) return;
 
+        GameObject labelObject = targetLabelRect.gameObject;
+
         InteractableBase target = interactor.Current;
         if (target == null || worldCamera == null)
         {
-            if (targetLabel.gameObject.activeSelf) targetLabel.gameObject.SetActive(false);
+            if (labelObject.activeSelf) labelObject.SetActive(false);
             return;
         }
 
         Vector3 sp = worldCamera.WorldToScreenPoint(target.Position + Vector3.up * 1.5f);
         if (sp.z < 0f)
         {
-            if (targetLabel.gameObject.activeSelf) targetLabel.gameObject.SetActive(false);
+            if (labelObject.activeSelf) labelObject.SetActive(false);
             return;
         }
 
-        if (!targetLabel.gameObject.activeSelf) targetLabel.gameObject.SetActive(true);
+        if (!labelObject.activeSelf) labelObject.SetActive(true);
         targetLabel.text = $"E — {target.Prompt}";
+        FitBackground(targetLabel, targetLabelRect, new Vector2(20f, 8f));
         targetLabelRect.anchoredPosition = ScreenToCanvas(sp);
     }
 
@@ -365,9 +411,15 @@ public class HudUI : MonoBehaviour
     {
         if (collector == null || pickupPrompt == null) return;
 
+        GameObject promptObject = pickupPrompt.transform.parent.gameObject;
+
         bool show = collector.NearbyCount > 0 && (interactor == null || interactor.Current == null);
-        if (pickupPrompt.gameObject.activeSelf != show) pickupPrompt.gameObject.SetActive(show);
-        if (show) pickupPrompt.text = $"E — 줍기 (근처 {collector.NearbyCount}묶음)";
+        if (promptObject.activeSelf != show) promptObject.SetActive(show);
+        if (show)
+        {
+            pickupPrompt.text = $"E — 줍기 (근처 {collector.NearbyCount}묶음)";
+            FitBackground(pickupPrompt, pickupBackRect, new Vector2(20f, 8f));
+        }
     }
 
     private void UpdateHearthGauges()
@@ -382,8 +434,15 @@ public class HudUI : MonoBehaviour
 
             if (!gauges.TryGetValue(h, out Gauge g)) { g = CreateGauge(h.name); gauges[h] = g; }
 
-            Vector3 sp = worldCamera.WorldToScreenPoint(h.transform.position + Vector3.up * 2.2f);
+            Vector3 sp = worldCamera.WorldToScreenPoint(h.transform.position + Vector3.up * gaugeWorldHeight);
             bool visible = sp.z > 0f;
+
+            // 지금 겨냥 중인 화로라면 라벨이 같은 정보를 보여주므로 게이지를 숨긴다
+            if (visible && hideGaugeWhenTargeted && interactor != null && interactor.Current != null)
+            {
+                Hearth targeted = interactor.Current.GetComponent<Hearth>();
+                if (targeted == h) visible = false;
+            }
             if (g.root.gameObject.activeSelf != visible) g.root.gameObject.SetActive(visible);
             if (!visible) continue;
 

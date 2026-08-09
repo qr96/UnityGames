@@ -163,7 +163,7 @@ public class AttackExecutor : MonoBehaviour
         if (UIInputLock.IsBlocked)
         {
             if (verboseLog && Input.GetKeyDown(attackKey))
-                Debug.Log("[공격] UI가 열려 있어 입력 무시 (Tab/Q/ESC로 닫기)");
+                Debug.Log("[공격] 창이 열려 있어 입력 무시 (Tab/Q/ESC로 닫기)");
             return;
         }
 

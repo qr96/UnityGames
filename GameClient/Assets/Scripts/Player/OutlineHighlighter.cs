@@ -11,8 +11,9 @@ public interface IHighlightable
 [DisallowMultipleComponent]
 public class OutlineHighlighter : MonoBehaviour, IHighlightable
 {
-    [SerializeField] private Color outlineColor = Color.white;
-    [SerializeField] private float outlineWidth = 0.03f;
+    [Tooltip("눈밭에서 묻히지 않도록 기본값은 어두운 색")]
+    [SerializeField] private Color outlineColor = new Color(0.06f, 0.09f, 0.14f, 1f);
+    [SerializeField] private float outlineWidth = 0.06f;
     [SerializeField] private Material outlineMaterialOverride;
 
     // 색·두께가 같으면 모든 오브젝트가 하나의 머티리얼을 공유한다
@@ -66,7 +67,7 @@ public class OutlineHighlighter : MonoBehaviour, IHighlightable
         if (on == value || outlineMat == null || renderers == null) return;
         on = value;
 
-        if (value) ApplyProperties(); // 켤 때 최신 값 사용
+        if (value) ApplyProperties(); // 켤 때 그 대상의 색·두께를 반영
 
         for (int i = 0; i < renderers.Length; i++)
         {
