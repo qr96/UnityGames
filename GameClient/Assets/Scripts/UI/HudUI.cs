@@ -25,6 +25,18 @@ public class HudUI : MonoBehaviour
     [SerializeField] private int counterFontSize = 16;
     [SerializeField] private int worldLabelFontSize = 15;
 
+    [Header("스태미나 원형 게이지")]
+    [Tooltip("캐릭터를 따라다닌다. 비우면 PlayerMovement로 찾음")]
+    [SerializeField] private Transform followTarget;
+    [SerializeField] private float gaugeSize = 56f;
+    [Tooltip("캐릭터 기준 화면 오프셋(픽셀)")]
+    [SerializeField] private Vector2 gaugeScreenOffset = new Vector2(46f, -18f);
+    [SerializeField] private float gaugeThickness = 0.62f;   // 안쪽 반지름 비율(클수록 얇음)
+    [SerializeField] private Color gaugeBorderColor = new Color(0f, 0f, 0f, 0.85f);
+    [SerializeField] private Color gaugeBackColor = new Color(0f, 0f, 0f, 0.45f);
+    [Tooltip("가득 찼을 때 숨김")]
+    [SerializeField] private bool hideWhenFull = true;
+
     [Header("스탯 막대")]
     [SerializeField] private Vector2 barSize = new Vector2(220f, 16f);
     [SerializeField] private float barGap = 6f;
@@ -46,7 +58,10 @@ public class HudUI : MonoBehaviour
         public float width;
     }
 
-    private Bar healthBar, warmthBar, hungerBar, staminaBar;
+    private Bar healthBar, warmthBar, hungerBar;
+
+    private RectTransform staminaRoot;
+    private Image staminaFill;
 
     private class Slot
     {
@@ -110,12 +125,13 @@ public class HudUI : MonoBehaviour
 
         // ── 스탯 막대 (좌하단) ──
         float x = 16f;
-        float y = 16f + (barSize.y + barGap) * 3f;
+        float y = 16f + (barSize.y + barGap) * 2f;
 
         healthBar = CreateBar("Health", new Vector2(x, y), healthColor);
         warmthBar = CreateBar("Warmth", new Vector2(x, y - (barSize.y + barGap)), warmthColor);
         hungerBar = CreateBar("Hunger", new Vector2(x, y - (barSize.y + barGap) * 2f), hungerColor);
-        staminaBar = CreateBar("Stamina", new Vector2(x, y - (barSize.y + barGap) * 3f), staminaColor);
+
+        BuildStaminaGauge();
 
         // ── 핫바 (하단 중앙) ──
         const float slotW = 68f, slotH = 46f, slotGap = 4f;
@@ -155,6 +171,66 @@ public class HudUI : MonoBehaviour
         UIKit.SetRect(gaugeParent, new Vector2(0f, 0f), new Vector2(0f, 0f), Vector2.zero, Vector2.zero);
     }
 
+    private void BuildStaminaGauge()
+    {
+        Sprite ring = UIKit.CreateRingSprite(128, gaugeThickness);
+        Sprite border = UIKit.CreateRingSprite(128, gaugeThickness - 0.08f);
+
+        staminaRoot = UIKit.CreateRect("StaminaGauge", root);
+        UIKit.SetRect(staminaRoot, new Vector2(0f, 0f), new Vector2(0.5f, 0.5f),
+                      Vector2.zero, new Vector2(gaugeSize, gaugeSize));
+
+        // 테두리(살짝 크게) → 배경 → 채움 순서
+        Image borderImg = UIKit.CreateImage("Border", staminaRoot, gaugeBorderColor);
+        borderImg.sprite = border;
+        UIKit.SetRect(borderImg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                      Vector2.zero, new Vector2(gaugeSize + 6f, gaugeSize + 6f));
+
+        Image backImg = UIKit.CreateImage("Back", staminaRoot, gaugeBackColor);
+        backImg.sprite = ring;
+        UIKit.SetRect(backImg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                      Vector2.zero, new Vector2(gaugeSize, gaugeSize));
+
+        staminaFill = UIKit.CreateImage("Fill", staminaRoot, staminaColor);
+        staminaFill.sprite = ring;
+        staminaFill.type = Image.Type.Filled;
+        staminaFill.fillMethod = Image.FillMethod.Radial360;
+        staminaFill.fillOrigin = (int)Image.Origin360.Top;
+        staminaFill.fillClockwise = true;
+        UIKit.SetRect(staminaFill.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                      Vector2.zero, new Vector2(gaugeSize, gaugeSize));
+    }
+
+    private void UpdateStaminaGauge()
+    {
+        if (staminaRoot == null || stats == null) return;
+
+        if (followTarget == null)
+        {
+            PlayerMovement pm = FindObjectOfType<PlayerMovement>();
+            if (pm != null) followTarget = pm.transform;
+        }
+
+        float ratio = Mathf.Clamp01(stats.StaminaNormalized);
+        bool show = followTarget != null && worldCamera != null
+                    && (!hideWhenFull || ratio < 0.999f || stats.IsExhausted);
+
+        if (show)
+        {
+            Vector3 sp = worldCamera.WorldToScreenPoint(followTarget.position + Vector3.up * 1f);
+            show = sp.z > 0f;
+            if (show) staminaRoot.anchoredPosition = ScreenToCanvas(sp) + gaugeScreenOffset;
+        }
+
+        if (staminaRoot.gameObject.activeSelf != show) staminaRoot.gameObject.SetActive(show);
+        if (!show) return;
+
+        staminaFill.fillAmount = ratio;
+        staminaFill.color = stats.IsExhausted ? lowColor
+                          : ratio <= lowThreshold ? Color.Lerp(lowColor, staminaColor, 0.4f)
+                          : staminaColor;
+    }
+
     private Bar CreateBar(string name, Vector2 pos, Color color)
     {
         RectTransform barRoot = UIKit.CreateRect(name, root);
@@ -190,6 +266,7 @@ public class HudUI : MonoBehaviour
         if (canvas == null) return;
 
         UpdateBars();
+        UpdateStaminaGauge();
         UpdateHotbar();
         UpdateCounter();
         UpdateTargetLabel();
@@ -214,8 +291,6 @@ public class HudUI : MonoBehaviour
         SetBar(healthBar, "생명력", stats.HealthNormalized, healthColor);
         SetBar(warmthBar, "온기", stats.WarmthNormalized, warmthColor);
         SetBar(hungerBar, "허기", stats.HungerNormalized, hungerColor);
-        SetBar(staminaBar, stats.IsExhausted ? "기력 (탈진)" : "기력",
-               stats.StaminaNormalized, staminaColor);
     }
 
     private void UpdateHotbar()
