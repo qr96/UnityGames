@@ -7,6 +7,7 @@ public struct AttackContext
     public Vector3 origin;   // 판정 시작점(보통 공격자 위치)
     public Vector3 forward;  // 바라보는 방향(XZ 평면)
     public int power;        // 도구 위력 = 타격량
+    public float charge01;   // 차지 진행도 0~1 (차지형 무기만 사용)
 }
 
 // 공격 판정 방식. 무기(ItemDef)가 이 에셋을 참조한다.
@@ -22,6 +23,19 @@ public abstract class AttackPattern : ScriptableObject
         if (hittableCategories == null) return false;
         for (int i = 0; i < hittableCategories.Length; i++)
             if (hittableCategories[i] == category) return true;
+        return false;
+    }
+
+    // 차지(홀드 후 발사)형인지. 기본은 아니오 — 누르면 바로 나간다.
+    public virtual bool IsCharged => false;
+    // 완전 차지까지 걸리는 시간(초)
+    public virtual float ChargeSeconds => 0f;
+
+    // 조준 원뿔(방향·각도·사거리). 차지 상태에 따라 각도가 좁아진다.
+    public virtual bool TryGetAimCone(in AttackContext ctx, out Vector3 dir,
+                                      out float angleDeg, out float range)
+    {
+        dir = ctx.forward; angleDeg = 0f; range = 0f;
         return false;
     }
 

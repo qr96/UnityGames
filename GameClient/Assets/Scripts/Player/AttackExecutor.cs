@@ -40,6 +40,14 @@ public class AttackExecutor : MonoBehaviour
     // 복귀 완료
     public event Action OnSwingEnd;
 
+    // 차지형 무기: 차지 진행도(0~1) 변화 — 조준 원뿔 표시가 구독
+    public event Action<AttackPattern, float> OnCharging;
+    // 발사 순간 — origin, 방향, 실제 도달 거리, 무기 사거리, 명중 여부
+    public event Action<Vector3, Vector3, float, float, bool> OnRangedShot;
+
+    public bool IsCharging { get; private set; }
+    public float Charge01 { get; private set; }
+
     // 하위 호환: 입력 순간과 동일
     public event Action OnAttack;
 
@@ -82,6 +90,7 @@ public class AttackExecutor : MonoBehaviour
             origin = transform.position,
             forward = AimDirection,
             power = power,
+            charge01 = 0f,
         };
     }
 
@@ -158,11 +167,21 @@ public class AttackExecutor : MonoBehaviour
         AttackPattern pattern = CurrentPattern;
         CurrentTarget = pattern != null ? pattern.FindPrimary(BuildContext(1)) : null;
 
-        if (!Input.GetKey(attackKey)) return;
+        bool blocked = UIInputLock.IsBlocked;
+        bool held = !blocked && Input.GetKey(attackKey);
 
-        if (UIInputLock.IsBlocked)
+        // ── 차지형(총·활): 누르는 동안 차지, 떼면 발사 ──
+        if (pattern != null && pattern.IsCharged)
         {
-            if (verboseLog && Input.GetKeyDown(attackKey))
+            HandleCharged(pattern, held);
+            return;
+        }
+
+        if (IsCharging) { IsCharging = false; Charge01 = 0f; }
+
+        if (!held)
+        {
+            if (blocked && verboseLog && Input.GetKeyDown(attackKey))
                 Debug.Log("[공격] 창이 열려 있어 입력 무시 (Tab/Q/ESC로 닫기)");
             return;
         }
@@ -171,6 +190,66 @@ public class AttackExecutor : MonoBehaviour
         nextTime = Time.time + Mathf.Max(0.01f, cooldown);
 
         DoAttack();
+    }
+
+    private void HandleCharged(AttackPattern pattern, bool held)
+    {
+        if (held)
+        {
+            IsCharging = true;
+            Charge01 = Mathf.Clamp01(Charge01 + Time.deltaTime / Mathf.Max(0.01f, pattern.ChargeSeconds));
+            OnCharging?.Invoke(pattern, Charge01);
+            return;
+        }
+
+        if (!IsCharging) return;   // 누른 적 없음
+
+        // 손을 뗀 순간 발사
+        float charge = Charge01;
+        IsCharging = false;
+        Charge01 = 0f;
+        OnCharging?.Invoke(pattern, 0f);
+
+        if (Time.time < nextTime) return;
+        nextTime = Time.time + Mathf.Max(0.01f, cooldown);
+
+        Fire(pattern, charge);
+    }
+
+    private void Fire(AttackPattern pattern, float charge)
+    {
+        ItemDef tool = EquippedTool;
+        if (tool == null) return;
+
+        // 탄약 소모
+        if (tool.consumesAmmo)
+        {
+            if (inventory == null || !inventory.Has(tool.ammoKind, 1))
+            {
+                if (verboseLog) Debug.Log($"[발사] {tool.displayName}: 탄약 없음");
+                return;
+            }
+            inventory.TrySpend(tool.ammoKind, 1);
+        }
+
+        AttackContext ctx = BuildContext(Mathf.Max(1, tool.hitPower));
+        ctx.charge01 = charge;
+
+        pattern.Execute(ctx);
+
+        // 연출용 정보 전달
+        if (pattern is RangedShotPattern ranged)
+        {
+            OnRangedShot?.Invoke(ctx.origin, ranged.LastShotDirection,
+                                 ranged.LastShotDistance, ranged.LastShotRange,
+                                 ranged.LastShotHit);
+        }
+
+        OnAttack?.Invoke();
+
+        if (verboseLog)
+            Debug.Log($"[발사] {tool.displayName} 차지 {charge:0.00} " +
+                      $"→ 명중 {(pattern is RangedShotPattern r2 && r2.LastShotHit ? "O" : "X")}");
     }
 
     private void DoAttack()

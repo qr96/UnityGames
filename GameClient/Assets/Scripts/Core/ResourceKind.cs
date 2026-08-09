@@ -10,4 +10,6 @@ public enum ResourceKind
     Food = 3,  // 눈 속 열매
     Axe = 4,  // 도끼 (도구)
     Workbench = 5, // 제작대 (설치물)
+    Gun = 6, // 총 (도구)
+    Ammo = 7, // 탄약
 }

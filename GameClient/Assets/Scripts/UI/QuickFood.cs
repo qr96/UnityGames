@@ -31,8 +31,10 @@ public class QuickFood : MonoBehaviour
         if (inventory != null) inventory.OnChanged -= EnsureAssigned;
     }
 
+    // 분류가 Food이고 회복량이 있는 것만 음식으로 본다
+    // (도구·설치물의 회복량 값이 남아 있어도 음식으로 잡히지 않게)
     private static bool IsFood(ItemDef def)
-        => def != null && (def.IsFood || def.hungerRestore > 0f);
+        => def != null && def.IsFood && def.hungerRestore > 0f;
 
     // 격자 UI에서 호출 — 음식만 지정 가능
     public bool Assign(ItemDef def)

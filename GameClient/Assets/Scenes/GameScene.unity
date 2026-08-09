@@ -1215,6 +1215,8 @@ GameObject:
   - component: {fileID: 802411311}
   - component: {fileID: 802411312}
   - component: {fileID: 802411313}
+  - component: {fileID: 802411315}
+  - component: {fileID: 802411314}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1291,6 +1293,8 @@ MonoBehaviour:
   sprintKey: 304
   sprintMultiplier: 1.5
   stats: {fileID: 0}
+  climbLerpSpeed: 12
+  dropLerpSpeed: 20
   groundExtraOffset: 0
 --- !u!143 &802411305
 CharacterController:
@@ -1430,6 +1434,48 @@ MonoBehaviour:
   showSeconds: 0.15
   color: {r: 1, g: 0.95, b: 0.6, a: 0.35}
   heightOffset: 0.15
+  segments: 24
+--- !u!114 &802411314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 802411301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 406fca666ca53004a9468197189df2c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GunVisuals
+  executor: {fileID: 0}
+  alwaysFullRange: 1
+  muzzleHeight: 0.4
+  fadeSeconds: 0.7
+  segments: 14
+  startWidth: 0.125
+  endWidth: 0.25
+  riseSpeed: 0.2
+  driftAmount: 0.3
+  waviness: 0.12
+  smokeColor: {r: 0.71729267, g: 0.71729267, b: 0.764151, a: 0.5}
+  poolSize: 6
+--- !u!114 &802411315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 802411301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32968ac20a81019438f619ee600b1707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AimConeVisual
+  executor: {fileID: 0}
+  origin: {fileID: 0}
+  rangeScale: 0.3
+  color: {r: 1, g: 0.9, b: 0.4, a: 0.22}
+  heightOffset: 0.12
   segments: 24
 --- !u!1 &844676586
 GameObject:
@@ -1927,6 +1973,7 @@ MonoBehaviour:
   origin: {x: 0, y: 0, z: 0}
   levelHeight: 1
   warmthCrossesLevels: 0
+  allowDropDown: 1
   blockMovementOnOccupied: 1
   drawGizmo: 1
 --- !u!114 &1977076628
