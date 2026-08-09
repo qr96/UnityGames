@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: HearthConfig
   m_EditorClassIdentifier: Assembly-CSharp::HearthConfig
   baseWarmthRadius: 5
-  baseFuelCapacity: 100
+  baseFuelCapacity: 300
   fuelBurnPerSec: 1
   upgrades:
   - goldCost: 0

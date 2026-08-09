@@ -20,6 +20,7 @@ public class CraftingUI : MonoBehaviour
     private int cursor;
     private bool skipFirstInput;
     private CraftStation? filter;   // null이면 전체 표시
+    private float craftProgress;    // 제작 진행 시간
 
     private GUIStyle rowStyle;
     private GUIStyle headStyle;
@@ -69,11 +70,31 @@ public class CraftingUI : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q) || Input.GetKeyDown(KeyCode.Escape)) { SetOpen(false); return; }
         if (shown.Count == 0) return;
 
-        if (Input.GetKeyDown(KeyCode.DownArrow)) cursor = (cursor + 1) % shown.Count;
-        if (Input.GetKeyDown(KeyCode.UpArrow)) cursor = (cursor - 1 + shown.Count) % shown.Count;
+        if (Input.GetKeyDown(KeyCode.DownArrow)) { cursor = (cursor + 1) % shown.Count; craftProgress = 0f; }
+        if (Input.GetKeyDown(KeyCode.UpArrow)) { cursor = (cursor - 1 + shown.Count) % shown.Count; craftProgress = 0f; }
 
-        if (Input.GetKeyDown(KeyCode.E) && crafting != null)
-            crafting.TryCraft(shown[cursor]); // 목록 유지 — 연달아 제작 가능
+        if (crafting == null) return;
+
+        CraftingRecipe recipe = shown[cursor];
+
+        // 제작 시간이 있으면 E를 누르고 있는 동안 진행
+        if (recipe.craftSeconds > 0f)
+        {
+            if (Input.GetKey(KeyCode.E) && crafting.BlockReason(recipe) == null)
+            {
+                craftProgress += Time.deltaTime;
+                if (craftProgress >= recipe.craftSeconds)
+                {
+                    crafting.TryCraft(recipe);
+                    craftProgress = 0f;
+                }
+            }
+            else craftProgress = 0f;
+        }
+        else if (Input.GetKeyDown(KeyCode.E))
+        {
+            crafting.TryCraft(recipe); // 목록 유지 — 연달아 제작 가능
+        }
     }
 
     private void RefreshList()
@@ -148,6 +169,10 @@ public class CraftingUI : MonoBehaviour
 
             string reason = crafting != null ? crafting.BlockReason(r) : "제작 불가";
             if (reason != null) sb.Append($"({reason})");
+            else if (r.craftSeconds > 0f)
+                sb.Append(i == cursor && craftProgress > 0f
+                    ? $"[{craftProgress:0.0}/{r.craftSeconds:0.0}초]"
+                    : $"[{r.craftSeconds:0.#}초]");
 
             Rect rect = new Rect(px + 14f, py + 38f + i * (rowH + 4f), w - 28f, rowH);
             Color prev = GUI.color;
@@ -158,6 +183,6 @@ public class CraftingUI : MonoBehaviour
         }
 
         GUI.Label(new Rect(px + 14f, py + panelH - 26f, w - 28f, 22f),
-            "위/아래 선택 · E 제작 · Q/ESC 닫기", headStyle);
+            "위/아래 선택 · E 제작(시간 있는 것은 누르고 있기) · Q/ESC 닫기", headStyle);
     }
 }

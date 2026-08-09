@@ -1,18 +1,28 @@
 using UnityEngine;
 
 // 쿨타임 채취 노드. 코드 1벌 + 인스펙터 값으로 분화:
-//  - 나무(벌목): requiresAxe=true, yield=Firewood, yieldMode=Drop  → 바닥에 떨어뜨림
-//  - 열매(채집): requiresAxe=false, yield=Food,   yieldMode=Instant → 즉시 수납
+//  - 도구로 캐는 노드(나무·바위): requiresAxe=true. HP가 있고 스윙 1회에 도구 위력만큼 깎인다.
+//  - 손으로 따는 노드(베리 등): requiresAxe=false. E 한 번에 즉시 수확(HP 무시).
 // cooldownSeconds <= 0 이면 1회성(채취 후 제거).
 public class HarvestNode : InteractableBase, IHittable
 {
     public enum YieldMode { Instant, Drop }
 
-    [Header("산출")]
-    [SerializeField] private ResourceKind yieldKind = ResourceKind.Firewood;
-    [Tooltip("1회 수확으로 나오는 개수")]
-    [SerializeField] private int yieldAmount = 1;
-    [Tooltip("소진되기까지 수확할 수 있는 '횟수'. 1이면 한 번 수확하고 소진")]
+    [System.Serializable]
+    public struct Yield
+    {
+        public ResourceKind kind;
+        public int amount;
+    }
+
+    [Header("산출 (여러 종류 가능)")]
+    [Tooltip("1회 수확으로 나오는 것들. 예: 장작 2 + 잔가지 1")]
+    [SerializeField]
+    private Yield[] yields = new Yield[]
+    {
+        new Yield { kind = ResourceKind.Firewood, amount = 1 },
+    };
+    [Tooltip("소진되기까지 수확할 수 있는 횟수. 3이면 E를 세 번 눌러 세 번 수확한다")]
     [SerializeField] private int harvestCharges = 1;
     [SerializeField] private string prompt = "패기";
     [SerializeField] private YieldMode yieldMode = YieldMode.Instant;
@@ -28,13 +38,14 @@ public class HarvestNode : InteractableBase, IHittable
     [Header("도구")]
     [SerializeField] private bool requiresAxe = true;
 
-    [Header("타격 (1회 수확에 필요한 E 연타)")]
-    [Tooltip("수확 1회를 완성하는 데 필요한 E 입력 수. 위의 '채취 횟수'와 별개")]
-    [SerializeField] private int hitsRequired = 1;
+    [Header("내구도 (도구로 캐는 노드만)")]
+    [Tooltip("노드 HP. 스윙 1회에 도구 위력(hitPower)만큼 깎이고 0이 되면 산출된다. " +
+             "상위 도구일수록 적은 타수로 넘어간다. 손으로 채집하는 노드에서는 무시된다")]
+    [SerializeField] private int nodeHealth = 3;
 
     public bool RequiresAxe => requiresAxe;
-    public int HitsRequired => Mathf.Max(1, hitsRequired);
-    public int HitsDone => hits;
+    public int MaxHealth => Mathf.Max(1, nodeHealth);
+    public int CurrentHealth => Mathf.Max(0, MaxHealth - damage);
 
     [Header("재생")]
     [Tooltip("채취 후 재생까지 시간(초). 0 이하면 1회성")]
@@ -52,8 +63,8 @@ public class HarvestNode : InteractableBase, IHittable
 
     private float readyTime;
     private bool depleted;
-    private int hits;
-    private int chargesLeft;
+    private int damage;        // 누적 피해
+    private int chargesLeft;   // 남은 수확 횟수
 
     protected override void OnEnable()
     {
@@ -91,12 +102,15 @@ public class HarvestNode : InteractableBase, IHittable
     {
         get
         {
-            if (yieldMode == YieldMode.Instant &&
-                inventory != null && inventory.FreeSpaceFor(yieldKind) <= 0)
+            if (yieldMode == YieldMode.Instant && inventory != null && yields != null &&
+                yields.Length > 0 && inventory.FreeSpaceFor(yields[0].kind) <= 0)
                 return $"{prompt} (가득 참)";
 
-            int need = HitsRequired;
-            string text = need > 1 ? $"{prompt} ({hits}/{need})" : prompt;
+            string text = prompt;
+
+            // 도구 노드는 남은 HP, 손 채집은 진행 표시 없음
+            if (requiresAxe && damage > 0) text = $"{prompt} ({CurrentHealth}/{MaxHealth})";
+
             if (harvestCharges > 1) text += $" [{chargesLeft}회 남음]";
             return text;
         }
@@ -106,11 +120,11 @@ public class HarvestNode : InteractableBase, IHittable
     public override bool CanInteract(GameObject interactor)
         => !depleted && !requiresAxe;
 
-    // 채집(도끼 불필요) — E 한 번이 1타
+    // 손 채집(도구 불필요) — HP와 무관하게 E 한 번에 즉시 수확
     public override void Interact(GameObject interactor)
     {
         if (!CanInteract(interactor)) return;
-        ApplyHits(1, interactor);
+        ApplyHits(MaxHealth, interactor);
     }
 
     // 타격 누적 → 필요 횟수에 도달하면 산출
@@ -128,17 +142,16 @@ public class HarvestNode : InteractableBase, IHittable
             hitFeedback.Play(dir);
         }
 
-        hits += count;
-        if (hits < HitsRequired) return;
+        damage += count;                  // count = 도구 위력
+        if (damage < MaxHealth) return;
 
         if (inventory == null) inventory = FindObjectOfType<Inventory>();
 
         if (yieldMode == YieldMode.Instant)
         {
-            int stored = inventory != null ? inventory.Add(yieldKind, yieldAmount) : 0;
-            if (stored <= 0)
+            if (!GiveYieldsToInventory())
             {
-                hits = HitsRequired - 1; // 마지막 타격 취소 — 다시 시도 가능
+                damage = MaxHealth - 1; // 마지막 타격 취소 — 다시 시도 가능
                 Debug.Log("[채취] 자리 없음 — 부리고 오세요");
                 return;
             }
@@ -147,18 +160,16 @@ public class HarvestNode : InteractableBase, IHittable
         {
             if (!SpawnDrops())
             {
-                hits = HitsRequired - 1;
+                damage = MaxHealth - 1;
                 return;
             }
         }
 
-        // 채취 횟수 차감 — 남아 있으면 소진하지 않고 계속 수확 가능
+        damage = 0;
+
+        // 수확 횟수 차감 — 남아 있으면 소진하지 않는다
         chargesLeft--;
-        if (chargesLeft > 0)
-        {
-            hits = 0;
-            return;
-        }
+        if (chargesLeft > 0) return;
 
         if (cooldownSeconds > 0f)
         {
@@ -171,6 +182,45 @@ public class HarvestNode : InteractableBase, IHittable
         }
     }
 
+    // 즉시 수납 — 하나라도 들어가면 성공
+    private bool GiveYieldsToInventory()
+    {
+        if (inventory == null)
+        {
+            Debug.LogWarning($"[채취] {name}: Inventory를 찾지 못함");
+            return false;
+        }
+
+        if (yields == null || yields.Length == 0)
+        {
+            Debug.LogWarning($"[채취] {name}: Yields 배열이 비어 있음 — 인스펙터에서 산출물을 지정할 것");
+            return false;
+        }
+
+        bool any = false;
+        for (int i = 0; i < yields.Length; i++)
+        {
+            if (yields[i].amount <= 0)
+            {
+                Debug.LogWarning($"[채취] {name}: Yields[{i}] 수량이 0");
+                continue;
+            }
+
+            int stored = inventory.Add(yields[i].kind, yields[i].amount);
+            if (stored > 0)
+            {
+                any = true;
+                Debug.Log($"[채취] {name}: {yields[i].kind} {stored}개 획득");
+            }
+            else
+            {
+                Debug.Log($"[채취] {name}: {yields[i].kind} 수납 실패 " +
+                          "(칸 부족이거나 ItemDatabase에 정의 없음)");
+            }
+        }
+        return any;
+    }
+
     private bool SpawnDrops()
     {
         if (dropPrefab == null)
@@ -178,22 +228,27 @@ public class HarvestNode : InteractableBase, IHittable
             Debug.LogWarning($"[채취] {name}: Yield Mode가 Drop인데 Drop Prefab이 없음");
             return false;
         }
+        if (yields == null || yields.Length == 0) return false;
 
         int per = Mathf.Max(1, amountPerDrop);
-        int remain = Mathf.Max(1, yieldAmount);
 
-        while (remain > 0)
+        for (int y = 0; y < yields.Length; y++)
         {
-            int chunk = Mathf.Min(per, remain);
-            remain -= chunk;
+            int remain = yields[y].amount;
+            while (remain > 0)
+            {
+                int chunk = Mathf.Min(per, remain);
+                remain -= chunk;
 
-            Vector2 c = Random.insideUnitCircle * scatterRadius;
-            Vector3 pos = transform.position + new Vector3(c.x, 0f, c.y);
+                Vector2 c = Random.insideUnitCircle * scatterRadius;
+                Vector3 pos = transform.position + new Vector3(c.x, 0f, c.y);
 
-            GameObject go = Instantiate(dropPrefab, pos, Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
-            DroppedItem drop = go.GetComponent<DroppedItem>();
-            if (drop != null) drop.Setup(yieldKind, chunk);
-            else Debug.LogWarning("[채취] Drop Prefab에 DroppedItem 없음");
+                GameObject go = Instantiate(dropPrefab, pos,
+                    Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
+                DroppedItem drop = go.GetComponent<DroppedItem>();
+                if (drop != null) drop.Setup(yields[y].kind, chunk);
+                else Debug.LogWarning("[채취] Drop Prefab에 DroppedItem 없음");
+            }
         }
 
         return true;
@@ -202,8 +257,8 @@ public class HarvestNode : InteractableBase, IHittable
     private void SetDepleted(bool value)
     {
         depleted = value;
-        hits = 0;                                  // 타격 진행 초기화
-        if (!value) chargesLeft = Mathf.Max(1, harvestCharges); // 재생 시 채취 횟수 복구
+        damage = 0;                                       // 재생·소진 시 피해 초기화
+        if (!value) chargesLeft = Mathf.Max(1, harvestCharges); // 재생 시 수확 횟수 복구
         if (fullVisual != null) fullVisual.SetActive(!value);
         if (depletedVisual != null) depletedVisual.SetActive(value);
     }

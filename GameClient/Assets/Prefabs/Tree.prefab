@@ -11,11 +11,11 @@ GameObject:
   - component: {fileID: 4733855466606875067}
   - component: {fileID: 6605478263800507604}
   - component: {fileID: 2073050833884956565}
-  - component: {fileID: 8852826759502073483}
   - component: {fileID: 3020773500705320249}
   - component: {fileID: 2770085337985893987}
   - component: {fileID: 5637556864657936642}
   - component: {fileID: 5136127466891612718}
+  - component: {fileID: 4115995590699473739}
   m_Layer: 0
   m_Name: Tree
   m_TagString: Untagged
@@ -94,27 +94,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8852826759502073483
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7732165403120921067}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3020773500705320249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,8 +106,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffacdc15d3e924c4b90d045dce9d5cc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HarvestNode
-  yieldKind: 2
-  yieldAmount: 3
+  yields:
+  - kind: 2
+    amount: 1
   harvestCharges: 1
   prompt: "\uD328\uAE30"
   yieldMode: 1
@@ -136,8 +116,8 @@ MonoBehaviour:
   amountPerDrop: 1
   scatterRadius: 1.2
   requiresAxe: 1
-  hitsRequired: 3
-  cooldownSeconds: 5
+  nodeHealth: 3
+  cooldownSeconds: 0
   fullVisual: {fileID: 0}
   depletedVisual: {fileID: 0}
   hitFeedback: {fileID: 0}
@@ -164,7 +144,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7732165403120921067}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9bcc6bf12d1675e45acd89785fc065ff, type: 3}
   m_Name: 
@@ -190,3 +170,24 @@ MonoBehaviour:
   debrisPrefab: {fileID: 0}
   debrisOffset: {x: 0, y: 1, z: 0}
   debrisLifetime: 1.2
+--- !u!65 &4115995590699473739
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7732165403120921067}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}

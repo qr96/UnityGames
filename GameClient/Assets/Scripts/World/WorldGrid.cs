@@ -1,8 +1,9 @@
 using UnityEngine;
 
 // 월드 격자. 1칸 = cellSize(기본 1m).
-// 담당: 좌표 변환 / 칸 점유 / 높이 층·통행 판정.
-// 이동 자체는 자유(연속)이며, 격자는 '갈 수 있는가'만 판정한다.
+// 담당: 좌표 변환 / 칸 점유(논리) / 높이 층·절벽 통행 판정.
+// 이동은 자유(연속). 격자는 층·절벽만 막고, 나무·바위 같은 개체의 물리적 차단은 콜라이더가 맡는다.
+// 칸 점유(GridOccupant)는 '그 칸에 설치할 수 있는가'와 이후 경로 탐색을 위한 정보다.
 public class WorldGrid : MonoBehaviour
 {
     public static WorldGrid Instance { get; private set; }
@@ -22,8 +23,9 @@ public class WorldGrid : MonoBehaviour
     [Tooltip("켜면 층이 달라도 온기가 넘어간다. 끄면 절벽 위아래는 서로 데우지 않음")]
     [SerializeField] private bool warmthCrossesLevels = false;
 
-    [Tooltip("켜면 격자를 점유한 배치물(GridOccupant)이 있는 칸을 지나갈 수 없다")]
-    [SerializeField] private bool blockMovementOnOccupied = true;
+    [Tooltip("켜면 격자를 점유한 칸 자체가 통행 불가가 된다(네모난 차단). " +
+             "기본은 꺼짐 — 물리적 차단은 콜라이더가 맡고, 격자 점유는 설치 가능 여부·경로 정보로만 쓴다")]
+    [SerializeField] private bool blockMovementOnOccupied = false;
 
     [Header("표시")]
     [SerializeField] private bool drawGizmo = true;
@@ -90,8 +92,9 @@ public class WorldGrid : MonoBehaviour
                 if (TryGetRampRise(c, out _)) continue;
 
                 bad++;
-                Debug.LogWarning($"[격자] 경사로 ({x},{z}) 옆에 한 단 높은 칸이 없음 — " +
-                                 "경사로는 낮은 쪽 칸에 두어야 함(현재 층 " + levels[x, z] + ")");
+                Debug.LogWarning($"[격자] 경사로 ({x},{z}): 오를 수 있는 축을 찾지 못함 — " +
+                                 $"현재 층 {levels[x, z]}. 경사로는 낮은 쪽 칸에 두고, " +
+                                 "런의 한쪽 끝은 한 단 높은 칸, 반대쪽 끝은 같은 층(진입로)이어야 함");
             }
         if (bad > 0) Debug.LogWarning($"[격자] 잘못 놓인 경사로 {bad}개 — 경사면이 생기지 않음");
     }
@@ -174,6 +177,13 @@ public class WorldGrid : MonoBehaviour
 
         const int maxRun = 16;
 
+        // 1순위: 오르는 쪽 끝이 +1층이고, 반대쪽 끝이 같은 층(열린 진입로)인 축.
+        //         노치형(절벽 안으로 파인 형태)에서는 양옆도 +1층이라 이 조건으로 벽과 축을 가른다.
+        // 2순위: 진입로 조건이 맞지 않으면(막다른 형태) 오르는 조건만으로 판단.
+        Vector2Int fallbackDir = Vector2Int.zero;
+        int fallbackIndex = 0, fallbackCount = 1;
+        bool hasFallback = false;
+
         for (int i = 0; i < dirs.Length; i++)
         {
             Vector2Int d = dirs[i];
@@ -187,7 +197,7 @@ public class WorldGrid : MonoBehaviour
                 forward++;
             }
 
-            // 런의 끝 다음 칸이 한 단 높으면 이 방향이 오르는 방향
+            // 런의 끝 다음 칸이 한 단 높아야 오르는 방향
             Vector2Int top = cell + d * forward;
             if (!InBounds(top) || GetLevel(top) != my + 1) continue;
 
@@ -200,9 +210,25 @@ public class WorldGrid : MonoBehaviour
                 back++;
             }
 
+            if (!hasFallback)
+            {
+                fallbackDir = d; fallbackIndex = back; fallbackCount = back + forward;
+                hasFallback = true;
+            }
+
+            // 진입로 검사: 런의 반대쪽 끝 바깥이 같은 층이어야 축이다
+            Vector2Int entry = cell - d * (back + 1);
+            if (!InBounds(entry) || GetLevel(entry) != my) continue;
+
             dir = d;
             index = back;
             count = back + forward;
+            return true;
+        }
+
+        if (hasFallback)
+        {
+            dir = fallbackDir; index = fallbackIndex; count = fallbackCount;
             return true;
         }
 
@@ -211,6 +237,26 @@ public class WorldGrid : MonoBehaviour
 
     public bool TryGetRampRise(Vector2Int cell, out Vector2Int dir)
         => TryGetRampInfo(cell, out dir, out _, out _);
+
+    // 칸의 모서리별 지표면 높이. corner: 0=SW, 1=NW, 2=NE, 3=SE
+    // 경사로 칸이면 올라가는 쪽 두 모서리가 한 단계 높다.
+    public float SurfaceHeightAtCorner(Vector2Int cell, int corner)
+    {
+        float baseY = HeightAt(cell);
+        if (!TryGetRampInfo(cell, out Vector2Int dir, out int index, out int count)) return baseY;
+
+        float step = levelHeight / Mathf.Max(1, count);
+        float low = baseY + index * step;
+        float high = low + step;
+
+        bool isHigh;
+        if (dir.x > 0) isHigh = (corner == 2 || corner == 3); // NE, SE
+        else if (dir.x < 0) isHigh = (corner == 0 || corner == 1); // SW, NW
+        else if (dir.y > 0) isHigh = (corner == 1 || corner == 2); // NW, NE
+        else isHigh = (corner == 0 || corner == 3); // SW, SE
+
+        return isHigh ? high : low;
+    }
 
     // 월드 지점의 실제 지면 높이. 경사로 칸에서는 칸 안 위치에 따라 보간된다.
     public float SampleHeight(Vector3 world)
@@ -245,17 +291,31 @@ public class WorldGrid : MonoBehaviour
     }
 
     // 이웃 칸으로 넘어갈 수 있는지 (동물의 숲식 절벽 규칙)
+    //  - 같은 층: 통행 가능
+    //  - 1층 차이: 경사로를 '경사 축 방향으로' 지날 때만 가능
+    //             (노치형에서 양옆 벽을 타고 오르는 것을 막는다)
+    //  - 2층 이상: 불가
     public bool CanMoveBetween(Vector2Int from, Vector2Int to)
     {
         if (from == to) return CanStand(to);
         if (!CanStand(to) || !InBounds(from)) return false;
 
-        int diff = Mathf.Abs(GetLevel(to) - GetLevel(from));
+        int diff = GetLevel(to) - GetLevel(from);
         if (diff == 0) return true;
-        if (diff > 1) return false;
+        if (Mathf.Abs(diff) > 1) return false;
 
-        // 1층 차이 — 경사로에서만 오르내림
-        return IsRamp(from) || IsRamp(to);
+        if (diff > 0)
+        {
+            // 올라가기: 지금 칸이 경사로이고, 목적지가 그 경사 축의 위쪽이어야 한다
+            if (!TryGetRampInfo(from, out Vector2Int upDir, out _, out _)) return false;
+            return to == from + upDir;
+        }
+        else
+        {
+            // 내려가기: 목적지가 경사로이고, 지금 칸이 그 경사 축의 위쪽이어야 한다
+            if (!TryGetRampInfo(to, out Vector2Int downDir, out _, out _)) return false;
+            return from == to + downDir;
+        }
     }
 
     // 월드 좌표 기준 이동 가능 판정

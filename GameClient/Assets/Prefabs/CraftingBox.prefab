@@ -11,11 +11,11 @@ GameObject:
   - component: {fileID: 6054110475802161902}
   - component: {fileID: 571794506269576003}
   - component: {fileID: 2227113879514063543}
-  - component: {fileID: 8265319733831233607}
   - component: {fileID: 9106157759199106522}
   - component: {fileID: 1862999535341040640}
   - component: {fileID: 8283481296366193112}
   - component: {fileID: 7447871245657460317}
+  - component: {fileID: 254705802628574741}
   m_Layer: 0
   m_Name: CraftingBox
   m_TagString: Untagged
@@ -94,27 +94,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8265319733831233607
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4187521956452554282}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &9106157759199106522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -129,6 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CraftingStation
   stationType: 1
   useRadius: 3
+  craftingUI: {fileID: 0}
 --- !u!114 &1862999535341040640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,7 +131,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4187521956452554282}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9bcc6bf12d1675e45acd89785fc065ff, type: 3}
   m_Name: 
@@ -171,3 +151,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GridOccupant
   footprint: {x: 1, y: 1}
   snapOnStart: 1
+--- !u!65 &254705802628574741
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4187521956452554282}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}

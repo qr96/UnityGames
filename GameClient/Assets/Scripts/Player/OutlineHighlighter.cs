@@ -15,6 +15,9 @@ public class OutlineHighlighter : MonoBehaviour, IHighlightable
     [SerializeField] private float outlineWidth = 0.03f;
     [SerializeField] private Material outlineMaterialOverride;
 
+    // 색·두께가 같으면 모든 오브젝트가 하나의 머티리얼을 공유한다
+    private static Material sharedOutline;
+
     private Renderer[] renderers;
     private Material[][] baseMaterials; // 렌더러별 원본 배열
     private Material outlineMat;
@@ -33,31 +36,29 @@ public class OutlineHighlighter : MonoBehaviour, IHighlightable
         }
         else
         {
-            Shader s = Shader.Find("Hokhan/Outline");
-            if (s != null)
+            if (sharedOutline == null)
             {
-                outlineMat = new Material(s);
-                ApplyProperties();
+                Shader s = Shader.Find("Hokhan/Outline");
+                if (s != null)
+                {
+                    sharedOutline = new Material(s);
+                    sharedOutline.SetColor("_OutlineColor", outlineColor);
+                    sharedOutline.SetFloat("_OutlineWidth", outlineWidth);
+                }
             }
-            else
-            {
+            outlineMat = sharedOutline;
+
+            if (outlineMat == null)
                 Debug.LogWarning("[OutlineHighlighter] 'Hokhan/Outline' 셰이더를 못 찾음. 외곽선 비활성.");
-            }
         }
     }
 
-    // 색/두께를 런타임 재질에 반영. 오버라이드 재질을 쓰면 건드리지 않음.
+    // 색·두께는 공유 머티리얼에 반영된다(모든 대상에 함께 적용됨).
     private void ApplyProperties()
     {
         if (outlineMat == null || outlineMaterialOverride != null) return;
         outlineMat.SetColor("_OutlineColor", outlineColor);
         outlineMat.SetFloat("_OutlineWidth", outlineWidth);
-    }
-
-    private void OnValidate()
-    {
-        // 플레이 중 인스펙터에서 값 바꾸면 즉시 반영
-        if (Application.isPlaying) ApplyProperties();
     }
 
     public void SetHighlighted(bool value)

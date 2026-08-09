@@ -11,6 +11,15 @@ public class Hearth : MonoBehaviour
     [Header("설정 (있으면 기본값/강화를 여기서 읽음)")]
     [SerializeField] private HearthConfig config;
 
+    [Header("불빛/온기 반경 — 연료 비축률에 따라 변함")]
+    [Tooltip("비축 100%일 때 반경(타일)")]
+    [SerializeField] private float maxRadius = 4f;
+    [Tooltip("비축이 lowFuelRatio 이하일 때 반경(타일)")]
+    [SerializeField] private float minRadius = 2f;
+    [Tooltip("이 비율 이하에서 최소 반경")]
+    [Range(0f, 1f)]
+    [SerializeField] private float lowFuelRatio = 0.2f;
+
     [Header("기본값 (config 없을 때)")]
     [SerializeField] private float baseWarmthRadius = 5f;
     [SerializeField] private float baseFuelCapacity = 100f;
@@ -62,12 +71,14 @@ public class Hearth : MonoBehaviour
     {
         RecalcStats();
         fuel = Mathf.Min(fuel, currentCapacity);
+        UpdateRadius();
         ApplyRadiusVisual();
         ApplyUpgradeVisual();
     }
 
     private void Update()
     {
+        UpdateRadius();
         if (!isLit) return;
 
         fuel -= currentBurn * Time.deltaTime;
@@ -76,6 +87,17 @@ public class Hearth : MonoBehaviour
             fuel = 0f;
             isLit = false; // 꺼짐 → IsPointWarm이 false → 추위 침식
         }
+    }
+
+    // 연료 비축률에 따라 반경을 보간 (100% → maxRadius, lowFuelRatio 이하 → minRadius)
+    private void UpdateRadius()
+    {
+        if (!isLit) { currentRadius = 0f; return; }
+
+        float ratio = FuelRatio;
+        float t = Mathf.InverseLerp(Mathf.Clamp01(lowFuelRatio), 1f, ratio);
+        currentRadius = Mathf.Lerp(minRadius, maxRadius, t);
+        ApplyRadiusVisual();
     }
 
     // ---- 상호작용 진입점 ----
@@ -140,6 +162,8 @@ public class Hearth : MonoBehaviour
         ApplyUpgradeVisual();
     }
 
+    private static MaterialPropertyBlock propertyBlock;
+
     private void ApplyUpgradeVisual()
     {
         if (upgradedVisual != null)
@@ -148,15 +172,19 @@ public class Hearth : MonoBehaviour
             return;
         }
 
-        // 지정 비주얼이 없으면 색·크기로 구분
+        // MaterialPropertyBlock 사용 — 머티리얼 사본을 만들지 않아 배칭이 깨지지 않는다
+        if (propertyBlock == null) propertyBlock = new MaterialPropertyBlock();
+
         Renderer[] rs = GetComponentsInChildren<Renderer>(true);
         for (int i = 0; i < rs.Length; i++)
         {
             if (meltedGroundVisual != null && rs[i].transform.IsChildOf(meltedGroundVisual)) continue;
-            Material m = rs[i].material;
+
+            rs[i].GetPropertyBlock(propertyBlock);
             Color c = isUpgraded ? upgradedTint : Color.white;
-            if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", c);
-            if (m.HasProperty("_Color")) m.SetColor("_Color", c);
+            propertyBlock.SetColor("_BaseColor", c);
+            propertyBlock.SetColor("_Color", c);
+            rs[i].SetPropertyBlock(propertyBlock);
         }
 
         if (!Mathf.Approximately(upgradedScale, 1f))
@@ -168,7 +196,6 @@ public class Hearth : MonoBehaviour
 
     private void RecalcStats()
     {
-        currentRadius = config != null ? config.baseWarmthRadius : baseWarmthRadius;
         currentCapacity = config != null ? config.baseFuelCapacity : baseFuelCapacity;
 
         float burn = config != null ? config.fuelBurnPerSec : fuelBurnPerSec;
@@ -176,12 +203,14 @@ public class Hearth : MonoBehaviour
         currentBurn = burn;
     }
 
+    // 눈 녹은 땅 오브젝트를 지정했다면 반경에 맞춰 크기를 맞춘다
     private void ApplyRadiusVisual()
     {
         if (meltedGroundVisual == null) return;
+
         float d = currentRadius * 2f; // 지름
-        Vector3 s = meltedGroundVisual.localScale;
-        meltedGroundVisual.localScale = new Vector3(d, s.y, d);
+        Vector3 sc = meltedGroundVisual.localScale;
+        meltedGroundVisual.localScale = new Vector3(d, sc.y, d);
     }
 
     // ---- 정적 조회 ----

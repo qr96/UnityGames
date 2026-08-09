@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4773350968892555471}
   - component: {fileID: 924572986027125724}
   - component: {fileID: 4707486043046978688}
-  - component: {fileID: 5611743798789138027}
   - component: {fileID: 5956249572918538012}
   - component: {fileID: 1842505354905069884}
   - component: {fileID: 6132837791772638136}
@@ -93,27 +92,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5611743798789138027
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5937129539654792257}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5956249572918538012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,19 +104,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffacdc15d3e924c4b90d045dce9d5cc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HarvestNode
-  yieldKind: 3
-  yieldAmount: 1
+  yields:
+  - kind: 3
+    amount: 1
+  harvestCharges: 5
   prompt: "\uCC44\uC9D1"
   yieldMode: 0
   dropPrefab: {fileID: 0}
   amountPerDrop: 1
   scatterRadius: 1.2
   requiresAxe: 0
-  hitsRequired: 1
-  harvestCharges: 5
-  cooldownSeconds: 5
+  nodeHealth: 3
+  cooldownSeconds: 240
   fullVisual: {fileID: 0}
   depletedVisual: {fileID: 0}
+  hitFeedback: {fileID: 0}
   inventory: {fileID: 0}
 --- !u!114 &1842505354905069884
 MonoBehaviour:
@@ -162,7 +142,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5937129539654792257}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9bcc6bf12d1675e45acd89785fc065ff, type: 3}
   m_Name: 

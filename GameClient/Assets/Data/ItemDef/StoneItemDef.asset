@@ -15,7 +15,11 @@ MonoBehaviour:
   kind: 1
   displayName: "\uB3CC\uBA69\uC774"
   category: 0
-  stackLimit: 50
-  weightPerUnit: 3
+  stackLimit: 5
+  toolType: 0
+  hitPower: 1
+  attackPattern: {fileID: 0}
+  placementPrefab: {fileID: 0}
+  placementFootprint: {x: 1, y: 1}
   fuelValue: 0
   hungerRestore: 0

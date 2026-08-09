@@ -111,35 +111,5 @@ public class Hotbar : MonoBehaviour
         if (Input.GetKeyDown(cycleKey)) Cycle();
     }
 
-    private GUIStyle slotStyle;
 
-    private void OnGUI()
-    {
-        if (slotStyle == null)
-            slotStyle = new GUIStyle(GUI.skin.box) { fontSize = 12, alignment = TextAnchor.MiddleCenter };
-
-        const float w = 68f, h = 46f, gap = 4f;
-        float total = SlotCount * w + (SlotCount - 1) * gap;
-        float x0 = (Screen.width - total) * 0.5f;
-        float y = Screen.height - h - 16f;
-
-        for (int i = 0; i < SlotCount; i++)
-        {
-            Rect r = new Rect(x0 + i * (w + gap), y, w, h);
-            ItemDef def = assigned[i];
-
-            string text;
-            if (def == null) text = $"{i + 1}\n-";
-            else
-            {
-                bool have = inventory != null && inventory.Has(def.kind, 1);
-                text = $"{i + 1}\n{def.displayName}" + (have ? "" : " (없음)");
-            }
-
-            Color prev = GUI.color;
-            if (i == equippedIndex) GUI.color = new Color(1f, 0.95f, 0.6f); // 손에 든 것
-            GUI.Box(r, text, slotStyle);
-            GUI.color = prev;
-        }
-    }
 }

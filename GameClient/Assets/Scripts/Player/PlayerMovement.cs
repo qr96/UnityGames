@@ -96,7 +96,7 @@ public class PlayerMovement : MonoBehaviour
                           && stats != null && stats.CanSprint;
         if (stats != null) stats.SetSprinting(wantSprint);
 
-        float speed = moveSpeed;
+        float speed = moveSpeed * (stats != null ? stats.MoveSpeedMultiplier : 1f);
         if (wantSprint) speed *= Mathf.Max(1f, sprintMultiplier);
 
         Vector3 horizontal = inputDir * speed * Time.deltaTime;

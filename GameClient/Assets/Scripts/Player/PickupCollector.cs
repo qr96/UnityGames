@@ -19,10 +19,6 @@ public class PickupCollector : MonoBehaviour
     [SerializeField] private float radius = 3f;
     [SerializeField] private Inventory inventory; // 비우면 씬에서 찾음
 
-    [Header("안내")]
-    [Tooltip("반경 안에 줍을 것이 있으면 화면에 안내 표시")]
-    [SerializeField] private bool showPrompt = true;
-
     // 지금 반경 안에 줍을 것이 있는지 (UI 표시용)
     public int NearbyCount { get; private set; }
 
@@ -136,24 +132,7 @@ public class PickupCollector : MonoBehaviour
             Debug.Log("[줍기] 자리 없음 — 부리고 오세요");
     }
 
-    private GUIStyle promptStyle;
 
-    private void OnGUI()
-    {
-        if (!showPrompt || NearbyCount <= 0) return;
-        if (InteractionHasPriority) return; // 상호작용 라벨과 겹치지 않게
-
-        if (promptStyle == null)
-        {
-            promptStyle = new GUIStyle(GUI.skin.box) { fontSize = 15, alignment = TextAnchor.MiddleCenter };
-            promptStyle.normal.textColor = Color.white;
-        }
-
-        string text = collectMode == Mode.Nearest
-            ? $"{pickupKey} — 줍기 (근처 {NearbyCount}묶음)"
-            : $"{pickupKey} — 모두 줍기 ({NearbyCount}묶음)";
-        GUI.Box(new Rect((Screen.width - 220f) * 0.5f, Screen.height - 110f, 220f, 30f), text, promptStyle);
-    }
 
     private void OnDrawGizmosSelected()
     {

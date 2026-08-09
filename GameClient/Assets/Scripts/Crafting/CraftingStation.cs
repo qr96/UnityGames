@@ -54,6 +54,9 @@ public class CraftingStation : InteractableBase
     {
         if (type == CraftStation.Hand) return true;
 
+        // 불 앞 = 켜진 화로의 온기 반경 안
+        if (type == CraftStation.Fire) return Hearth.IsPointWarm(point);
+
         for (int i = 0; i < All.Count; i++)
         {
             CraftingStation s = All[i];
@@ -72,6 +75,7 @@ public class CraftingStation : InteractableBase
             case CraftStation.Workbench: return "제작대";
             case CraftStation.Anvil: return "모루";
             case CraftStation.CookingPot: return "요리솥";
+            case CraftStation.Fire: return "불 앞";
             default: return type.ToString();
         }
     }

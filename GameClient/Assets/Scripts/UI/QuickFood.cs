@@ -86,21 +86,5 @@ public class QuickFood : MonoBehaviour
         EnsureAssigned(); // 소진 시 자동 재지정
     }
 
-    private GUIStyle slotStyle;
 
-    private void OnGUI()
-    {
-        if (slotStyle == null)
-            slotStyle = new GUIStyle(GUI.skin.box) { fontSize = 12, alignment = TextAnchor.MiddleCenter };
-
-        const float w = 92f, h = 46f;
-        float x = (Screen.width * 0.5f) + (Hotbar.SlotCount * 68f + (Hotbar.SlotCount - 1) * 4f) * 0.5f + 12f;
-        float y = Screen.height - h - 16f;
-
-        string text = assigned == null
-            ? $"{eatKey}\n음식 없음"
-            : $"{eatKey}\n{assigned.displayName} {AssignedCount}";
-
-        GUI.Box(new Rect(x, y, w, h), text, slotStyle);
-    }
 }
