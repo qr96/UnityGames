@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 4773350968892555471}
   - component: {fileID: 924572986027125724}
   - component: {fileID: 4707486043046978688}
-  - component: {fileID: 5956249572918538012}
   - component: {fileID: 1842505354905069884}
+  - component: {fileID: 7358524997918025068}
   m_Layer: 0
   m_Name: BerryTree
   m_TagString: Untagged
@@ -91,34 +91,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &5956249572918538012
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5937129539654792257}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffacdc15d3e924c4b90d045dce9d5cc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HarvestNode
-  yields:
-  - item: {fileID: 11400000, guid: e667e89693e02f14cba56db4015df0c3, type: 2}
-    amount: 1
-  harvestCharges: 5
-  prompt: "\uCC44\uC9D1"
-  yieldMode: 0
-  dropPrefab: {fileID: 0}
-  amountPerDrop: 1
-  scatterRadius: 1.2
-  requiresAxe: 0
-  nodeHealth: 3
-  cooldownSeconds: 240
-  fullVisual: {fileID: 0}
-  depletedVisual: {fileID: 0}
-  hitFeedback: {fileID: 0}
-  inventory: {fileID: 0}
 --- !u!114 &1842505354905069884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,3 +106,22 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 0.03
   outlineMaterialOverride: {fileID: 0}
+--- !u!114 &7358524997918025068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5937129539654792257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8aaff5b1c0689e24b971e00fb6591f32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceSource
+  def: {fileID: 11400000, guid: 8fdf14ad7a0dfc94aad0c002bdbe7951, type: 2}
+  uid: 
+  variant: 0
+  fullVisual: {fileID: 0}
+  depletedVisual: {fileID: 0}
+  inventory: {fileID: 0}
+  hitFeedback: {fileID: 0}

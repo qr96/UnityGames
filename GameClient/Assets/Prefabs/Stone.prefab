@@ -99,7 +99,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7286084870818382727}
   - component: {fileID: 1144288305259715202}
-  - component: {fileID: 3441058024070199269}
+  - component: {fileID: 3030347993722552883}
   m_Layer: 0
   m_Name: Stone
   m_TagString: Untagged
@@ -138,7 +138,7 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 0.03
   outlineMaterialOverride: {fileID: 0}
---- !u!114 &3441058024070199269
+--- !u!114 &3030347993722552883
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -147,12 +147,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 8667438733448051177}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35ebfc6d4ea0c8b46ae1ba7bfd5fe619, type: 3}
+  m_Script: {fileID: 11500000, guid: 8aaff5b1c0689e24b971e00fb6591f32, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GatherPoint
-  item: {fileID: 11400000, guid: 36280fe707bd9144fb8d75e7fad725e7, type: 2}
-  amount: 1
-  prompt: "\uC90D\uAE30"
-  respawnSeconds: 30
-  visual: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceSource
+  def: {fileID: 11400000, guid: 94e66d104d451cc4cafcfdf8a8dc5829, type: 2}
+  uid: 
+  variant: 0
+  fullVisual: {fileID: 0}
+  depletedVisual: {fileID: 0}
   inventory: {fileID: 0}
+  hitFeedback: {fileID: 0}

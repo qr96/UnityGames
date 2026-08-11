@@ -11,10 +11,10 @@ GameObject:
   - component: {fileID: 4733855466606875067}
   - component: {fileID: 6605478263800507604}
   - component: {fileID: 2073050833884956565}
-  - component: {fileID: 3020773500705320249}
   - component: {fileID: 2770085337985893987}
   - component: {fileID: 5136127466891612718}
   - component: {fileID: 4115995590699473739}
+  - component: {fileID: 3445907496370755762}
   m_Layer: 0
   m_Name: Tree
   m_TagString: Untagged
@@ -93,32 +93,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &3020773500705320249
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7732165403120921067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffacdc15d3e924c4b90d045dce9d5cc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HarvestNode
-  yields: []
-  harvestCharges: 1
-  prompt: "\uD328\uAE30"
-  yieldMode: 1
-  dropPrefab: {fileID: 3541415768129457373, guid: 6926d059c38a16443b1746f56d973db9, type: 3}
-  amountPerDrop: 1
-  scatterRadius: 1.2
-  requiresAxe: 1
-  nodeHealth: 3
-  cooldownSeconds: 0
-  fullVisual: {fileID: 0}
-  depletedVisual: {fileID: 0}
-  hitFeedback: {fileID: 0}
-  inventory: {fileID: 0}
 --- !u!114 &2770085337985893987
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -175,3 +149,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3445907496370755762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7732165403120921067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8aaff5b1c0689e24b971e00fb6591f32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceSource
+  def: {fileID: 11400000, guid: 50af9af04520d2c4b8223919a1967d47, type: 2}
+  uid: 
+  variant: 0
+  fullVisual: {fileID: 0}
+  depletedVisual: {fileID: 0}
+  inventory: {fileID: 0}
+  hitFeedback: {fileID: 0}

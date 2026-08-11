@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7648756167413625566}
   - component: {fileID: 2458175032746641356}
   - component: {fileID: 2712498319671870616}
-  - component: {fileID: 3747388120117407485}
+  - component: {fileID: 1792501915285730952}
   m_Layer: 0
   m_Name: TreeStick
   m_TagString: Untagged
@@ -106,7 +106,7 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 0.1
   outlineMaterialOverride: {fileID: 0}
---- !u!114 &3747388120117407485
+--- !u!114 &1792501915285730952
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,12 +115,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 2583383051432869776}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35ebfc6d4ea0c8b46ae1ba7bfd5fe619, type: 3}
+  m_Script: {fileID: 11500000, guid: 8aaff5b1c0689e24b971e00fb6591f32, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GatherPoint
-  item: {fileID: 11400000, guid: 0b3f806c6082bf041a3c965f8c961c6e, type: 2}
-  amount: 1
-  prompt: "\uC90D\uAE30"
-  respawnSeconds: 30
-  visual: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceSource
+  def: {fileID: 11400000, guid: fcd4cebc7e9944941ac2d8b224c7ddc9, type: 2}
+  uid: 
+  variant: 0
+  fullVisual: {fileID: 0}
+  depletedVisual: {fileID: 0}
   inventory: {fileID: 0}
+  hitFeedback: {fileID: 0}
