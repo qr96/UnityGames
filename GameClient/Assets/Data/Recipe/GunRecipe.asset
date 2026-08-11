@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CraftingRecipe
   outputName: "\uB77C\uC774\uD50C"
   requiredStation: 0
-  outputKind: 6
+  output: {fileID: 11400000, guid: adc7f1aab113c3c44a6b225f78d49908, type: 2}
   outputAmount: 1
   craftSeconds: 5
   costs:
-  - kind: 0
+  - item: {fileID: 11400000, guid: 0b3f806c6082bf041a3c965f8c961c6e, type: 2}
     amount: 5

@@ -150,7 +150,7 @@ public class CraftingUI : MonoBehaviour
             var sb = new StringBuilder();
 
             sb.Append(string.IsNullOrEmpty(r.outputName)
-                ? PlayerCrafting.KindLabel(r.outputKind)
+                ? PlayerCrafting.ItemLabel(r.output)
                 : r.outputName);
             if (r.outputAmount > 1) sb.Append($" x{r.outputAmount}");
 
@@ -162,8 +162,8 @@ public class CraftingUI : MonoBehaviour
             {
                 for (int c = 0; c < r.costs.Length; c++)
                 {
-                    int have = inventory != null ? inventory.Get(r.costs[c].kind) : 0;
-                    sb.Append($"{PlayerCrafting.KindLabel(r.costs[c].kind)} {have}/{r.costs[c].amount}   ");
+                    int have = inventory != null ? inventory.Get(r.costs[c].item) : 0;
+                    sb.Append($"{PlayerCrafting.ItemLabel(r.costs[c].item)} {have}/{r.costs[c].amount}   ");
                 }
             }
 

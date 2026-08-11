@@ -248,7 +248,7 @@ public class BuildMode : MonoBehaviour
             return;
         }
 
-        if (!inventory.TrySpend(def.kind, 1))
+        if (!inventory.TrySpend(def, 1))
         {
             Debug.Log("[건설] 아이템 부족");
             return;
@@ -259,7 +259,7 @@ public class BuildMode : MonoBehaviour
         Instantiate(def.placementPrefab, pos, Quaternion.Euler(0f, rotationStep * 90f, 0f));
 
         // 더 놓을 게 없으면 목록 갱신 후 종료 판단
-        if (!inventory.Has(def.kind, 1))
+        if (!inventory.Has(def, 1))
         {
             RefreshPlaceables();
             DestroyGhost();
@@ -280,7 +280,7 @@ public class BuildMode : MonoBehaviour
 
         ItemDef def = SelectedPlaceable;
         string name = def != null ? def.displayName : "설치물 없음";
-        int have = (def != null && inventory != null) ? inventory.Get(def.kind) : 0;
+        int have = (def != null && inventory != null) ? inventory.Get(def) : 0;
         CanPlaceHere(def, out string reason);
 
         string text = $"건설 — {name} x{have}" +

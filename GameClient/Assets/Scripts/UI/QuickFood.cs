@@ -12,7 +12,7 @@ public class QuickFood : MonoBehaviour
     private ItemDef assigned;
 
     public ItemDef Assigned => assigned;
-    public int AssignedCount => (assigned != null && inventory != null) ? inventory.Get(assigned.kind) : 0;
+    public int AssignedCount => (assigned != null && inventory != null) ? inventory.Get(assigned) : 0;
 
     private void Start()
     {
@@ -48,7 +48,7 @@ public class QuickFood : MonoBehaviour
     private void EnsureAssigned()
     {
         if (inventory == null) return;
-        if (assigned != null && inventory.Has(assigned.kind, 1)) return;
+        if (assigned != null && inventory.Has(assigned, 1)) return;
 
         for (int i = 0; i < inventory.SlotCount; i++)
         {
@@ -73,7 +73,7 @@ public class QuickFood : MonoBehaviour
     {
         if (inventory == null) inventory = FindObjectOfType<Inventory>();
         if (assigned == null) { Debug.Log("[퀵푸드] 지정된 음식 없음"); return; }
-        if (inventory == null || !inventory.Has(assigned.kind, 1))
+        if (inventory == null || !inventory.Has(assigned, 1))
         {
             Debug.Log($"[퀵푸드] {assigned.displayName} 없음");
             EnsureAssigned();
@@ -83,7 +83,7 @@ public class QuickFood : MonoBehaviour
         if (stats == null) stats = FindObjectOfType<PlayerStats>();
         if (stats == null) { Debug.LogWarning("[퀵푸드] PlayerStats를 찾지 못함"); return; }
 
-        inventory.TrySpend(assigned.kind, 1);
+        inventory.TrySpend(assigned, 1);
         stats.Eat(assigned.hungerRestore);
         EnsureAssigned(); // 소진 시 자동 재지정
     }

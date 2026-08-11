@@ -37,14 +37,14 @@ public class DevTint : MonoBehaviour
         else if (go.GetComponent<DroppedItem>() != null || go.GetComponent<GatherPoint>() != null)
         {
             DroppedItem d = go.GetComponent<DroppedItem>();
-            ResourceKind kind = d != null ? d.Kind : ResourceKind.Stick;
-            switch (kind)
-            {
-                case ResourceKind.Stone: color = new Color(0.55f, 0.55f, 0.6f); height = 0.3f; break; // 회색: 돌
-                case ResourceKind.Firewood: color = new Color(0.45f, 0.3f, 0.15f); height = 0.4f; break; // 짙은 갈색: 장작
-                case ResourceKind.Food: color = new Color(0.8f, 0.2f, 0.35f); height = 0.3f; break;
-                default: color = new Color(0.75f, 0.65f, 0.45f); height = 0.3f; break; // 베이지: 나뭇가지
-            }
+            string id = (d != null && d.Item != null) ? d.Item.id : "";
+
+            if (id.Contains("stone")) { color = new Color(0.55f, 0.55f, 0.6f); height = 0.3f; }
+            else if (id.Contains("firewood") || id.Contains("log"))
+            { color = new Color(0.45f, 0.3f, 0.15f); height = 0.4f; }
+            else if (id.Contains("berry") || id.Contains("food"))
+            { color = new Color(0.8f, 0.2f, 0.35f); height = 0.3f; }
+            else { color = new Color(0.75f, 0.65f, 0.45f); height = 0.3f; }
         }
         else if (go.GetComponent<HarvestNode>() != null)
         {

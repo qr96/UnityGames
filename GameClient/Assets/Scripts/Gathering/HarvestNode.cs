@@ -11,17 +11,13 @@ public class HarvestNode : InteractableBase, IHittable
     [System.Serializable]
     public struct Yield
     {
-        public ResourceKind kind;
+        public ItemDef item;
         public int amount;
     }
 
     [Header("산출 (여러 종류 가능)")]
     [Tooltip("1회 수확으로 나오는 것들. 예: 장작 2 + 잔가지 1")]
-    [SerializeField]
-    private Yield[] yields = new Yield[]
-    {
-        new Yield { kind = ResourceKind.Firewood, amount = 1 },
-    };
+    [SerializeField] private Yield[] yields = new Yield[0];
     [Tooltip("소진되기까지 수확할 수 있는 횟수. 3이면 E를 세 번 눌러 세 번 수확한다")]
     [SerializeField] private int harvestCharges = 1;
     [SerializeField] private string prompt = "패기";
@@ -103,7 +99,7 @@ public class HarvestNode : InteractableBase, IHittable
         get
         {
             if (yieldMode == YieldMode.Instant && inventory != null && yields != null &&
-                yields.Length > 0 && inventory.FreeSpaceFor(yields[0].kind) <= 0)
+                yields.Length > 0 && inventory.FreeSpaceFor(yields[0].item) <= 0)
                 return $"{prompt} (가득 참)";
 
             string text = prompt;
@@ -206,16 +202,16 @@ public class HarvestNode : InteractableBase, IHittable
                 continue;
             }
 
-            int stored = inventory.Add(yields[i].kind, yields[i].amount);
+            int stored = inventory.Add(yields[i].item, yields[i].amount);
             if (stored > 0)
             {
                 any = true;
-                Debug.Log($"[채취] {name}: {yields[i].kind} {stored}개 획득");
+                Debug.Log($"[채취] {name}: {yields[i].item.displayName} {stored}개 획득");
             }
             else
             {
-                Debug.Log($"[채취] {name}: {yields[i].kind} 수납 실패 " +
-                          "(칸 부족이거나 ItemDatabase에 정의 없음)");
+                Debug.Log($"[채취] {name}: {(yields[i].item != null ? yields[i].item.displayName : "미지정")} " +
+                          "수납 실패 (칸 부족이거나 Yields 미설정)");
             }
         }
         return any;
@@ -246,7 +242,7 @@ public class HarvestNode : InteractableBase, IHittable
                 GameObject go = Instantiate(dropPrefab, pos,
                     Quaternion.Euler(0f, Random.Range(0f, 360f), 0f));
                 DroppedItem drop = go.GetComponent<DroppedItem>();
-                if (drop != null) drop.Setup(yields[y].kind, chunk);
+                if (drop != null) drop.Setup(yields[y].item, chunk);
                 else Debug.LogWarning("[채취] Drop Prefab에 DroppedItem 없음");
             }
         }

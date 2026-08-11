@@ -99,7 +99,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7286084870818382727}
   - component: {fileID: 1144288305259715202}
-  - component: {fileID: 3192349063866059002}
   - component: {fileID: 3441058024070199269}
   m_Layer: 0
   m_Name: Stone
@@ -139,19 +138,6 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 0.03
   outlineMaterialOverride: {fileID: 0}
---- !u!114 &3192349063866059002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8667438733448051177}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9bcc6bf12d1675e45acd89785fc065ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DevTint
-  applyToAllInScene: 1
 --- !u!114 &3441058024070199269
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35ebfc6d4ea0c8b46ae1ba7bfd5fe619, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GatherPoint
-  kind: 1
+  item: {fileID: 11400000, guid: 36280fe707bd9144fb8d75e7fad725e7, type: 2}
   amount: 1
   prompt: "\uC90D\uAE30"
   respawnSeconds: 30

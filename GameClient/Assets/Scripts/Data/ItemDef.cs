@@ -13,8 +13,6 @@ public class ItemDef : ScriptableObject
     [Tooltip("문자열 id — 'item/stick' 형식. 한 번 정하면 바꾸지 말 것(세이브 호환)")]
     public string id;
 
-    [Tooltip("구 식별자. 문자열 id 전환이 끝나면 제거된다")]
-    public ResourceKind kind;
     public string displayName = "이름";
     public ItemCategory category = ItemCategory.Resource;
 
@@ -36,8 +34,8 @@ public class ItemDef : ScriptableObject
     public Vector2Int placementFootprint = new Vector2Int(1, 1);
 
     [Header("원거리 (총·활)")]
-    [Tooltip("1회 발사에 소모할 탄약 종류. None이면 소모 없음")]
-    public ResourceKind ammoKind = ResourceKind.Ammo;
+    [Tooltip("1회 발사에 소모할 탄약. 비우면 소모 없음")]
+    public ItemDef ammoItem;
     [Tooltip("탄약을 소모할지 여부")]
     public bool consumesAmmo = false;
 

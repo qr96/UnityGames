@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 4707486043046978688}
   - component: {fileID: 5956249572918538012}
   - component: {fileID: 1842505354905069884}
-  - component: {fileID: 6132837791772638136}
   m_Layer: 0
   m_Name: BerryTree
   m_TagString: Untagged
@@ -105,7 +104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HarvestNode
   yields:
-  - kind: 3
+  - item: {fileID: 11400000, guid: e667e89693e02f14cba56db4015df0c3, type: 2}
     amount: 1
   harvestCharges: 5
   prompt: "\uCC44\uC9D1"
@@ -135,16 +134,3 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 0.03
   outlineMaterialOverride: {fileID: 0}
---- !u!114 &6132837791772638136
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5937129539654792257}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9bcc6bf12d1675e45acd89785fc065ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DevTint
-  applyToAllInScene: 1

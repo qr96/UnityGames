@@ -79,10 +79,10 @@ public class PickupCollector : MonoBehaviour
 
         if (best == null) return;
 
-        ResourceKind kind = best.Kind;
+        ItemDef item = best.Item;
         int got = best.Collect(inventory);
 
-        if (got > 0) Debug.Log($"[줍기] {PlayerCrafting.KindLabel(kind)} {got}개");
+        if (got > 0) Debug.Log($"[줍기] {PlayerCrafting.ItemLabel(item)} {got}개");
         else Debug.Log("[줍기] 자리 없음 — 부리고 오세요");
     }
 

@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: AmmoItemDef
   m_EditorClassIdentifier: Assembly-CSharp::ItemDef
   id: item/ammo
-  kind: 7
   displayName: "\uD0C4\uC54C"
   category: 0
   stackLimit: 30
@@ -22,7 +21,7 @@ MonoBehaviour:
   attackPattern: {fileID: 0}
   placementPrefab: {fileID: 0}
   placementFootprint: {x: 1, y: 1}
-  ammoKind: 7
+  ammoItem: {fileID: 0}
   consumesAmmo: 0
   fuelValue: 0
   hungerRestore: 25

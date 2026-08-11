@@ -7,14 +7,14 @@ public class DroppedItem : MonoBehaviour
 {
     public static readonly List<DroppedItem> All = new List<DroppedItem>();
 
-    [SerializeField] private ResourceKind kind = ResourceKind.Firewood;
+    [SerializeField] private ItemDef item;
     [SerializeField] private int amount = 1;
 
     [Header("소멸")]
     [Tooltip("이 시간(초) 뒤 사라짐. 0 이하면 사라지지 않음")]
     [SerializeField] private float despawnSeconds = 120f;
 
-    public ResourceKind Kind => kind;
+    public ItemDef Item => item;
     public int Amount => amount;
     public Vector3 Position => transform.position;
 
@@ -24,9 +24,9 @@ public class DroppedItem : MonoBehaviour
     private void OnDisable() { All.Remove(this); }
 
     // 노드가 스폰 직후 호출
-    public void Setup(ResourceKind newKind, int newAmount)
+    public void Setup(ItemDef newItem, int newAmount)
     {
-        kind = newKind;
+        item = newItem;
         amount = Mathf.Max(1, newAmount);
     }
 
@@ -45,7 +45,7 @@ public class DroppedItem : MonoBehaviour
     {
         if (inv == null || amount <= 0) return 0;
 
-        int stored = inv.Add(kind, amount);
+        int stored = inv.Add(item, amount);
         if (stored <= 0) return 0;
 
         amount -= stored;

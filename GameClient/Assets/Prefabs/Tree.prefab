@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 2073050833884956565}
   - component: {fileID: 3020773500705320249}
   - component: {fileID: 2770085337985893987}
-  - component: {fileID: 5637556864657936642}
   - component: {fileID: 5136127466891612718}
   - component: {fileID: 4115995590699473739}
   m_Layer: 0
@@ -106,9 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffacdc15d3e924c4b90d045dce9d5cc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HarvestNode
-  yields:
-  - kind: 2
-    amount: 1
+  yields: []
   harvestCharges: 1
   prompt: "\uD328\uAE30"
   yieldMode: 1
@@ -137,19 +134,6 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 0.03
   outlineMaterialOverride: {fileID: 0}
---- !u!114 &5637556864657936642
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7732165403120921067}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9bcc6bf12d1675e45acd89785fc065ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DevTint
-  applyToAllInScene: 1
 --- !u!114 &5136127466891612718
 MonoBehaviour:
   m_ObjectHideFlags: 0

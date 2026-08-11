@@ -118,7 +118,7 @@ public class FuelSelectUI : MonoBehaviour
         for (int i = 0; i < candidates.Count; i++)
         {
             ItemDef def = candidates[i];
-            int have = inventory != null ? inventory.Get(def.kind) : 0;
+            int have = inventory != null ? inventory.Get(def) : 0;
             int room = hearth != null ? hearth.RoomForUnits(def) : 0;
             string text = $"{def.displayName}   보유 {have}   연료 {def.fuelValue:0.##}/개   더 넣을 수 있음 {Mathf.Min(have, room)}개";
 

@@ -9,7 +9,7 @@ public class WorkBuildingDef : ScriptableObject
     public GameObject propPrefab;   // 소품(임시 아트) — 공통 구조에 끼움
 
     [Header("생산")]
-    public ResourceKind produces;   // 벌목막사=Firewood, 채집오두막=Food
+    public ItemDef produces;        // 벌목막사=장작, 채집오두막=식량
     public int amountPerCycle = 1;
     public float cycleSeconds = 3f; // 1회 생산 주기
 

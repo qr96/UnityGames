@@ -77,7 +77,7 @@ public class HearthMenuUI : MonoBehaviour
         if (cursor >= entries.Count) cursor = entries.Count - 1;
 
         if (Input.GetKeyDown(KeyCode.DownArrow)) cursor = (cursor + 1) % entries.Count;
-        if (Input.GetKeyDown(KeyCode.UpArrow))   cursor = (cursor - 1 + entries.Count) % entries.Count;
+        if (Input.GetKeyDown(KeyCode.UpArrow)) cursor = (cursor - 1 + entries.Count) % entries.Count;
 
         if (Input.GetKeyDown(KeyCode.E)) Confirm();
     }
@@ -104,7 +104,8 @@ public class HearthMenuUI : MonoBehaviour
                     Debug.Log($"[화로] 강화 완료 — 연료 소모 감소");
                     Close();
                 }
-                else Debug.Log($"[화로] 강화 실패 — 돌 {h.UpgradeStoneCost}개 필요");
+                else Debug.Log($"[화로] 강화 실패 — {PlayerCrafting.ItemLabel(h.UpgradeCostItem)} " +
+                               $"{h.UpgradeCostAmount}개 필요");
                 break;
         }
     }
@@ -135,14 +136,15 @@ public class HearthMenuUI : MonoBehaviour
             string text = entries[i] switch
             {
                 Entry.Relight => "불 피우기",
-                Entry.Refuel  => "연료 넣기",
-                Entry.Upgrade => $"강화 — 돌 {(inventory != null ? inventory.Get(ResourceKind.Stone) : 0)}/{hearth.UpgradeStoneCost}"
-                                 + " (연료 소모 감소, 1회)",
+                Entry.Refuel => "연료 넣기",
+                Entry.Upgrade => $"강화 — {PlayerCrafting.ItemLabel(hearth.UpgradeCostItem)} " +
+                                 $"{(inventory != null ? inventory.Get(hearth.UpgradeCostItem) : 0)}/{hearth.UpgradeCostAmount}" +
+                                 " (연료 소모 감소, 1회)",
                 _ => "?",
             };
 
             bool ok = entries[i] != Entry.Upgrade ||
-                      (inventory != null && inventory.Has(ResourceKind.Stone, hearth.UpgradeStoneCost));
+                      (inventory != null && inventory.Has(hearth.UpgradeCostItem, hearth.UpgradeCostAmount));
 
             Rect r = new Rect(px + 14f, py + 36f + i * (rowH + 4f), w - 28f, rowH);
             Color prev = GUI.color;

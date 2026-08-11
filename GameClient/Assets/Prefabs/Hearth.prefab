@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 4933039123598355932}
   - component: {fileID: 7731962651628912772}
   - component: {fileID: 835120964273401716}
-  - component: {fileID: 2569969791331684601}
   - component: {fileID: 6606969269384712578}
   m_Layer: 0
   m_Name: Hearth
@@ -115,7 +114,8 @@ MonoBehaviour:
   fuelBurnPerSec: 1
   fuel: 300
   isLit: 1
-  upgradeStoneCost: 5
+  upgradeCostItem: {fileID: 0}
+  upgradeCostAmount: 5
   upgradedBurnMultiplier: 0.66
   isUpgraded: 0
   meltedGroundVisual: {fileID: 0}
@@ -152,19 +152,6 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 0.03
   outlineMaterialOverride: {fileID: 0}
---- !u!114 &2569969791331684601
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 482709525067408468}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9bcc6bf12d1675e45acd89785fc065ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DevTint
-  applyToAllInScene: 1
 --- !u!136 &6606969269384712578
 CapsuleCollider:
   m_ObjectHideFlags: 0

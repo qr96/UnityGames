@@ -10,15 +10,21 @@ public class DebugHud : MonoBehaviour
     [SerializeField] private PlayerStats stats;
     [SerializeField] private PickupCollector collector;
 
+    [Header("디버그 지급 / 표시")]
+    [Tooltip("G키로 지급할 도구")]
+    [SerializeField] private ItemDef debugTool;
+    [Tooltip("HUD에 수량을 표시할 아이템들")]
+    [SerializeField] private ItemDef[] watchItems;
+
     private GUIStyle style;
 
     private void Update()
     {
         // 디버그 도끼 지급 (정식 경로는 제작대)
-        if (Input.GetKeyDown(KeyCode.G) && inventory != null)
+        if (Input.GetKeyDown(KeyCode.G) && inventory != null && debugTool != null)
         {
-            if (inventory.Add(ResourceKind.Axe, 1) <= 0)
-                Debug.Log("[디버그] 도끼를 넣을 칸 없음 / ItemDef 미등록");
+            if (inventory.Add(debugTool, 1) <= 0)
+                Debug.Log($"[디버그] {debugTool.displayName}을(를) 넣을 칸 없음");
         }
     }
 
@@ -56,8 +62,12 @@ public class DebugHud : MonoBehaviour
 
         if (inventory != null)
         {
-            sb.AppendLine($"나뭇가지 {inventory.Get(ResourceKind.Stick)}   돌 {inventory.Get(ResourceKind.Stone)}");
-            sb.AppendLine($"장작 {inventory.Get(ResourceKind.Firewood)}   식량 {inventory.Get(ResourceKind.Food)}");
+            if (watchItems != null)
+                for (int i = 0; i < watchItems.Length; i++)
+                {
+                    ItemDef w = watchItems[i];
+                    if (w != null) sb.AppendLine($"{w.displayName} {inventory.Get(w)}");
+                }
             sb.AppendLine($"골드 {inventory.Gold}");
         }
 

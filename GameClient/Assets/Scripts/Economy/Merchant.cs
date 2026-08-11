@@ -30,7 +30,7 @@ public class Merchant : InteractableBase
         if (timer > 0f) return;
 
         if (visiting) { SetVisiting(false); timer = config.visitIntervalSeconds; }
-        else          { SetVisiting(true);  timer = config.staySeconds; }
+        else { SetVisiting(true); timer = config.staySeconds; }
     }
 
     private void SetVisiting(bool v)
@@ -53,11 +53,11 @@ public class Merchant : InteractableBase
                 for (int i = 0; i < config.buyPrices.Length; i++)
                 {
                     MerchantConfig.BuyPrice bp = config.buyPrices[i];
-                    int qty = inventory.Get(bp.kind);
+                    int qty = inventory.Get(bp.item);
                     if (qty <= 0) continue;
                     any = true;
                     gold += qty * bp.goldPerUnit;
-                    sb.Append($" {KindLabel(bp.kind)}x{qty}");
+                    sb.Append($" {PlayerCrafting.ItemLabel(bp.item)}x{qty}");
                 }
             }
             return any ? sb.Append($" → {gold}G").ToString() : "행상인 (팔 것 없음)";
@@ -76,23 +76,13 @@ public class Merchant : InteractableBase
         for (int i = 0; i < config.buyPrices.Length; i++)
         {
             MerchantConfig.BuyPrice bp = config.buyPrices[i];
-            int qty = inventory.Get(bp.kind);
+            int qty = inventory.Get(bp.item);
             if (qty <= 0) continue;
-            inventory.TrySpend(bp.kind, qty);
+            inventory.TrySpend(bp.item, qty);
             gold += qty * bp.goldPerUnit;
         }
         if (gold > 0) inventory.AddGold(gold);
         else Debug.Log("[행상인] 팔 물건 없음");
     }
 
-    private static string KindLabel(ResourceKind kind)
-    {
-        switch (kind)
-        {
-            case ResourceKind.Stick:    return "나뭇가지";
-            case ResourceKind.Firewood: return "장작";
-            case ResourceKind.Food:     return "식량";
-            default:                    return kind.ToString();
-        }
-    }
 }

@@ -24,7 +24,7 @@ public class Hotbar : MonoBehaviour
         {
             ItemDef def = assigned[equippedIndex];
             if (def == null || inventory == null) return null;
-            return inventory.Has(def.kind, 1) ? def : null;
+            return inventory.Has(def, 1) ? def : null;
         }
     }
 

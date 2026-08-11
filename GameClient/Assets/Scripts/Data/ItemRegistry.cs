@@ -1,22 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// 아이템 조회표. 문자열 id가 정본이며, 전환 기간 동안 구 열거형 조회도 함께 제공한다.
-// (ItemDatabase를 대체할 예정 — M2에서 참조를 모두 옮긴 뒤 ItemDatabase는 삭제)
+// 아이템 조회표. 문자열 id → ItemDef.
+// 씬·에셋 안에서는 ItemDef를 직접 참조하고, 이 조회표는 데이터 경계(맵 JSON·세이브)에서 쓴다.
 [CreateAssetMenu(fileName = "ItemRegistry", menuName = "혹한/Item Registry")]
 public class ItemRegistry : ScriptableObject
 {
     public ItemDef[] items;
 
     private Dictionary<string, ItemDef> byId;
-    private Dictionary<ResourceKind, ItemDef> byKind;
 
     private void OnEnable() => Rebuild();
 
     public void Rebuild()
     {
         byId = new Dictionary<string, ItemDef>();
-        byKind = new Dictionary<ResourceKind, ItemDef>();
         if (items == null) return;
 
         for (int i = 0; i < items.Length; i++)
@@ -30,8 +28,6 @@ public class ItemRegistry : ScriptableObject
                 Debug.LogWarning($"[아이템] id 중복: '{def.id}' ({def.name})");
             else
                 byId[def.id] = def;
-
-            if (!byKind.ContainsKey(def.kind)) byKind[def.kind] = def;
         }
     }
 
@@ -41,13 +37,6 @@ public class ItemRegistry : ScriptableObject
         if (string.IsNullOrEmpty(id)) return null;
         if (byId == null) Rebuild();
         return byId.TryGetValue(id, out ItemDef def) ? def : null;
-    }
-
-    // 전환 기간용 — M2 완료 후 제거
-    public ItemDef Find(ResourceKind kind)
-    {
-        if (byKind == null) Rebuild();
-        return byKind.TryGetValue(kind, out ItemDef def) ? def : null;
     }
 
     // 모든 항목의 id가 채워졌는지 확인 (M2 착수 조건)

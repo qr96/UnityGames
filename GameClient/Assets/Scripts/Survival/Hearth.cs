@@ -30,8 +30,10 @@ public class Hearth : MonoBehaviour
     [SerializeField] private bool isLit = true;
 
     [Header("강화 (1회)")]
-    [Tooltip("강화에 드는 돌 개수")]
-    [SerializeField] private int upgradeStoneCost = 5;
+    [Tooltip("강화에 드는 재료")]
+    [SerializeField] private ItemDef upgradeCostItem;
+    [Tooltip("강화에 드는 개수")]
+    [SerializeField] private int upgradeCostAmount = 5;
     [Tooltip("강화 후 연료 소모율 배수 (0.66 = 34% 절약)")]
     [SerializeField] private float upgradedBurnMultiplier = 0.66f;
     [SerializeField] private bool isUpgraded = false;
@@ -60,7 +62,8 @@ public class Hearth : MonoBehaviour
     // 현재 연료로 남은 지속 시간(초). 소모율이 0이면 무한.
     public float RemainingSeconds => currentBurn > 0f ? fuel / currentBurn : Mathf.Infinity;
     public bool IsUpgraded => isUpgraded;
-    public int UpgradeStoneCost => Mathf.Max(1, upgradeStoneCost);
+    public ItemDef UpgradeCostItem => upgradeCostItem;
+    public int UpgradeCostAmount => Mathf.Max(1, upgradeCostAmount);
     public bool CanUpgrade => !isUpgraded;
     public string DisplayName => isUpgraded ? "강화 화로" : "화로";
 
@@ -107,9 +110,9 @@ public class Hearth : MonoBehaviour
     {
         if (inv == null || def == null || !def.IsFuel) return false;
         if (currentCapacity - fuel < def.fuelValue) return false; // 용량 여유 부족
-        if (!inv.Has(def.kind, 1)) return false;
+        if (!inv.Has(def, 1)) return false;
 
-        inv.TrySpend(def.kind, 1);
+        inv.TrySpend(def, 1);
         fuel = Mathf.Min(currentCapacity, fuel + def.fuelValue);
         return true;
     }
@@ -120,9 +123,9 @@ public class Hearth : MonoBehaviour
     {
         if (isLit) return false;
         if (inv == null || def == null || !def.IsFuel) return false;
-        if (!inv.Has(def.kind, 1)) return false;
+        if (!inv.Has(def, 1)) return false;
 
-        inv.TrySpend(def.kind, 1);
+        inv.TrySpend(def, 1);
         fuel = Mathf.Min(currentCapacity, fuel + def.fuelValue);
         Relight();
         return true;
@@ -144,10 +147,10 @@ public class Hearth : MonoBehaviour
     // 강화(1회): 돌 소모 → 연료 소모율 감소. 성공 시 true.
     public bool TryUpgrade(Inventory inv)
     {
-        if (isUpgraded || inv == null) return false;
-        if (!inv.Has(ResourceKind.Stone, UpgradeStoneCost)) return false;
+        if (isUpgraded || inv == null || upgradeCostItem == null) return false;
+        if (!inv.Has(upgradeCostItem, UpgradeCostAmount)) return false;
 
-        inv.TrySpend(ResourceKind.Stone, UpgradeStoneCost);
+        inv.TrySpend(upgradeCostItem, UpgradeCostAmount);
         SetUpgraded(true);
         return true;
     }

@@ -22,7 +22,7 @@ public class CraftingRecipe : ScriptableObject
     public CraftStation requiredStation = CraftStation.Hand;
 
     [Header("산출")]
-    public ResourceKind outputKind = ResourceKind.Axe;
+    public ItemDef output;
     public int outputAmount = 1;
 
     [Header("시간")]
@@ -35,7 +35,7 @@ public class CraftingRecipe : ScriptableObject
     [Serializable]
     public struct Cost
     {
-        public ResourceKind kind;
+        public ItemDef item;
         public int amount;
     }
 }

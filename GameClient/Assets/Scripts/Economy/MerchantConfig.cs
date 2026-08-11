@@ -11,12 +11,12 @@ public class MerchantConfig : ScriptableObject
     public float staySeconds = 20f;
 
     [Header("매입가")]
-    public BuyPrice[] buyPrices;  // Firewood, Food
+    public BuyPrice[] buyPrices;  // 예: 장작, 식량
 
     [Serializable]
     public struct BuyPrice
     {
-        public ResourceKind kind;
+        public ItemDef item;
         public int goldPerUnit;
     }
 }

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 2584143661642263674}
   - component: {fileID: 8359041886889394437}
   - component: {fileID: 8607113460846511253}
-  - component: {fileID: 6504397509317591844}
   - component: {fileID: 5710037172663012368}
   m_Layer: 0
   m_Name: Firewood
@@ -107,19 +106,6 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 1, b: 1, a: 1}
   outlineWidth: 0.1
   outlineMaterialOverride: {fileID: 0}
---- !u!114 &6504397509317591844
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3541415768129457373}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9bcc6bf12d1675e45acd89785fc065ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DevTint
-  applyToAllInScene: 1
 --- !u!114 &5710037172663012368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132,6 +118,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29b81e648617da34a9e0844544b35036, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroppedItem
-  kind: 2
+  item: {fileID: 11400000, guid: d8777ebec39d61e458baa4ba9baf233b, type: 2}
   amount: 1
   despawnSeconds: 120

@@ -224,12 +224,12 @@ public class AttackExecutor : MonoBehaviour
         // 탄약 소모
         if (tool.consumesAmmo)
         {
-            if (inventory == null || !inventory.Has(tool.ammoKind, 1))
+            if (inventory == null || tool.ammoItem == null || !inventory.Has(tool.ammoItem, 1))
             {
                 if (verboseLog) Debug.Log($"[발사] {tool.displayName}: 탄약 없음");
                 return;
             }
-            inventory.TrySpend(tool.ammoKind, 1);
+            inventory.TrySpend(tool.ammoItem, 1);
         }
 
         AttackContext ctx = BuildContext(Mathf.Max(1, tool.hitPower));

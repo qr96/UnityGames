@@ -4,7 +4,7 @@ using UnityEngine;
 // 부순 뒤 나오는 바닥 드랍(DroppedItem)과는 별개다.
 public class GatherPoint : InteractableBase
 {
-    [SerializeField] private ResourceKind kind = ResourceKind.Stick;
+    [SerializeField] private ItemDef item;
     [SerializeField] private int amount = 1;
     [SerializeField] private string prompt = "따기";
 
@@ -35,8 +35,8 @@ public class GatherPoint : InteractableBase
     {
         get
         {
-            string label = PlayerCrafting.KindLabel(kind);
-            bool full = inventory != null && inventory.FreeSpaceFor(kind) <= 0;
+            string label = item != null ? item.displayName : "?";
+            bool full = inventory != null && inventory.FreeSpaceFor(item) <= 0;
             return full ? $"{prompt} — {label} (가득 참)" : $"{prompt} — {label}";
         }
     }
@@ -48,7 +48,7 @@ public class GatherPoint : InteractableBase
         if (taken) return;
         if (inventory == null) inventory = FindObjectOfType<Inventory>();
 
-        int stored = inventory != null ? inventory.Add(kind, amount) : 0;
+        int stored = inventory != null ? inventory.Add(item, amount) : 0;
         if (stored <= 0)
         {
             Debug.Log("[따기] 자리 없음 — 부리고 오세요");

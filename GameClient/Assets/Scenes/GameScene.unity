@@ -313,7 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afcfcfe026fb93e40a7c779eec79158c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  database: {fileID: 11400000, guid: 8f66e0324bffa4b4dae585ab71a3cf13, type: 2}
+  registry: {fileID: 11400000, guid: d455f0e81bc22d24e8029a6852092ab8, type: 2}
   slotCount: 10
   gold: 0
 --- !u!1001 &349297630
@@ -1739,6 +1739,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1194544964}
   - component: {fileID: 1194544965}
+  - component: {fileID: 1194544966}
   m_Layer: 0
   m_Name: Debug
   m_TagString: Untagged
@@ -1778,6 +1779,21 @@ MonoBehaviour:
   inventory: {fileID: 284510997}
   stats: {fileID: 802411303}
   collector: {fileID: 0}
+  debugTool: {fileID: 0}
+  watchItems: []
+--- !u!114 &1194544966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1194544963}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bcc6bf12d1675e45acd89785fc065ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DevTint
+  applyToAllInScene: 1
 --- !u!1 &1314573450
 GameObject:
   m_ObjectHideFlags: 0

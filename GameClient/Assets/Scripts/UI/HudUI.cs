@@ -347,7 +347,7 @@ public class HudUI : MonoBehaviour
                 if (def == null) slot.label.text = $"{i + 1}\n-";
                 else
                 {
-                    bool have = inventory != null && inventory.Has(def.kind, 1);
+                    bool have = inventory != null && inventory.Has(def, 1);
                     slot.label.text = $"{i + 1}\n{def.displayName}" + (have ? "" : " (없음)");
                 }
 

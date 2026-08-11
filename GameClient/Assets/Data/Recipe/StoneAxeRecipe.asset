@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CraftingRecipe
   outputName: "\uB3CC\uB3C4\uB07C"
   requiredStation: 0
-  outputKind: 4
+  output: {fileID: 11400000, guid: 26f83a572b4de994986e88c34bb87182, type: 2}
   outputAmount: 1
+  craftSeconds: 0
   costs:
-  - kind: 0
+  - item: {fileID: 11400000, guid: 0b3f806c6082bf041a3c965f8c961c6e, type: 2}
     amount: 3
-  - kind: 1
+  - item: {fileID: 11400000, guid: 36280fe707bd9144fb8d75e7fad725e7, type: 2}
     amount: 2
