@@ -9,6 +9,11 @@ public enum ToolType { None = 0, Axe = 1, Pickaxe = 2, Gun = 3, Bow = 4 }
 [CreateAssetMenu(fileName = "ItemDef", menuName = "혹한/Item Def")]
 public class ItemDef : ScriptableObject
 {
+    [Header("식별자")]
+    [Tooltip("문자열 id — 'item/stick' 형식. 한 번 정하면 바꾸지 말 것(세이브 호환)")]
+    public string id;
+
+    [Tooltip("구 식별자. 문자열 id 전환이 끝나면 제거된다")]
     public ResourceKind kind;
     public string displayName = "이름";
     public ItemCategory category = ItemCategory.Resource;

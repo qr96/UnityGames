@@ -12,15 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da73b8c9ec6dca04c92554bf407f0357, type: 3}
   m_Name: WorkbenchItemDef
   m_EditorClassIdentifier: Assembly-CSharp::ItemDef
+  id: item/workbench
   kind: 5
   displayName: "\uC81C\uC791\uB300"
   category: 0
   stackLimit: 1
-  weightPerUnit: 1
   toolType: 0
   hitPower: 1
   attackPattern: {fileID: 0}
   placementPrefab: {fileID: 4187521956452554282, guid: e9f031bf9007b284c978f07ada0cdad5, type: 3}
   placementFootprint: {x: 1, y: 1}
+  ammoKind: 7
+  consumesAmmo: 0
   fuelValue: 0
   hungerRestore: 25

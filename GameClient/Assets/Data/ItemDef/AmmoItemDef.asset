@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da73b8c9ec6dca04c92554bf407f0357, type: 3}
   m_Name: AmmoItemDef
   m_EditorClassIdentifier: Assembly-CSharp::ItemDef
+  id: item/ammo
   kind: 7
   displayName: "\uD0C4\uC54C"
   category: 0

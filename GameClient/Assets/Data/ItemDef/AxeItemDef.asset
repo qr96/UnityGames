@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da73b8c9ec6dca04c92554bf407f0357, type: 3}
   m_Name: AxeItemDef
   m_EditorClassIdentifier: Assembly-CSharp::ItemDef
+  id: item/axe_stone
   kind: 4
   displayName: "\uB3C4\uB07C"
   category: 1
@@ -21,5 +22,7 @@ MonoBehaviour:
   attackPattern: {fileID: 11400000, guid: 9bb7f33093846fe46ae76f4953fa71c2, type: 2}
   placementPrefab: {fileID: 0}
   placementFootprint: {x: 1, y: 1}
+  ammoKind: 7
+  consumesAmmo: 0
   fuelValue: 0
   hungerRestore: 0

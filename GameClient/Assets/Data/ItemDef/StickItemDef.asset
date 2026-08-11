@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da73b8c9ec6dca04c92554bf407f0357, type: 3}
   m_Name: StickItemDef
   m_EditorClassIdentifier: Assembly-CSharp::ItemDef
+  id: item/stick
   kind: 0
   displayName: "\uB098\uBB47\uAC00\uC9C0"
   category: 0
@@ -21,5 +22,7 @@ MonoBehaviour:
   attackPattern: {fileID: 0}
   placementPrefab: {fileID: 0}
   placementFootprint: {x: 1, y: 1}
+  ammoKind: 7
+  consumesAmmo: 0
   fuelValue: 15
   hungerRestore: 0
