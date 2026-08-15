@@ -84,7 +84,7 @@ public class Hearth : MonoBehaviour
         UpdateRadius();
         if (!isLit) return;
 
-        fuel -= currentBurn * Time.deltaTime;
+        fuel -= currentBurn * GameClock.Delta;
         if (fuel <= 0f)
         {
             fuel = 0f;

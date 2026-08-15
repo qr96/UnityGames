@@ -18,7 +18,7 @@ public class DroppedItem : MonoBehaviour
     public int Amount => amount;
     public Vector3 Position => transform.position;
 
-    private float despawnTime;
+    private double despawnTime;
 
     private void OnEnable() { if (!All.Contains(this)) All.Add(this); }
     private void OnDisable() { All.Remove(this); }
@@ -32,12 +32,12 @@ public class DroppedItem : MonoBehaviour
 
     private void Start()
     {
-        if (despawnSeconds > 0f) despawnTime = Time.time + despawnSeconds;
+        if (despawnSeconds > 0f) despawnTime = GameClock.Time_ + despawnSeconds;
     }
 
     private void Update()
     {
-        if (despawnSeconds > 0f && Time.time >= despawnTime) Destroy(gameObject);
+        if (despawnSeconds > 0f && GameClock.Time_ >= despawnTime) Destroy(gameObject);
     }
 
     // 수납된 개수 반환. 남으면 바닥에 그대로 남는다.

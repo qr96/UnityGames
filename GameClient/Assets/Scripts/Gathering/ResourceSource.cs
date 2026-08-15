@@ -26,7 +26,7 @@ public class ResourceSource : InteractableBase, IHittable
     private int damage;
     private int chargesLeft;
     private bool depleted;
-    private float regenAt;
+    private double regenAt;
 
     public ResourceSourceDef Def => def;
     public string Uid => uid;
@@ -45,7 +45,7 @@ public class ResourceSource : InteractableBase, IHittable
     }
 
     // 세이브 복원용
-    public void LoadState(int savedDamage, int savedCharges, float savedRegenAt)
+    public void LoadState(int savedDamage, int savedCharges, double savedRegenAt)
     {
         damage = savedDamage;
         chargesLeft = savedCharges;
@@ -92,7 +92,7 @@ public class ResourceSource : InteractableBase, IHittable
         if (!depleted || def == null) return;
         if (def.regenSeconds <= 0f) return;
 
-        if (Time.time >= regenAt) ResetState();
+        if (GameClock.Time_ >= regenAt) ResetState();
     }
 
     // ---- IHittable ----
@@ -161,7 +161,7 @@ public class ResourceSource : InteractableBase, IHittable
 
         if (def.regenSeconds > 0f)
         {
-            regenAt = Time.time + def.regenSeconds;
+            regenAt = GameClock.Time_ + def.regenSeconds;
             SetDepleted(true);
         }
         else

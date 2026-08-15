@@ -98,7 +98,7 @@ public class PlayerStats : MonoBehaviour
 
     private void Update()
     {
-        float dt = Time.deltaTime;
+        float dt = GameClock.Delta;   // 게임 시간 — 수면으로 건너뛴 만큼도 반영된다
 
         // ── 기력 ──
         float maxStam = EffectiveMaxStamina;

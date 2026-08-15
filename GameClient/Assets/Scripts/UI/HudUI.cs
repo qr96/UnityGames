@@ -14,6 +14,7 @@ public class HudUI : MonoBehaviour
     [SerializeField] private PlayerInteractor interactor;
     [SerializeField] private PickupCollector collector;
     [SerializeField] private Camera worldCamera;
+    [SerializeField] private GameClock clock;
 
     [Header("캔버스")]
     [Tooltip("씬의 Canvas를 연결. 크기·해상도 설정은 그 Canvas Scaler에서 한다")]
@@ -82,6 +83,8 @@ public class HudUI : MonoBehaviour
     private readonly List<Slot> hotbarSlots = new List<Slot>();
     private Slot foodSlot;
 
+    private Text clockText;
+    private RectTransform clockBackRect;
     private Text counterText;
     private RectTransform counterBackRect;
     private Text targetLabel;
@@ -113,6 +116,7 @@ public class HudUI : MonoBehaviour
         if (interactor == null) interactor = FindObjectOfType<PlayerInteractor>();
         if (collector == null) collector = FindObjectOfType<PickupCollector>();
         if (worldCamera == null) worldCamera = Camera.main;
+        if (clock == null) clock = GameClock.Instance != null ? GameClock.Instance : FindObjectOfType<GameClock>();
 
         Build();
     }
@@ -170,6 +174,17 @@ public class HudUI : MonoBehaviour
                                        TextAnchor.MiddleRight);
         UIKit.SetRect(counterText.rectTransform, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
                       new Vector2(-10f, 0f), new Vector2(220f, 52f));
+
+        // ── 날짜·시각 (우상단, 카운터 위) ──
+        Image clockBack = UIKit.CreateImage("ClockBack", root, labelBackColor);
+        clockBackRect = clockBack.rectTransform;
+        UIKit.SetRect(clockBackRect, new Vector2(1f, 1f), new Vector2(1f, 1f),
+                      new Vector2(-12f, -76f), new Vector2(200f, 30f));
+
+        clockText = UIKit.CreateText("Clock", clockBack.transform, counterFontSize,
+                                     TextAnchor.MiddleRight);
+        UIKit.SetRect(clockText.rectTransform, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
+                      new Vector2(-10f, 0f), new Vector2(180f, 26f));
 
         // ── 타겟 라벨 (월드 추적) — 반투명 배경판 위에 ──
         Image targetBack = UIKit.CreateImage("TargetLabelBack", root, labelBackColor);
@@ -295,6 +310,7 @@ public class HudUI : MonoBehaviour
         if (canvas == null) return;
 
         UpdateBars();
+        UpdateClock();
         UpdateStaminaGauge();
         UpdateHotbar();
         UpdateCounter();
@@ -364,6 +380,27 @@ public class HudUI : MonoBehaviour
                 ? "F\n음식 없음"
                 : $"F\n{def.displayName} {quickFood.AssignedCount}";
         }
+    }
+
+    private void UpdateClock()
+    {
+        if (clockText == null) return;
+
+        if (clock == null)
+        {
+            clock = GameClock.Instance;
+            if (clock == null)
+            {
+                if (clockBackRect.gameObject.activeSelf) clockBackRect.gameObject.SetActive(false);
+                return;
+            }
+            if (!clockBackRect.gameObject.activeSelf) clockBackRect.gameObject.SetActive(true);
+        }
+
+        clockText.text = $"{clock.Day}일차  {clock.Hour:00}:{clock.Minute:00}" +
+                         (clock.IsNight ? "  (밤)" : "");
+        clockText.color = clock.IsNight ? new Color(0.65f, 0.75f, 1f) : Color.white;
+        FitBackground(clockText, clockBackRect, new Vector2(24f, 12f));
     }
 
     private void UpdateCounter()

@@ -26,7 +26,7 @@ public class Merchant : InteractableBase
     private void Update()
     {
         if (config == null) return;
-        timer -= Time.deltaTime;
+        timer -= GameClock.Delta;
         if (timer > 0f) return;
 
         if (visiting) { SetVisiting(false); timer = config.visitIntervalSeconds; }
