@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82a9d0c635b07834daebf2a9fbda72ef, type: 3}
   m_Name: RangedShotPattern
   m_EditorClassIdentifier: Assembly-CSharp::RangedShotPattern
-  hittableCategories: 00000000
+  hittableCategories: 01000000
   range: 12
   hitRadius: 0.5
   chargeSeconds: 1
