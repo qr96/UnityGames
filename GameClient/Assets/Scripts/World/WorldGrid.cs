@@ -304,6 +304,10 @@ public class WorldGrid : MonoBehaviour
         if (from == to) return CanStand(to);
         if (!CanStand(to) || !InBounds(from)) return false;
 
+        // 건축된 벽이 두 칸 사이를 막고 있으면 통행 불가 (열린 문은 통과 가능)
+        BuildingGrid building = BuildingGrid.Instance;
+        if (building != null && building.IsEdgeBlocked(from, to, GetLevel(from))) return false;
+
         int diff = GetLevel(to) - GetLevel(from);
         if (diff == 0) return true;
         if (Mathf.Abs(diff) > 1) return false;

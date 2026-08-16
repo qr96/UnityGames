@@ -2010,6 +2010,7 @@ GameObject:
   - component: {fileID: 1977076627}
   - component: {fileID: 1977076630}
   - component: {fileID: 1977076631}
+  - component: {fileID: 1977076632}
   m_Layer: 0
   m_Name: WorldManager
   m_TagString: Untagged
@@ -2103,14 +2104,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BuildMode
   toggleKey: 98
   placeKey: 101
+  removeKey: 120
   rotateKey: 114
   cycleKey: 113
+  categoryKey: 116
+  parts:
+  - {fileID: 11400000, guid: 0a02a4371ce20744487b8a32b7aed35b, type: 2}
+  - {fileID: 11400000, guid: ac9ed87de0657024bb3abece5fa69545, type: 2}
   maxDistanceCells: 6
   okColor: {r: 0.4, g: 1, b: 0.5, a: 0.5}
   badColor: {r: 1, g: 0.35, b: 0.3, a: 0.5}
   inventory: {fileID: 0}
   grid: {fileID: 0}
+  building: {fileID: 0}
   player: {fileID: 802411302}
+--- !u!114 &1977076632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1977076626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6da964c4b97831499ba9f872c44f300, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingGrid
 --- !u!1 &1986016849
 GameObject:
   m_ObjectHideFlags: 0

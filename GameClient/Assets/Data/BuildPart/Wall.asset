@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6eaa52573f4a47468fe914121eb4a3c, type: 3}
+  m_Name: Wall
+  m_EditorClassIdentifier: Assembly-CSharp::BuildPartDef
+  id: BuildPart/Wall
+  displayName: "\uB098\uBB34\uBCBD"
+  kind: 1
+  prefab: {fileID: 2041264928592661498, guid: 29fd13ade1f95cc4fa17d579a9a4fed6, type: 3}
+  placementHeight: 0
+  startsOpen: 1
+  blocksWhenClosed: 1
