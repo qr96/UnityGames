@@ -48,20 +48,29 @@ public class CharacterStats : ScriptableObject
     [Min(0)]
     public int lungeCount = 1;
 
-    [Tooltip("도약 속도 (m/s). 이동 속도의 2~3배가 적당하다")]
+    [Tooltip("도약 속도 (m/s)")]
     public float lungeSpeed = 13f;
 
     [Tooltip("도약 지속 시간(초). 속도 x 시간 = 도약 거리")]
     public float lungeDuration = 0.28f;
 
     [Range(0f, 1f)]
-    [Tooltip("도약이 끝난 뒤 남기는 속도 비율. 0이면 즉시 멈춤")]
+    [Tooltip("도약이 끝난 뒤 남기는 속도 비율")]
     public float lungeExitSpeedRatio = 0.4f;
 
-    [Tooltip("점프 직후 도약까지의 최소 간격(초). 연타 오작동 방지")]
+    [Tooltip("점프 직후 도약까지의 최소 간격(초)")]
     public float lungeCooldown = 0.15f;
 
-    [Header("Action")]
-    [Tooltip("기본 공격 동작이 캐릭터를 잠그는 시간(초)")]
-    public float attackDuration = 0.45f;
+    [Header("Melee Attack")]
+    [Tooltip("선딜: 휘두르기 시작부터 판정 발생까지 (초)")]
+    public float attackWindup = 0.14f;
+
+    [Tooltip("판정 지속: 이 시간 동안 타격 판정이 살아 있다 (초)")]
+    public float attackActive = 0.12f;
+
+    [Tooltip("후딜: 판정이 끝나고 다시 움직일 수 있을 때까지 (초)")]
+    public float attackRecovery = 0.26f;
+
+    [Tooltip("공격 중 정면으로 밀고 나가는 속도 (m/s). 0이면 제자리")]
+    public float attackStepSpeed = 2.5f;
 }

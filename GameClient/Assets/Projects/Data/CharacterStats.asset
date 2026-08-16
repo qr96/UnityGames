@@ -23,4 +23,12 @@ MonoBehaviour:
   airControl: 0.45
   coyoteTime: 0.12
   jumpBufferTime: 0.12
-  attackDuration: 0.45
+  lungeCount: 1
+  lungeSpeed: 13
+  lungeDuration: 0.28
+  lungeExitSpeedRatio: 0.4
+  lungeCooldown: 0.15
+  attackWindup: 0.14
+  attackActive: 0.12
+  attackRecovery: 0.12
+  attackStepSpeed: 2.5

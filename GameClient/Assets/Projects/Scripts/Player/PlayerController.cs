@@ -4,24 +4,29 @@ public enum PlayerState
 {
     Locomotion,  // 지상 이동
     Airborne,    // 공중 (점프 / 낙하)
-    Lunge,       // 공중 도약 (한조 도약류)
-    Attack       // 액션 잠금
+    Lunge,       // 공중 도약
+    Attack       // 근접 공격
 }
 
 /// <summary>
 /// 3인칭 백뷰 캐릭터 컨트롤러.
-/// 공중에서 스페이스를 한 번 더 누르면 수직 점프가 아니라 수평 도약(Lunge)이 나간다.
-/// 도약 중에는 중력이 꺼지고 속도가 고정되어, 짧고 직선적인 돌진이 된다.
+/// 공격은 선딜(Windup) → 판정(Active) → 후딜(Recovery) 3단계로 나뉜다.
+/// 판정 구간이 분리되어 있어야 나중에 애니메이션 타이밍을 맞추거나
+/// 회피 프레임 같은 걸 붙일 때 구조를 안 건드린다.
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInputReader))]
 public class PlayerController : MonoBehaviour
 {
+    enum AttackPhase { Windup, Active, Recovery }
+
     [Header("References")]
     [SerializeField] CharacterStats stats;
     [SerializeField] PlayerInputReader input;
     [Tooltip("비워두면 Camera.main을 자동으로 잡는다")]
     [SerializeField] Transform cameraTransform;
+    [Tooltip("비워두면 같은 오브젝트에서 자동으로 찾는다")]
+    [SerializeField] MeleeWeapon melee;
     [Tooltip("아직 없으면 비워둬도 된다")]
     [SerializeField] Animator animator;
 
@@ -42,6 +47,10 @@ public class PlayerController : MonoBehaviour
     float lungeCooldownTimer;
     Vector3 lungeDirection;
 
+    // 공격
+    AttackPhase attackPhase;
+    float attackPhaseTimer;
+
     static readonly int SpeedHash = Animator.StringToHash("Speed");
     static readonly int GroundedHash = Animator.StringToHash("Grounded");
     static readonly int AttackHash = Animator.StringToHash("Attack");
@@ -49,16 +58,18 @@ public class PlayerController : MonoBehaviour
 
     public PlayerState State => state;
     public bool IsGrounded => cc.isGrounded;
-    public int LungesRemaining => stats ? stats.lungeCount - lungesUsed : 0;
 
     void Awake()
     {
         cc = GetComponent<CharacterController>();
         if (!input) input = GetComponent<PlayerInputReader>();
+        if (!melee) melee = GetComponent<MeleeWeapon>();
         if (!cameraTransform && Camera.main) cameraTransform = Camera.main.transform;
 
         if (!stats)
             Debug.LogError($"{name}: CharacterStats가 비어 있다. 인스펙터에 에셋을 꽂아라.", this);
+        if (!melee)
+            Debug.LogWarning($"{name}: MeleeWeapon이 없다. 공격 판정이 발생하지 않는다.", this);
     }
 
     void Update()
@@ -94,7 +105,7 @@ public class PlayerController : MonoBehaviour
         if (cc.isGrounded)
         {
             coyoteTimer = stats.coyoteTime;
-            lungesUsed = 0;                // 착지하면 도약 회복
+            lungesUsed = 0;
         }
         else
         {
@@ -102,6 +113,7 @@ public class PlayerController : MonoBehaviour
         }
 
         lungeCooldownTimer -= dt;
+        attackPhaseTimer -= dt;
         stateTimer -= dt;
     }
 
@@ -139,11 +151,9 @@ public class PlayerController : MonoBehaviour
 
     void TickLunge(float dt)
     {
-        // 속도 고정 — 가감속 없이 직선으로 뻗는다
         horizontalVelocity = lungeDirection * stats.lungeSpeed;
         verticalVelocity = 0f;
 
-        // 벽에 박히거나 시간이 다 되면 종료
         bool blocked = (cc.collisionFlags & CollisionFlags.Sides) != 0;
 
         if (stateTimer <= 0f || blocked)
@@ -152,11 +162,55 @@ public class PlayerController : MonoBehaviour
 
     void TickAttack(float dt)
     {
-        horizontalVelocity = Vector3.MoveTowards(
-            horizontalVelocity, Vector3.zero, stats.deceleration * dt);
+        switch (attackPhase)
+        {
+            case AttackPhase.Windup:
+                StepForward(dt, stats.attackStepSpeed);
+                if (attackPhaseTimer <= 0f) EnterAttackPhase(AttackPhase.Active);
+                break;
 
-        if (stateTimer <= 0f)
-            TransitionTo(cc.isGrounded ? PlayerState.Locomotion : PlayerState.Airborne);
+            case AttackPhase.Active:
+                StepForward(dt, stats.attackStepSpeed * 0.5f);
+                if (melee) melee.HitCheck();
+                if (attackPhaseTimer <= 0f) EnterAttackPhase(AttackPhase.Recovery);
+                break;
+
+            case AttackPhase.Recovery:
+                horizontalVelocity = Vector3.MoveTowards(
+                    horizontalVelocity, Vector3.zero, stats.deceleration * dt);
+
+                if (attackPhaseTimer <= 0f)
+                    TransitionTo(cc.isGrounded ? PlayerState.Locomotion : PlayerState.Airborne);
+                break;
+        }
+    }
+
+    void EnterAttackPhase(AttackPhase phase)
+    {
+        attackPhase = phase;
+
+        switch (phase)
+        {
+            case AttackPhase.Windup:
+                attackPhaseTimer = stats.attackWindup;
+                break;
+
+            case AttackPhase.Active:
+                attackPhaseTimer = stats.attackActive;
+                if (melee) melee.BeginSwing();
+                break;
+
+            case AttackPhase.Recovery:
+                attackPhaseTimer = stats.attackRecovery;
+                break;
+        }
+    }
+
+    /// <summary>공격 중 정면으로 살짝 밀고 나간다. 헛스윙 느낌을 줄여준다.</summary>
+    void StepForward(float dt, float speed)
+    {
+        horizontalVelocity = Vector3.MoveTowards(
+            horizontalVelocity, transform.forward * speed, stats.acceleration * dt);
     }
 
     // ── 상태 전이 ──────────────────────────────
@@ -165,20 +219,26 @@ public class PlayerController : MonoBehaviour
     {
         if (state == next) return;
 
-        // Exit
         if (state == PlayerState.Lunge)
-        {
-            // 도약이 끝나면 속도를 조금 죽여서 관성이 과하게 남지 않게 한다
             horizontalVelocity *= stats.lungeExitSpeedRatio;
-        }
 
         state = next;
 
-        // Enter
         switch (state)
         {
             case PlayerState.Attack:
-                stateTimer = stats.attackDuration;
+                // 카메라가 보는 수평 방향으로 몸을 돌린 뒤 휘두른다
+                if (cameraTransform)
+                {
+                    Vector3 aim = cameraTransform.forward;
+                    aim.y = 0f;
+                    if (aim.sqrMagnitude > 0.001f)
+                    {
+                        transform.rotation = Quaternion.LookRotation(aim.normalized, Vector3.up);
+                        turnSmoothVelocity = 0f;
+                    }
+                }
+                EnterAttackPhase(AttackPhase.Windup);
                 if (animator) animator.SetTrigger(AttackHash);
                 break;
 
@@ -237,7 +297,7 @@ public class PlayerController : MonoBehaviour
 
     void ApplyGravity(float dt)
     {
-        if (state == PlayerState.Lunge) return;   // 도약 중에는 중력 없음
+        if (state == PlayerState.Lunge) return;
 
         if (cc.isGrounded && state != PlayerState.Airborne && verticalVelocity < 0f)
         {
@@ -254,20 +314,18 @@ public class PlayerController : MonoBehaviour
         verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(stats.gravity) * stats.jumpHeight);
         jumpBufferTimer = 0f;
         coyoteTimer = 0f;
-        lungeCooldownTimer = stats.lungeCooldown;  // 점프 직후 즉시 도약 방지
+        lungeCooldownTimer = stats.lungeCooldown;
         TransitionTo(PlayerState.Airborne);
     }
 
     void StartLunge()
     {
-        // 방향 결정: 입력 우선, 없으면 캐릭터 정면
         Vector3 dir = CameraRelativeInput();
         if (dir.sqrMagnitude <= 0.001f) dir = transform.forward;
 
         dir.y = 0f;
         lungeDirection = dir.normalized;
 
-        // 도약 방향으로 즉시 몸을 돌린다
         transform.rotation = Quaternion.LookRotation(lungeDirection, Vector3.up);
         turnSmoothVelocity = 0f;
 

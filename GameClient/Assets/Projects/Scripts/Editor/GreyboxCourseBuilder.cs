@@ -6,7 +6,6 @@ using UnityEditor;
 /// 메뉴: Tools > Level > Build Test Course
 ///
 /// 반드시 Assets/_Project/Scripts/Editor/ 폴더에 둘 것.
-/// (Editor 폴더가 아니면 빌드에 포함되어 컴파일 에러가 난다)
 /// </summary>
 public static class GreyboxCourseBuilder
 {
@@ -15,6 +14,17 @@ public static class GreyboxCourseBuilder
     [MenuItem("Tools/Level/Build Test Course")]
     public static void Build()
     {
+        int envLayer = LayerMask.NameToLayer(Layers.EnvironmentName);
+        int dmgLayer = LayerMask.NameToLayer(Layers.DamageableName);
+
+        if (envLayer < 0 || dmgLayer < 0)
+        {
+            EditorUtility.DisplayDialog("레이어 없음",
+                $"'{Layers.EnvironmentName}'와 '{Layers.DamageableName}' 레이어를 먼저 만들어라.\n" +
+                "Project Settings > Tags and Layers", "확인");
+            return;
+        }
+
         var old = GameObject.Find(RootName);
         if (old) Object.DestroyImmediate(old);
 
@@ -28,38 +38,33 @@ public static class GreyboxCourseBuilder
         BuildGaps(root.transform);
         BuildOcclusionArea(root.transform);
         BuildCorridor(root.transform);
+        BuildDummies(root.transform);
 
         Selection.activeGameObject = root;
-        Debug.Log("테스트 코스 생성 완료. 플레이어를 원점 근처에 두고 돌려봐라.");
+        Debug.Log("테스트 코스 생성 완료. 허수아비는 원점 앞쪽에 있다.");
     }
 
-    // ── 지면 ───────────────────────────────────
     static void BuildGround(Transform parent)
     {
         var g = Group(parent, "Ground");
         Box(g, "Floor", new Vector3(0, -0.5f, 0), new Vector3(80, 1, 80));
     }
 
-    // ── 경사로: Slope Limit 검증 ────────────────
-    // 45도가 CharacterController 기본 한계. 그 위아래를 모두 둔다.
     static void BuildSlopes(Transform parent)
     {
         var g = Group(parent, "Slopes");
         float[] angles = { 15f, 25f, 35f, 45f, 55f };
-        float z = 12f;
 
         for (int i = 0; i < angles.Length; i++)
         {
             float a = angles[i];
             float len = 8f;
-            var pos = new Vector3(-24f + i * 7f, Mathf.Sin(a * Mathf.Deg2Rad) * len * 0.5f, z);
+            var pos = new Vector3(-24f + i * 7f, Mathf.Sin(a * Mathf.Deg2Rad) * len * 0.5f, 12f);
             var box = Box(g, $"Slope_{a}deg", pos, new Vector3(4f, 0.5f, len));
             box.transform.rotation = Quaternion.Euler(-a, 0f, 0f);
         }
     }
 
-    // ── 계단: Step Offset 검증 ──────────────────
-    // 기본 Step Offset은 0.3. 그보다 낮은/높은 계단을 나란히 둔다.
     static void BuildStairs(Transform parent)
     {
         var g = Group(parent, "Stairs");
@@ -79,7 +84,6 @@ public static class GreyboxCourseBuilder
         }
     }
 
-    // ── 점프 플랫폼: jumpHeight 검증 ────────────
     static void BuildJumpPlatforms(Transform parent)
     {
         var g = Group(parent, "JumpPlatforms");
@@ -94,7 +98,6 @@ public static class GreyboxCourseBuilder
         }
     }
 
-    // ── 간격 점프: 수평 점프 거리 검증 ──────────
     static void BuildGaps(Transform parent)
     {
         var g = Group(parent, "GapJumps");
@@ -111,32 +114,43 @@ public static class GreyboxCourseBuilder
         }
     }
 
-    // ── 카메라 가림 검증: Deoccluder 확인용 ─────
     static void BuildOcclusionArea(Transform parent)
     {
         var g = Group(parent, "Occlusion");
 
-        // 기둥 숲: 캐릭터가 뒤로 돌아가면 카메라가 당겨지는지 본다
         for (int i = 0; i < 5; i++)
             for (int j = 0; j < 3; j++)
                 Box(g, $"Pillar_{i}_{j}",
                     new Vector3(-20f + i * 3f, 2.5f, 26f + j * 4f),
                     new Vector3(1f, 5f, 1f));
 
-        // 낮은 벽: 카메라가 넘어가는지 파고드는지
         Box(g, "LowWall", new Vector3(4f, 0.75f, 26f), new Vector3(12f, 1.5f, 0.5f));
-
-        // 높은 벽: 확실한 차단
         Box(g, "HighWall", new Vector3(4f, 3f, 32f), new Vector3(12f, 6f, 0.5f));
     }
 
-    // ── 좁은 통로: 카메라가 가장 잘 깨지는 곳 ───
     static void BuildCorridor(Transform parent)
     {
         var g = Group(parent, "Corridor");
         Box(g, "WallL", new Vector3(22f, 2f, -14f), new Vector3(0.5f, 4f, 16f));
         Box(g, "WallR", new Vector3(25f, 2f, -14f), new Vector3(0.5f, 4f, 16f));
         Box(g, "Ceiling", new Vector3(23.5f, 4f, -14f), new Vector3(3f, 0.5f, 16f));
+    }
+
+    // ── 타격 테스트용 허수아비 ──────────────────
+    static void BuildDummies(Transform parent)
+    {
+        var g = Group(parent, "Dummies");
+        int layer = LayerMask.NameToLayer(Layers.DamageableName);
+
+        for (int i = 0; i < 5; i++)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            go.name = $"Dummy_{i}";
+            go.transform.SetParent(g, false);
+            go.transform.position = new Vector3(-6f + i * 3f, 1f, 6f);
+            go.layer = layer;
+            go.AddComponent<TrainingDummy>();
+        }
     }
 
     // ── 헬퍼 ───────────────────────────────────
@@ -154,6 +168,7 @@ public static class GreyboxCourseBuilder
         go.transform.SetParent(parent, false);
         go.transform.position = pos;
         go.transform.localScale = size;
+        go.layer = LayerMask.NameToLayer(Layers.EnvironmentName);
         go.isStatic = true;
         return go;
     }
