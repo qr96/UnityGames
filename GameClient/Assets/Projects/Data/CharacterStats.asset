@@ -28,7 +28,13 @@ MonoBehaviour:
   lungeDuration: 0.28
   lungeExitSpeedRatio: 0.4
   lungeCooldown: 0.15
-  attackWindup: 0.14
-  attackActive: 0.12
-  attackRecovery: 0.12
-  attackStepSpeed: 2.5
+  aimMoveSpeed: 4
+  aimTurnSpeed: 900
+  aimEnterTime: 0.1
+  drawTime: 0.55
+  minLaunchSpeed: 60
+  maxLaunchSpeed: 48
+  minArrowDamage: 8
+  maxArrowDamage: 30
+  fireCooldown: 0.35
+  minChargeToFire: 0.15

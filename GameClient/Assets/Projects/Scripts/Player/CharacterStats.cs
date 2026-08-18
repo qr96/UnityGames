@@ -1,76 +1,65 @@
 using UnityEngine;
 
 /// <summary>
-/// 캐릭터의 모든 수치. 코드에 하드코딩하지 않고 에셋으로 분리한다.
-/// Project 창 > Create > Game > Character Stats 로 생성.
+/// 캐릭터의 모든 수치. Project 창 > Create > Game > Character Stats 로 생성.
 /// </summary>
 [CreateAssetMenu(fileName = "CharacterStats", menuName = "Game/Character Stats")]
 public class CharacterStats : ScriptableObject
 {
     [Header("Move")]
-    [Tooltip("기본 이동 속도 (m/s)")]
     public float moveSpeed = 4.5f;
-
-    [Tooltip("달리기 속도 (m/s)")]
     public float sprintSpeed = 7.5f;
-
-    [Tooltip("목표 속도까지 도달하는 가속도. 높을수록 즉각적")]
     public float acceleration = 40f;
-
-    [Tooltip("입력이 없을 때 감속도. 높을수록 칼같이 멈춤")]
     public float deceleration = 50f;
-
     [Tooltip("진행 방향으로 회전하는 데 걸리는 시간(초). 작을수록 민첩")]
     public float rotationSmoothTime = 0.08f;
 
     [Header("Jump")]
-    [Tooltip("지상 점프 최고 높이 (m)")]
     public float jumpHeight = 1.4f;
-
-    [Tooltip("중력 가속도. 음수. -9.81보다 세게 주면 손맛이 좋아진다")]
+    [Tooltip("중력 가속도. 음수")]
     public float gravity = -22f;
-
-    [Tooltip("낙하 속도 상한 (m/s)")]
     public float terminalVelocity = -40f;
-
-    [Range(0f, 1f)]
-    [Tooltip("공중에서의 조작 가능 비율. 0이면 공중 제어 불가")]
-    public float airControl = 0.45f;
-
-    [Tooltip("발판에서 떨어진 뒤에도 점프를 허용하는 시간(초)")]
+    [Range(0f, 1f)] public float airControl = 0.45f;
     public float coyoteTime = 0.12f;
-
-    [Tooltip("착지 직전에 누른 점프를 기억하는 시간(초)")]
     public float jumpBufferTime = 0.12f;
 
     [Header("Lunge (공중 도약)")]
-    [Tooltip("착지 전까지 가능한 도약 횟수")]
-    [Min(0)]
-    public int lungeCount = 1;
-
-    [Tooltip("도약 속도 (m/s)")]
+    [Min(0)] public int lungeCount = 1;
     public float lungeSpeed = 13f;
-
-    [Tooltip("도약 지속 시간(초). 속도 x 시간 = 도약 거리")]
     public float lungeDuration = 0.28f;
-
-    [Range(0f, 1f)]
-    [Tooltip("도약이 끝난 뒤 남기는 속도 비율")]
-    public float lungeExitSpeedRatio = 0.4f;
-
-    [Tooltip("점프 직후 도약까지의 최소 간격(초)")]
+    [Range(0f, 1f)] public float lungeExitSpeedRatio = 0.4f;
     public float lungeCooldown = 0.15f;
 
-    [Header("Melee Attack")]
-    [Tooltip("선딜: 휘두르기 시작부터 판정 발생까지 (초)")]
-    public float attackWindup = 0.14f;
+    [Header("Aim (조준)")]
+    [Tooltip("조준 중 이동 속도. 느려야 조준의 대가가 생긴다")]
+    public float aimMoveSpeed = 2.0f;
 
-    [Tooltip("판정 지속: 이 시간 동안 타격 판정이 살아 있다 (초)")]
-    public float attackActive = 0.12f;
+    [Tooltip("조준 시작 시 카메라 방향으로 몸을 돌리는 속도 (도/초)")]
+    public float aimTurnSpeed = 900f;
 
-    [Tooltip("후딜: 판정이 끝나고 다시 움직일 수 있을 때까지 (초)")]
-    public float attackRecovery = 0.26f;
+    [Tooltip("조준 진입/해제에 걸리는 시간(초). 연타 방지")]
+    public float aimEnterTime = 0.1f;
 
-    [Tooltip("공격 중 정면으로 밀고 나가는 속도 (m/s). 0이면 제자리")]
-    public float attackStepSpeed = 2.5f;
+    [Header("Bow (활)")]
+    [Tooltip("시위를 완전히 당기는 데 걸리는 시간(초)")]
+    public float drawTime = 0.55f;
+
+    [Tooltip("최소 차지에서의 발사 속도 (m/s)")]
+    public float minLaunchSpeed = 20f;
+
+    [Tooltip("최대 차지에서의 발사 속도 (m/s)")]
+    public float maxLaunchSpeed = 48f;
+
+    [Tooltip("최소 차지 데미지")]
+    public float minArrowDamage = 8f;
+
+    [Tooltip("최대 차지 데미지")]
+    public float maxArrowDamage = 30f;
+
+    [Tooltip("발사 후 다음 발사까지의 간격(초)")]
+    public float fireCooldown = 0.35f;
+
+    [Tooltip("이 차지 미만에서는 발사되지 않는다")]
+    [Range(0f, 1f)]
+    public float minChargeToFire = 0.15f;
 }

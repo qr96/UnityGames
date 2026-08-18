@@ -5,29 +5,31 @@ public enum PlayerState
     Locomotion,  // 지상 이동
     Airborne,    // 공중 (점프 / 낙하)
     Lunge,       // 공중 도약
-    Attack       // 근접 공격
+    Aim          // 활 조준
 }
 
 /// <summary>
-/// 3인칭 백뷰 캐릭터 컨트롤러.
-/// 공격은 선딜(Windup) → 판정(Active) → 후딜(Recovery) 3단계로 나뉜다.
-/// 판정 구간이 분리되어 있어야 나중에 애니메이션 타이밍을 맞추거나
-/// 회피 프레임 같은 걸 붙일 때 구조를 안 건드린다.
+/// 3인칭 백뷰 캐릭터 컨트롤러 (궁수).
+///
+/// 조작:
+///   좌클릭 홀드 → 조준 진입 + 시위 당김 (누르고 있는 동안에만 차지)
+///   좌클릭 뗌   → 발사 (조준 유지)
+///   우클릭      → 조준 해제, 3인칭 복귀
+///   스페이스    → 점프 (조준 중에도 가능, 조준 유지)
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerInputReader))]
 public class PlayerController : MonoBehaviour
 {
-    enum AttackPhase { Windup, Active, Recovery }
-
     [Header("References")]
     [SerializeField] CharacterStats stats;
     [SerializeField] PlayerInputReader input;
     [Tooltip("비워두면 Camera.main을 자동으로 잡는다")]
     [SerializeField] Transform cameraTransform;
     [Tooltip("비워두면 같은 오브젝트에서 자동으로 찾는다")]
-    [SerializeField] MeleeWeapon melee;
-    [Tooltip("아직 없으면 비워둬도 된다")]
+    [SerializeField] Bow bow;
+    [Tooltip("조준 카메라 전환기")]
+    [SerializeField] AimCameraRig cameraRig;
     [SerializeField] Animator animator;
 
     CharacterController cc;
@@ -42,34 +44,29 @@ public class PlayerController : MonoBehaviour
     float coyoteTimer;
     float jumpBufferTimer;
 
-    // 도약
     int lungesUsed;
     float lungeCooldownTimer;
     Vector3 lungeDirection;
 
-    // 공격
-    AttackPhase attackPhase;
-    float attackPhaseTimer;
-
     static readonly int SpeedHash = Animator.StringToHash("Speed");
     static readonly int GroundedHash = Animator.StringToHash("Grounded");
-    static readonly int AttackHash = Animator.StringToHash("Attack");
+    static readonly int AimHash = Animator.StringToHash("Aiming");
+    static readonly int FireHash = Animator.StringToHash("Fire");
     static readonly int LungeHash = Animator.StringToHash("Lunge");
 
     public PlayerState State => state;
     public bool IsGrounded => cc.isGrounded;
+    public bool IsAiming => state == PlayerState.Aim;
 
     void Awake()
     {
         cc = GetComponent<CharacterController>();
         if (!input) input = GetComponent<PlayerInputReader>();
-        if (!melee) melee = GetComponent<MeleeWeapon>();
+        if (!bow) bow = GetComponent<Bow>();
         if (!cameraTransform && Camera.main) cameraTransform = Camera.main.transform;
 
-        if (!stats)
-            Debug.LogError($"{name}: CharacterStats가 비어 있다. 인스펙터에 에셋을 꽂아라.", this);
-        if (!melee)
-            Debug.LogWarning($"{name}: MeleeWeapon이 없다. 공격 판정이 발생하지 않는다.", this);
+        if (!stats) Debug.LogError($"{name}: CharacterStats가 비어 있다.", this);
+        if (!cameraRig) Debug.LogWarning($"{name}: AimCameraRig가 없다. 카메라가 전환되지 않는다.", this);
     }
 
     void Update()
@@ -84,7 +81,7 @@ public class PlayerController : MonoBehaviour
             case PlayerState.Locomotion: TickLocomotion(dt); break;
             case PlayerState.Airborne: TickAirborne(dt); break;
             case PlayerState.Lunge: TickLunge(dt); break;
-            case PlayerState.Attack: TickAttack(dt); break;
+            case PlayerState.Aim: TickAim(dt); break;
         }
 
         ApplyGravity(dt);
@@ -107,13 +104,9 @@ public class PlayerController : MonoBehaviour
             coyoteTimer = stats.coyoteTime;
             lungesUsed = 0;
         }
-        else
-        {
-            coyoteTimer -= dt;
-        }
+        else coyoteTimer -= dt;
 
         lungeCooldownTimer -= dt;
-        attackPhaseTimer -= dt;
         stateTimer -= dt;
     }
 
@@ -121,7 +114,7 @@ public class PlayerController : MonoBehaviour
 
     void TickLocomotion(float dt)
     {
-        if (input.ConsumeAttack()) { TransitionTo(PlayerState.Attack); return; }
+        if (input.AttackHeld) { TransitionTo(PlayerState.Aim); return; }
 
         if (jumpBufferTimer > 0f && coyoteTimer > 0f) { DoGroundJump(); return; }
 
@@ -132,6 +125,8 @@ public class PlayerController : MonoBehaviour
 
     void TickAirborne(float dt)
     {
+        if (input.AttackHeld) { TransitionTo(PlayerState.Aim); return; }
+
         if (cc.isGrounded && verticalVelocity <= 0f)
         {
             TransitionTo(PlayerState.Locomotion);
@@ -160,57 +155,40 @@ public class PlayerController : MonoBehaviour
             TransitionTo(cc.isGrounded ? PlayerState.Locomotion : PlayerState.Airborne);
     }
 
-    void TickAttack(float dt)
+    /// <summary>조준 상태. 우클릭으로만 빠져나간다. 점프해도 유지된다.</summary>
+    void TickAim(float dt)
     {
-        switch (attackPhase)
+        if (input.ConsumeCancel())
         {
-            case AttackPhase.Windup:
-                StepForward(dt, stats.attackStepSpeed);
-                if (attackPhaseTimer <= 0f) EnterAttackPhase(AttackPhase.Active);
-                break;
+            ExitAim();
+            return;
+        }
 
-            case AttackPhase.Active:
-                StepForward(dt, stats.attackStepSpeed * 0.5f);
-                if (melee) melee.HitCheck();
-                if (attackPhaseTimer <= 0f) EnterAttackPhase(AttackPhase.Recovery);
-                break;
+        FaceCamera(dt);
+        StrafeMove(dt);
 
-            case AttackPhase.Recovery:
-                horizontalVelocity = Vector3.MoveTowards(
-                    horizontalVelocity, Vector3.zero, stats.deceleration * dt);
+        // 조준 중 점프. DoGroundJump()는 Airborne으로 전이해서 조준이
+        // 풀리므로, 수직 속도만 직접 준다. 중력 처리는 상태와 무관하게
+        // 돌고 있어서 착지까지 자연스럽게 이어진다.
+        if (jumpBufferTimer > 0f && coyoteTimer > 0f)
+        {
+            verticalVelocity = Mathf.Sqrt(2f * Mathf.Abs(stats.gravity) * stats.jumpHeight);
+            jumpBufferTimer = 0f;
+            coyoteTimer = 0f;
+        }
 
-                if (attackPhaseTimer <= 0f)
-                    TransitionTo(cc.isGrounded ? PlayerState.Locomotion : PlayerState.Airborne);
-                break;
+        // 좌클릭을 누르고 있는 동안에만 시위가 당겨진다
+        if (bow) bow.TickDraw(dt, input.AttackHeld);
+
+        if (input.ConsumeAttackReleased())
+        {
+            if (bow && bow.Fire() && animator) animator.SetTrigger(FireHash);
         }
     }
 
-    void EnterAttackPhase(AttackPhase phase)
+    void ExitAim()
     {
-        attackPhase = phase;
-
-        switch (phase)
-        {
-            case AttackPhase.Windup:
-                attackPhaseTimer = stats.attackWindup;
-                break;
-
-            case AttackPhase.Active:
-                attackPhaseTimer = stats.attackActive;
-                if (melee) melee.BeginSwing();
-                break;
-
-            case AttackPhase.Recovery:
-                attackPhaseTimer = stats.attackRecovery;
-                break;
-        }
-    }
-
-    /// <summary>공격 중 정면으로 살짝 밀고 나간다. 헛스윙 느낌을 줄여준다.</summary>
-    void StepForward(float dt, float speed)
-    {
-        horizontalVelocity = Vector3.MoveTowards(
-            horizontalVelocity, transform.forward * speed, stats.acceleration * dt);
+        TransitionTo(cc.isGrounded ? PlayerState.Locomotion : PlayerState.Airborne);
     }
 
     // ── 상태 전이 ──────────────────────────────
@@ -222,24 +200,19 @@ public class PlayerController : MonoBehaviour
         if (state == PlayerState.Lunge)
             horizontalVelocity *= stats.lungeExitSpeedRatio;
 
+        if (state == PlayerState.Aim)
+        {
+            if (bow) bow.CancelAim();
+            if (cameraRig) cameraRig.SetAiming(false);
+        }
+
         state = next;
 
         switch (state)
         {
-            case PlayerState.Attack:
-                // 카메라가 보는 수평 방향으로 몸을 돌린 뒤 휘두른다
-                if (cameraTransform)
-                {
-                    Vector3 aim = cameraTransform.forward;
-                    aim.y = 0f;
-                    if (aim.sqrMagnitude > 0.001f)
-                    {
-                        transform.rotation = Quaternion.LookRotation(aim.normalized, Vector3.up);
-                        turnSmoothVelocity = 0f;
-                    }
-                }
-                EnterAttackPhase(AttackPhase.Windup);
-                if (animator) animator.SetTrigger(AttackHash);
+            case PlayerState.Aim:
+                if (bow) bow.BeginAim();
+                if (cameraRig) cameraRig.SetAiming(true);
                 break;
 
             case PlayerState.Lunge:
@@ -263,11 +236,38 @@ public class PlayerController : MonoBehaviour
         Vector3 targetVelocity = dir * targetSpeed;
         float rate = (hasInput ? stats.acceleration : stats.deceleration) * control;
 
-        horizontalVelocity = Vector3.MoveTowards(
-            horizontalVelocity, targetVelocity, rate * dt);
+        horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, rate * dt);
 
         if (hasInput && control > 0f)
             RotateTowards(dir, dt);
+    }
+
+    /// <summary>조준 중 이동. 몸은 카메라를 보고 이동만 옆으로 한다.</summary>
+    void StrafeMove(float dt)
+    {
+        Vector3 dir = CameraRelativeInput();
+        bool hasInput = dir.sqrMagnitude > 0.001f;
+
+        Vector3 targetVelocity = hasInput ? dir * stats.aimMoveSpeed : Vector3.zero;
+        float rate = hasInput ? stats.acceleration : stats.deceleration;
+
+        horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, targetVelocity, rate * dt);
+    }
+
+    void FaceCamera(float dt)
+    {
+        if (!cameraTransform) return;
+
+        Vector3 aim = cameraTransform.forward;
+        aim.y = 0f;
+        if (aim.sqrMagnitude < 0.001f) return;
+
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            Quaternion.LookRotation(aim.normalized, Vector3.up),
+            stats.aimTurnSpeed * dt);
+
+        turnSmoothVelocity = 0f;
     }
 
     Vector3 CameraRelativeInput()
@@ -343,5 +343,6 @@ public class PlayerController : MonoBehaviour
         if (!animator) return;
         animator.SetFloat(SpeedHash, horizontalVelocity.magnitude, 0.1f, Time.deltaTime);
         animator.SetBool(GroundedHash, cc.isGrounded);
+        animator.SetBool(AimHash, state == PlayerState.Aim);
     }
 }

@@ -4,11 +4,20 @@ using UnityEngine;
 /// 타격 테스트용 허수아비. IDamageable 구현 예시이기도 하다.
 /// 적 AI를 붙일 때도 이 인터페이스만 구현하면 공격 코드는 그대로 동작한다.
 ///
-/// 사용: Cube에 이 컴포넌트를 붙이고 레이어를 Damageable로 설정.
+/// 넉백을 받을지 말지는 맞는 쪽이 결정한다. MeleeWeapon은 세기만 전달할 뿐이다.
+///
+/// 사용: Capsule에 이 컴포넌트를 붙이고 레이어를 Damageable로 설정.
 /// </summary>
 public class TrainingDummy : MonoBehaviour, IDamageable
 {
+    [Header("Health")]
     [SerializeField] float maxHealth = 100f;
+
+    [Header("Knockback")]
+    [Tooltip("체크 해제하면 넉백을 무시한다. 고정 허수아비, 바위, 나무 등")]
+    [SerializeField] bool receiveKnockback = false;
+
+    [Tooltip("넉백이 감쇠하는 속도. 클수록 빨리 멈춘다")]
     [SerializeField] float knockbackDamping = 8f;
 
     [Header("Feedback")]
@@ -45,7 +54,7 @@ public class TrainingDummy : MonoBehaviour, IDamageable
 
         health -= info.Amount;
 
-        if (info.Knockback > 0f)
+        if (receiveKnockback && info.Knockback > 0f)
         {
             Vector3 dir = info.Direction;
             dir.y = 0f;
@@ -61,7 +70,6 @@ public class TrainingDummy : MonoBehaviour, IDamageable
     {
         float dt = Time.deltaTime;
 
-        // 넉백 감쇠
         if (knockbackVelocity.sqrMagnitude > 0.0001f)
         {
             transform.position += knockbackVelocity * dt;
@@ -69,7 +77,6 @@ public class TrainingDummy : MonoBehaviour, IDamageable
                 knockbackVelocity, Vector3.zero, knockbackDamping * dt);
         }
 
-        // 피격 플래시
         if (flashTimer > 0f)
         {
             flashTimer -= dt;
